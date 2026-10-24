@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Tracking Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: #f8fafc; color: #0f172a; padding: 2rem; max-width: 900px; margin: 0 auto; }
+        .card { 
+			width: 100%;
+			max-width: 650px;
+			margin: 20px auto;
+			background: #ffffff;
+			padding: 24px;
+			border-radius: 12px;
+			box-sizing: border-box;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+		}
+        h2 { color: #4f46e5; margin-bottom: 0.5rem; }
+        .subtitle { color: #64748b; font-size: 0.875rem; margin-bottom: 1.5rem; }
+        .back-btn { display: inline-block; margin-bottom: 1.5rem; color: #4f46e5; text-decoration: none; font-weight: 600; }
+        .back-btn:hover { text-decoration: underline; }
+        
+        .fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+        .vehicle-card { 
+			background: #f8fafc;
+			border: 1px solid #e2e8f0;
+			border-radius: 10px;
+			padding: 16px;
+			box-sizing: border-box;
+			display: flex;
+			flex-direction: column;
+			gap: 10px; 
+		}
+		.vehicle-card h3 {
+			margin: 0;
+			font-size: 16px;
+			color: #1e293b;
+		}
+        .vehicle-card p { 
+			font-size: 14px;
+			color: #475569;
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 6px; 
+		}
+        
+        .action-links { 
+			margin-top: 1rem; 
+			display: flex; 
+			gap: 8px; 
+			flex-wrap: wrap; 
+		}
+        .btn-link { padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; color: white; display: inline-block; }
+        .btn-map { background-color: #007BFF; }
+        .btn-map:hover { background-color: #0056b3; }
+        .btn-history { background-color: #10b981; }
+        .btn-history:hover { background-color: #059669; }
+        
+        .loading { 
+			display: flex;
+			flex-direction: column;
+			gap: 16px;
+			margin-top: 20px;
+			}
+        .error { color: #ef4444; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">← Back to Dashboard</a>
+
+    <div class="card">
+        <h2>🗺️ Fleet Tracking Overview</h2>
+        <p class="subtitle">Monitor real-time locations and access past telemetry trails for all registered vehicles.</p>
+        
+        <div id="fleet-container" class="loading">Loading your fleet data...</div>
+    </div>
+
+    <script>
+        const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api";
+
+        function getAccessToken() {
+            return localStorage.getItem('accessToken');
+        }
+
+        async function fetchFleetVehicles() {
+            const container = document.getElementById('fleet-container');
+            const token = getAccessToken();
+
+            if (!token) {
+                container.innerHTML = '<p class="error">Authentication token not found. Please log in.</p>';
+                return;
+            }
+
+            try {
+                // Fetch all vehicles owned by the logged-in owner
+                const response = await fetch(`${API_BASE}/vehicles/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 		
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load fleet (Status: ${response.status})`);
+                }
+
+                const vehicles = await response.json();
+
+                if (vehicles && vehicles.length > 0) {
+                    container.innerHTML = '<div class="fleet-grid"></div>';
+                    const grid = container.querySelector('.fleet-grid');
+
+                    vehicles.forEach(vehicle => {
+                        const card = document.createElement('div');
+                        card.className = 'vehicle-card';
+
+                        let actionButtons = '';
+                        if (vehicle.currlat && vehicle.currlon) {
+                            const mapUrl = `https://www.google.com/maps/search/?api=1&query=${vehicle.currlat},${vehicle.currlon}`;
+                            actionButtons += `<a href="${mapUrl}" target="_blank" class="btn-link btn-map">📍 Live Map</a>`;
+                        } else {
+                            actionButtons += `<span style="font-size: 12px; color: #94a3b8; align-self: center;">No GPS fix</span>`;
+                        }
+
+                        actionButtons += `<a href="vehicle_history.html?id=${vehicle.id}" class="btn-link btn-history">📜 History Trail</a>`;
+
+                        card.innerHTML = `
+                            <h3>${vehicle.vehicle_no}</h3>
+                            <p><strong>Type:</strong> ${vehicle.vehicle_type}</p>
+                            <p><strong>Chassis:</strong> ${vehicle.chesis_no}</p>
+                            <p><strong>Lat/Lon:</strong> ${vehicle.currlat ? vehicle.currlat.toFixed(4) + ', ' + vehicle.currlon.toFixed(4) : 'N/A'}</p>
+                            <div class="action-links">${actionButtons}</div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = '<p>No vehicles found in your fleet.</p>';
+                }
+
+            } catch (error) {
+                console.error('Error fetching fleet:', error);
+                container.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchFleetVehicles);
+    </script>
+</body>
+</html>

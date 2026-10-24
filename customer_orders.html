@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Portal - My Orders</title>
+    <style>
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background-color: #f4f6f9; 
+            margin: 0; 
+            padding: 20px; 
+            color: #1e293b;
+        }
+        .card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            margin: 0 auto; 
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 600px;
+        }
+        .back-btn { 
+            display: inline-block; 
+            margin-bottom: 1.5rem; 
+            color: #4f46e5; 
+            text-decoration: none; 
+            font-weight: 600; 
+        }
+        .back-btn:hover { text-decoration: underline; }
+        h2 { color: #4f46e5; margin-top: 0; }
+        .order-item { 
+            border-left: 4px solid #ffc107; 
+            padding: 16px; 
+            margin-bottom: 15px; 
+            background: #fafafa; 
+            border-radius: 8px; 
+            box-sizing: border-box;
+        }
+        .order-item.completed { border-left-color: #10b981; }
+        .order-item.in-transit { border-left-color: #0ea5e9; }
+        .status-badge { 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            font-size: 12px; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            color: white; 
+            background: #ffc107; 
+        }
+        .status-badge.in_transit { background: #0ea5e9; }
+        .status-badge.delivered { background: #10b981; }
+        .status-badge.assigned { background: #8b5cf6; }
+        #msg { margin-bottom: 15px; font-weight: 600; text-align: center; }
+        .tab-btn {
+            padding: 8px 16px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">← Back to Dashboard</a>
+    <div class="card">
+        <h2>📦 Customer Portal - My Orders</h2>
+        <p>View your active ongoing shipments and past completed orders.</p>
+        <div id="msg"></div>
+        
+        <!-- Tab Navigation Buttons -->
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button onclick="switchTab('active')" id="btn-active" class="tab-btn" style="background: #4f46e5; color: white;">Active Orders</button>
+            <button onclick="switchTab('history')" id="btn-history" class="tab-btn" style="background: #e2e8f0; color: #334155;">Completed History</button>
+        </div>
+        
+        <div id="orders-container"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://upheaval-revise-fit.ngrok-free.dev/etransport/api';
+        const token = localStorage.getItem('accessToken');
+        let currentTab = 'active';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('btn-active').style.background = tab === 'active' ? '#4f46e5' : '#e2e8f0';
+            document.getElementById('btn-active').style.color = tab === 'active' ? 'white' : '#334155';
+            
+            document.getElementById('btn-history').style.background = tab === 'history' ? '#4f46e5' : '#e2e8f0';
+            document.getElementById('btn-history').style.color = tab === 'history' ? 'white' : '#334155';
+
+            if (tab === 'active') {
+                fetchActiveOrders();
+            } else {
+                fetchOrderHistory();
+            }
+        }
+
+        async function fetchActiveOrders() {
+            const container = document.getElementById('orders-container');
+            const msg = document.getElementById('msg');
+            container.innerHTML = '<p>Loading active orders...</p>';
+            msg.innerHTML = '';
+
+            if (!token) {
+                container.innerHTML = '<p style="color: red;">Authentication token missing. Please log in.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/orders/`, {
+                    headers: { 
+						'Authorization': `Bearer ${token}`, 
+						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+					}
+                });
+                if (!response.ok) throw new Error("Failed to fetch active orders.");
+
+                const orders = await response.json();
+                
+                // Filter for active orders (pending, assigned, in_transit)
+                const activeOrders = orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled');
+
+                if (activeOrders.length === 0) {
+                    container.innerHTML = '<p>You have no active ongoing orders.</p>';
+                    return;
+                }
+
+                container.innerHTML = activeOrders.map(o => {
+					const statusClass = o.status;
+					const canCancel = o.status === 'pending' || o.status === 'assigned';
+					const hasDriver = (o.status === 'assigned' || o.status === 'in_transit') && o.customer_first_name;
+
+					return `
+						<div class="order-item ${o.status === 'in_transit' ? 'in-transit' : ''}">
+							<p><strong>Order ID:</strong> #${o.id}</p>
+							<p><strong>Material:</strong> ${o.material_description}</p>
+							<p><strong>Ordered By:</strong> ${o.customer_first_name} ${o.customer_last_name}</p>
+							<p><strong>Pickup:</strong> ${o.pickup_address}</p>
+							<p><strong>Delivery:</strong> ${o.delivery_address}</p>
+							<p><strong>Status:</strong> <span class="status-badge ${statusClass}">${o.status.replace('_', ' ')}</span></p>
+							
+							${hasDriver ? `
+								<div style="background: #eef2ff; border: 1px solid #c7d2fe; padding: 10px; border-radius: 6px; margin: 10px 0; font-size: 13px; color: #3730a3;">
+									👤 <strong>Assigned Driver:</strong> ${o.driver_first_name} ${o.driver_last_name}<br>
+									🚚 <strong>Assigned Vehicle:</strong> ${o.vehicle_no}<br>
+									📞 <strong>Phone:</strong> ${o.driver_phone_number ? `<a href="tel:${o.driver_phone_number}" style="color: #4f46e5; font-weight: 600; text-decoration: none;">${o.driver_phone_number}</a>` : 'Not provided'} <br>
+									📧 <strong>Email:</strong> ${o.driver_email ? `<a href="mailto:${o.driver_email}" style="color: #4f46e5; font-weight: 600; text-decoration: none;">${o.driver_email}</a>` : 'Not provided'}
+								</div>
+							` : ''}
+
+							${canCancel ? `
+								<button onclick="cancelOrder(${o.id})" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; margin-top: 4px;">
+									❌ Cancel Order
+								</button>
+							` : ''}
+						</div>
+					`;
+				}).join('');
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+            }
+        }
+
+        async function fetchOrderHistory() {
+            const container = document.getElementById('orders-container');
+            const msg = document.getElementById('msg');
+            container.innerHTML = '<p>Loading order history...</p>';
+            msg.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_BASE}/orders/history/`, {
+                    headers: { 
+						'Authorization': `Bearer ${token}`,
+						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+					}
+                });
+
+                if (!response.ok) throw new Error("Failed to fetch order history.");
+
+                const orders = await response.json();
+
+                if (orders.length === 0) {
+                    container.innerHTML = '<p>No completed order history found.</p>';
+                    return;
+                }
+
+                container.innerHTML = orders.map(o => {
+					const isCancelled = o.status === 'cancelled';
+					const statusColor = isCancelled ? '#ef4444' : '#10b981';
+					const statusText = isCancelled ? 'CANCELLED' : 'DELIVERED';
+					const cardBorderColor = isCancelled ? '#ef4444' : '#10b981';
+
+					return `
+						<div class="order-item" style="border-left: 4px solid ${cardBorderColor};">
+							<p><strong>Order ID:</strong> #${o.id}</p>
+							<p><strong>Material:</strong> ${o.material_description}</p>
+							<p><strong>Pickup:</strong> ${o.pickup_address}</p>
+							<p><strong>Delivery:</strong> ${o.delivery_address}</p>
+							<p><strong>Status:</strong> <span class="status-badge" style="background: ${statusColor};">${statusText}</span></p>
+							
+							${!isCancelled && o.vehicle ? `
+								<a href="vehicle_history.html?id=${o.vehicle}" target="_blank" style="display: inline-block; padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; margin-top: 5px;">
+									🗺️ See Route Trail
+								</a>
+							` : ''}
+						</div>
+					`;
+				}).join('');
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+            }
+        }
+		
+		async function cancelOrder(orderId) {
+			if (!confirm(`Are you sure you want to cancel Order #${orderId}?`)) return;
+
+			const msg = document.getElementById('msg');
+			msg.innerText = `Cancelling Order #${orderId}...`;
+			msg.style.color = "#0ea5e9";
+
+			try {
+				const response = await fetch(`${API_BASE}/orders/${orderId}/cancel/`, {
+					method: 'PATCH', // or 'POST' depending on your Django viewset setup
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${token}`,
+						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+					}
+				});
+
+				const data = await response.json();
+				if (!response.ok) throw new Error(data.error || "Failed to cancel order.");
+
+				msg.innerText = `Success! Order #${orderId} has been cancelled.`;
+				msg.style.color = "green";
+
+				// Refresh active orders list
+				fetchActiveOrders();
+
+			} catch (err) {
+				console.error(err);
+				msg.innerText = `Error: ${err.message}`;
+				msg.style.color = "red";
+			}
+		}
+
+        // Initialize by loading active orders on page load
+        document.addEventListener('DOMContentLoaded', fetchActiveOrders);
+    </script>
+</body>
+</html>

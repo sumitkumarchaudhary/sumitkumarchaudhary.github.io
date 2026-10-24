@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Supply Order with Address Search</title>
+    <style>
+        body { font-family: system-ui, sans-serif; background-color: #f8fafc; margin: 0px auto; max-width: 500px; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        h2 { color: #4f46e5; margin-top: 0; }
+		.back-btn { display: inline-block; margin-bottom: 1.5rem; color: #4f46e5; text-decoration: none; font-weight: 600; }
+        .back-btn:hover { text-decoration: underline; }
+		
+        .form-group { margin-bottom: 15px; position: relative; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; color: #334155; }
+        input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none; }
+        input:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        
+        /* Autocomplete dropdown styling */
+        .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #cbd5e1; border-radius: 0 0 6px 6px; max-height: 150px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .suggestion-item { padding: 10px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
+        .suggestion-item:hover { background-color: #f8fafc; }
+
+        button { width: 100%; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #4338ca; }
+        #response-msg { margin-top: 15px; font-weight: 600; text-align: center; font-size: 14px; }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+		
+		/* Card container styling refinement */
+		.form-group {
+			margin-bottom: 16px;
+		}
+
+		.form-group label {
+			display: block;
+			margin-bottom: 6px;
+			font-weight: 600;
+			color: #1e293b;
+			font-size: 14px;
+		}
+
+		.location-grid {
+			display: grid;
+			grid-template-columns: 1fr auto;
+			gap: 8px;
+			align-items: center;
+			width: 100%;
+		}
+
+		.location-grid input[type="text"],
+		.form-group input[type="text"] {
+			width: 100%;
+			height: 42px;
+			padding: 10px 14px;
+			box-sizing: border-box;
+			border: 1px solid #cbd5e1;
+			border-radius: 8px;
+			font-size: 14px;
+			outline: none;
+			transition: border-color 0.2s, box-shadow 0.2s;
+		}
+
+		.location-grid input[type="text"]:focus,
+		.form-group input[type="text"]:focus {
+			border-color: #4f46e5;
+			box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+		}
+
+		.location-grid button {
+			height: 42px;
+			padding: 0 10px;
+			background-color: #4f46e5; /* Matched to theme purple */
+			color: white;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+			font-size: 12px;
+			font-weight: 600;
+			white-space: nowrap;
+			box-sizing: border-box;
+			transition: background-color 0.2s, transform 0.1s;
+		}
+
+		.location-grid button:hover {
+			background-color: #4338ca;
+		}
+
+		.location-grid button:active {
+			transform: scale(0.98);
+		}
+		
+		<!-- .location-grid { -->
+			<!-- display: grid; -->
+			<!-- /* Give the input maximum space (1fr), and let the button size to its short content */ -->
+			<!-- grid-template-columns: 1fr auto; -->
+			<!-- gap: 8px; -->
+			<!-- align-items: center; -->
+			<!-- width: 100%; -->
+		<!-- } -->
+
+		<!-- .location-grid input[type="text"] { -->
+			<!-- width: 100%; -->
+			<!-- height: 40px; -->
+			<!-- padding: 8px 12px; -->
+			<!-- box-sizing: border-box; -->
+			<!-- border: 1px solid #cbd5e1; -->
+			<!-- border-radius: 6px; -->
+			<!-- font-size: 14px; -->
+		<!-- } -->
+
+		<!-- .location-grid button { -->
+			<!-- height: 40px; -->
+			<!-- padding: 0 12px; -->
+			<!-- background-color: #0ea5e9; -->
+			<!-- color: white; -->
+			<!-- border: none; -->
+			<!-- border-radius: 6px; -->
+			<!-- cursor: pointer; -->
+			<!-- font-size: 14px; -->
+			<!-- font-weight: 600; -->
+			<!-- white-space: nowrap; -->
+			<!-- box-sizing: border-box; -->
+		<!-- } -->
+		
+    </style>
+</head>
+<body>
+	<a href="index.html" class="back-btn">← Back to Dashboard</a>
+    <div class="card">
+        <h2>📦 Place a Material Order</h2>
+        <form id="order-form" onsubmit="submitOrder(event)">
+            
+            <div class="form-group">
+                <label for="material_description">Material Description</label>
+                <input type="text" id="material_description" placeholder="e.g., Sand, Bricks, Cement" required>
+            </div>
+
+            <!-- Pickup / Source Address Search -->
+			<div class="form-group" style="position: relative;">
+				<label for="pickup_address">Pickup Address (Source)</label>
+				<div class="location-grid">
+					<input type="text" id="pickup_address" placeholder="Type source location..." autocomplete="off" oninput="searchAddress('pickup_address', 'pickup-suggestions')" required>
+					<!-- Shortened label to save space -->
+					<button type="button" onclick="useCurrentLocationForPickup()" title="Use Current Location">📍</button>
+				</div>
+				<div id="pickup-suggestions" class="suggestions-box"></div>
+				<!-- Hidden coordinate holders -->
+				<input type="hidden" id="pickup_lat">
+				<input type="hidden" id="pickup_lon">
+			</div>
+            <!-- Delivery / Destination Address Search -->
+            <div class="form-group">
+                <label for="delivery_address">Delivery Address (Destination)</label>
+                <input type="text" id="delivery_address" placeholder="Type destination location..." autocomplete="off" oninput="searchAddress('delivery_address', 'delivery-suggestions')" required>
+                <div id="delivery-suggestions" class="suggestions-box"></div>
+                <!-- Hidden coordinate holders -->
+                <input type="hidden" id="drop_lat">
+                <input type="hidden" id="drop_lon">
+            </div>
+
+            <button type="submit">Submit Order</button>
+        </form>
+        <p id="response-msg"></p>
+    </div>
+
+    <script>
+        const API_URL = 'https://upheaval-revise-fit.ngrok-free.dev/etransport/api/orders/';
+
+        // Free OpenStreetMap Nominatim Geocoding Autocomplete
+		let debounceTimer;
+        function searchAddress(inputId, suggestionBoxId) {
+            clearTimeout(debounceTimer); // Clear previous timer
+            
+            // Wait 400ms after the user stops typing before making the API call (prevents 429 Too Many Requests)
+            debounceTimer = setTimeout(async () => {
+                const query = document.getElementById(inputId).value;
+                const box = document.getElementById(suggestionBoxId);
+
+                if (query.length < 3) {
+                    box.innerHTML = '';
+                    return;
+                }
+
+                try {
+                    // Added a unique user-agent/app name parameter as requested by Nominatim policy
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5`, {
+                        headers: {
+                            'User-Agent': 'eTransportApp/1.0' // Good practice for public APIs
+                        }
+                    });
+                    
+                    if (!res.ok) throw new Error("Search limit reached");
+
+                    const results = await res.json();
+
+                    box.innerHTML = '';
+                    results.forEach(place => {
+                        const item = document.createElement('div');
+                        item.className = 'suggestion-item';
+                        item.innerText = place.display_name;
+                        item.onclick = () => {
+                            document.getElementById(inputId).value = place.display_name;
+                            box.innerHTML = ''; // Clear suggestions
+
+                            // If this is the delivery destination, save coordinates for GeoDjango point field
+                            // Save coordinates depending on whether it's pickup or delivery
+							if (inputId === 'pickup_address') {
+								document.getElementById('pickup_lat').value = place.lat;
+								document.getElementById('pickup_lon').value = place.lon;
+							} else if (inputId === 'delivery_address') {
+								document.getElementById('drop_lat').value = place.lat;
+								document.getElementById('drop_lon').value = place.lon;
+							}
+                        };
+                        box.appendChild(item);
+                    });
+                } catch (err) {
+                    console.error("Geocoding error or rate limit hit:", err);
+                }
+            }, 1000); // 400ms delay debounce
+        }
+
+        async function submitOrder(event) {
+            event.preventDefault();
+
+            const msgElement = document.getElementById('response-msg');
+            msgElement.innerText = "Submitting order...";
+            msgElement.className = "";
+			
+			const payload = {
+				material_description: document.getElementById('material_description').value,
+				pickup_address: document.getElementById('pickup_address').value,
+				delivery_address: document.getElementById('delivery_address').value,
+				pickup_lat: document.getElementById('pickup_lat').value ? parseFloat(document.getElementById('pickup_lat').value) : null,
+				pickup_lon: document.getElementById('pickup_lon').value ? parseFloat(document.getElementById('pickup_lon').value) : null,
+				dropoff_lat: document.getElementById('drop_lat').value ? parseFloat(document.getElementById('drop_lat').value) : null,
+				dropoff_lon: document.getElementById('drop_lon').value ? parseFloat(document.getElementById('drop_lon').value) : null
+			};
+			
+			console.log(payload);
+
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                msgElement.innerText = "Error: You must be logged in as a customer.";
+                msgElement.className = "error";
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || "Failed to create order.");
+
+                msgElement.innerText = `Success! Order #${data.id} created successfully.`;
+                msgElement.className = "success";
+                document.getElementById('order-form').reset();
+				<!-- window.location.href = 'index.html'; -->
+
+            } catch (err) {
+                console.error(err );
+                msgElement.innerHTML = `
+					<p style="margin: 0 0 6px 0; color: #ef4444;">Error: ${err.message}</p>
+					<p style="margin: 0;">Click here to go to <a href="index.html" style="color: #4f46e5; text-decoration: underline; font-weight: 600;">Home Page</a></p>
+				`;
+                msgElement.className = "error";
+            }
+        }
+		async function useCurrentLocationForPickup() {
+			const addressInput = document.getElementById('pickup_address');
+			addressInput.value = "Fetching your location...";
+
+			if (!navigator.geolocation) {
+				alert("Geolocation is not supported by your browser.");
+				addressInput.value = "";
+				return;
+			}
+
+			navigator.geolocation.getCurrentPosition(async position => {
+				const lat = position.coords.latitude;
+				const lon = position.coords.longitude;
+
+				// Save hidden coordinates for the backend GeoDjango Point field
+				document.getElementById('pickup_lat').value = lat;
+				document.getElementById('pickup_lon').value = lon;
+
+				try {
+					// Reverse geocode using OpenStreetMap Nominatim
+					const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`, {
+						headers: { 'User-Agent': 'eTransportApp/1.0' }
+					});
+					
+					if (!res.ok) throw new Error("Failed to reverse geocode location.");
+
+					const data = await res.json();
+					
+					if (data && data.display_name) {
+						addressInput.value = data.display_name;
+					} else {
+						addressInput.value = `${lat}, ${lon}`;
+					}
+				} catch (err) {
+					console.error("Reverse geocoding error:", err);
+					// Fallback to displaying raw coordinates if API fails
+					addressInput.value = `Lat: ${lat}, Lon: ${lon}`;
+				}
+			}, error => {
+				alert("Unable to retrieve your location. Please check your browser permissions.");
+				addressInput.value = "";
+			}, { timeout: 10000 });
+		}
+		
+		// Run on page load
+        document.addEventListener('DOMContentLoaded', useCurrentLocationForPickup);
+    </script>
+</body>
+</html>

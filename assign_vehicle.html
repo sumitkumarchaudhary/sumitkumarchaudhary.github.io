@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Owner - Assign Vehicles to Drivers</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: #f8fafc; color: #0f172a; padding: 2rem; max-width: 800px; margin: 0 auto; }
+        .card { 
+			background: #f8fafc;
+			border: 1px solid #e2e8f0;
+			border-radius: 10px;
+			padding: 16px;
+			box-sizing: border-box;
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+			width: 100%;
+		}
+        h2 { color: #4f46e5; margin-bottom: 0.5rem; }
+        .subtitle { color: #64748b; font-size: 0.875rem; margin-bottom: 1.5rem; }
+        .back-btn { display: inline-block; margin-bottom: 1.5rem; color: #4f46e5; text-decoration: none; font-weight: 600; }
+        .back-btn:hover { text-decoration: underline; }
+        
+        .vehicle-row { background: #f8fafc; border: 1px solid #e2e8f0; padding: 1.25rem; border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .vehicle-info h3 { color: #0f172a; font-size: 1.1rem; margin-bottom: 0.25rem; }
+        .vehicle-info p { font-size: 0.875rem; color: #475569; }
+        
+        .assignment-controls {
+			display: flex;
+			gap: 8px;
+			align-items: center;
+			width: 100%;
+			box-sizing: border-box;
+		}
+        select {
+			flex: 1;
+			min-width: 0; /* Prevents overflow bugs in flex */
+			height: 40px;
+			padding: 0 10px;
+			border: 1px solid #cbd5e1;
+			border-radius: 8px;
+			background: white;
+			font-size: 14px;
+			box-sizing: border-box;
+	}
+        button { 
+			flex-shrink: 0;
+			height: 40px;
+			padding: 0 14px;
+			background-color: #4f46e5;
+			color: white;
+			border: none;
+			border-radius: 8px;
+			font-weight: 600;
+			font-size: 13px;
+			cursor: pointer;
+			box-sizing: border-box;
+			white-space: nowrap;
+		}
+        button:hover { background-color: #4338ca; }
+        
+        #msg { margin-bottom: 1rem; font-weight: 600; text-align: center; }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .loading { font-style: italic; color: #64748b; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">← Back to Dashboard</a>
+
+    <div class="card">
+        <h2>🚗 Assign Fleet Vehicles to Drivers</h2>
+        <p class="subtitle">Select a driver from the dropdown list to assign them to your fleet vehicles.</p>
+        
+        <div id="msg"></div>
+        <div id="fleet-container" class="loading">Loading fleet and drivers...</div>
+    </div>
+
+    <script>
+        const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api";
+
+        function getToken() {
+            return localStorage.getItem('accessToken');
+        }
+
+        async function initPage() {
+            const container = document.getElementById('fleet-container');
+            const token = getToken();
+
+            if (!token) {
+                container.innerHTML = '<p class="error">Authentication token missing. Please log in as an owner.</p>';
+                return;
+            }
+
+            try {
+                // 1. Fetch Owner's Vehicles and Available Drivers concurrently
+                const [vehiclesRes, usersRes] = await Promise.all([
+                    fetch(`${API_BASE}/vehicles/`, { 
+						headers: { 
+							'Authorization': `Bearer ${token}`, 
+							'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 							
+							} 
+					}),
+                    fetch(`${API_BASE}/users/`, { 
+						headers: { 
+							'Authorization': `Bearer ${token}`,
+							'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+						} 
+					})
+                ]);
+
+                if (!vehiclesRes.ok || !usersRes.ok) throw new Error("Failed to load required data.");
+
+                const vehicles = await vehiclesRes.json();
+                const users = await usersRes.json();
+				
+				
+
+                // Filter users who have the role of 'driver'
+                const drivers = users.filter(u => (u.profile?.role || u.role) === 'driver');
+
+                if (!vehicles || vehicles.length === 0) {
+                    container.innerHTML = '<p>You have no registered vehicles in your fleet.</p>';
+                    return;
+                }
+
+                // 2. Render vehicles list with assignment controls
+                container.innerHTML = '';
+                vehicles.forEach(vehicle => {
+                    const row = document.createElement('div');
+                    row.className = 'vehicle-row';
+
+                    // Build driver options dropdown
+                    let driverOptions = '<option value="">-- Unassigned --</option>';
+                    drivers.forEach(driver => {
+                        // Check if this driver is currently assigned to this vehicle
+                        const isSelected = (vehicle.driver === driver.id || vehicle.driver_id === driver.id) ? 'selected' : '';
+                        driverOptions += `<option value="${driver.id}" ${isSelected}>${driver.username} (${driver.first_name || 'Driver'})</option>`;
+                    });
+
+                    row.innerHTML = `
+                        <div class="vehicle-info">
+                            <h3>${vehicle.vehicle_no} (${vehicle.vehicle_type})</h3>
+                            <p><strong>Chassis:</strong> ${vehicle.chesis_no}</p>
+                            <p><strong>Current Driver:</strong> <span id="current-driver-${vehicle.id}">${vehicle.driver_username || vehicle.driver ? 'Assigned' : 'None'}</span></p>
+                        </div>
+                        <div class="assignment-controls">
+                            <select id="driver-select-${vehicle.id}">
+                                ${driverOptions}
+                            </select>
+                            <button onclick="assignDriver(${vehicle.id})">Save Assignment</button>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+            }
+        }
+
+        // 3. Send assignment PATCH request to backend
+        async function assignDriver(vehicleId) {
+            const msg = document.getElementById('msg');
+            const selectEl = document.getElementById(`driver-select-${vehicleId}`);
+            const driverId = selectEl.value ? parseInt(selectEl.value) : null;
+            const token = getToken();
+
+            msg.innerText = "Updating assignment...";
+            msg.className = "";
+
+            try {
+                const response = await fetch(`${API_BASE}/vehicles/${vehicleId}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+                    },
+                    body: JSON.stringify({ driver: driverId }) // Updates the driver foreign key on the vehicle model
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || "Failed to assign driver.");
+
+                msg.innerText = `Success! Vehicle #${vehicleId} driver assignment updated.`;
+                msg.className = "success";
+
+            } catch (err) {
+                console.error(err);
+                msg.innerText = `Error: ${err.message}`;
+                msg.className = "error";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>

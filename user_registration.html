@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration with JS Validation</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .registration-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .registration-container h2 {
+            margin-bottom: 20px;
+            color: #333333;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666666;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+		.form-group input[type="tel"],
+        .form-group input[type="password"],
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #4472c4;
+        }
+
+        .error-message {
+            color: #d9534f;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin: 20px 0;
+            font-size: 13px;
+            color: #666666;
+        }
+
+        .checkbox-group input {
+            margin-top: 3px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: #4472c4;
+            border: none;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #3359a3;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #666666;
+        }
+
+        .form-footer a {
+            color: #4472c4;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="registration-container">
+    <h2>Create an Account</h2>
+    
+    <form id="registrationForm" action="/register-endpoint" method="POST">
+        
+        <div class="form-group">
+            <label for="first_name">First Name</label>
+            <input type="text" id="first_name" name="first_name" placeholder="John" required>
+        </div>
+		
+		<div class="form-group">
+            <label for="last_name">Last Name</label>
+            <input type="text" id="last_name" name="last_name" placeholder="Doe" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+        </div>
+		<div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" placeholder="+1 (123) 456-7890" required>
+        </div>
+		<div class="form-group">
+            <label for="username">User Name</label>
+            <input type="text" id="username" name="username" placeholder="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" minlength="8" placeholder="At least 8 characters" required>
+        </div>
+
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Repeat password" required>
+            <div id="passwordError" class="error-message">Passwords do not match.</div>
+        </div>
+		<div class="form-group">
+            <label for="role">Role</label>
+            <select id="role" name="role" required>
+                <option value="" disabled selected>Select User Category</option>
+                <option value="customer">End Customer</option>
+                <option value="driver">Driver</option>
+                <option value="owner">Vehicle Owner</option>
+            </select>
+			<!-- <label for="phone">Phone Number</label> -->
+			<!-- <input type="text" id="phone" name="phone" placeholder="phone number" required> -->
+        </div>
+		
+
+        <div class="form-group">
+            <label>Gender</label>
+            <div class="radio-group">
+                <label class="radio-item">
+                    <input type="radio" name="gender" value="male" required> Male
+                </label>
+                <label class="radio-item">
+                    <input type="radio" name="gender" value="female"> Female
+                </label>
+                <label class="radio-item">
+                    <input type="radio" name="gender" value="other"> Other
+                </label>
+            </div>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="terms" name="terms" required>
+            <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</label>
+        </div>
+
+        <button type="submit" class="btn-submit">Register</button>
+
+        <div class="form-footer">
+            Already have an account? <a href="index.html">Sign In</a>
+        </div>
+    </form>
+</div>
+
+<script>
+	const API_URL = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
+	// Grab form and input elements
+	const form = document.getElementById('registrationForm');
+	const password = document.getElementById('password');
+	const confirmPassword = document.getElementById('confirmPassword');
+	const passwordError = document.getElementById('passwordError');
+
+	form.addEventListener('submit', async function(event) {
+		// 1. Prevent the default browser form submission (page reload)
+		event.preventDefault();
+
+		// 2. Clear previous states
+		passwordError.style.display = 'none';
+		confirmPassword.style.borderColor = '#cccccc';
+
+		// 3. Client-side password verification
+		if (password.value !== confirmPassword.value) {
+			passwordError.style.display = 'block';
+			confirmPassword.style.borderColor = '#d9534f';
+			confirmPassword.focus();
+			return;
+		}
+
+		// 4. Gather form data automatically
+		const formData = new FormData(form);
+		
+		// Convert FormData to a standard JavaScript object
+		const formProps = Object.fromEntries(formData);
+		console.log(formProps);
+		
+		// Reshape the payload to nest role and phone inside a 'profile' object
+		const payload = {
+			username: formProps.username,
+			email: formProps.email,
+			password: formProps.password,
+			first_name: formProps.first_name,
+			last_name: formProps.last_name,
+			<!-- role: formProps.role, -->
+			profile: {
+				role: formProps.role,
+				phone_number: formProps.phone // matches your HTML input id="phone"
+			}
+		};
+
+		console.log("Sending Payload:", payload);
+
+		// 5. Send data via Fetch API
+		try {
+			const response = await fetch(`${API_URL}/users/`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'ngrok-skip-browser-warning': 'true' // <-- Add this exact line!
+					// Optional: include authentication tokens or cross-site request forgery (CSRF) tokens here if required
+				},
+				body: JSON.stringify(payload) // Send data as JSON string
+			});
+
+			// 6. Handle the server response
+			if (response.ok) {
+				const result = await response.json();
+				form.reset(); // Clear the form fields
+				alert('Registration successful! Redirecting...');
+				// Optional: Redirect the user to a dashboard or login page
+				window.location.href = 'index.html';				
+			} else {
+				// Handle server-side errors (e.g., email already taken)
+				const errorData = await response.json();
+				alert(`Registration failed: ${errorData.message || 'Unknown error occurred.'}`);
+			}
+		} catch (error) {
+			// Handle network errors or server downtime
+			console.error('Network Error:', error);
+			alert('A network error occurred. Please check your connection and try again.');
+		}
+	});
+
+	// Real-time matching feedback as user types
+	confirmPassword.addEventListener('input', function() {
+		if (password.value === confirmPassword.value) {
+			passwordError.style.display = 'none';
+			confirmPassword.style.borderColor = '#28a745'; 
+		} else {
+			confirmPassword.style.borderColor = '#d9534f';
+		}
+	});
+</script>
+
+</body>
+</html>

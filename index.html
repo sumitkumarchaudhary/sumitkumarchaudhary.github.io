@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Connected Dashboard</title>
+    <style>
+        /* Modern Reset & UI Layout variables */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+        :root {
+            --bg-workspace: #f8fafc;
+            --surface: #ffffff;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --error: #ef4444;
+            --success: #10b981;
+        }
+        body { background-color: var(--bg-workspace); color: var(--text-dark); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1.5rem; }
+        .hidden { display: none !important; }
+        
+        /* Cards */
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; }
+        .auth-card { max-width: 440px; padding: 2.5rem; }
+        .profile-card { max-width: 600px; overflow: hidden; padding-bottom: 2rem; }
+        
+        /* Typography & Controls */
+        h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.025em; }
+        .subtitle { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
+        input { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; outline: none; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        .error-message { color: var(--error); font-size: 0.875rem; margin-top: 0.5rem; min-height: 1.25rem; }
+        
+        /* Buttons */
+        .btn { width: 100%; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; border: none; transition: background-color 0.2s; }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-primary:disabled { background-color: #a5b4fc; cursor: not-allowed; }
+        .btn-outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-dark); }
+        .btn-outline:hover { background-color: var(--bg-workspace); }
+        
+        /* Profile Details Layout */
+        .profile-banner { height: 120px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+        .profile-header-content { padding: 0 2rem 1.5rem 2rem; text-align: center; border-bottom: 1px solid var(--border); }
+        .avatar { width: 100px; height: 100px; border-radius: 50%; background: #e2e8f0; border: 4px solid var(--surface); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; color: var(--text-muted); margin: -50px auto 1rem auto; }
+        .profile-body { padding: 2rem; }
+        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        .info-item label { color: var(--text-muted); margin-bottom: 0.25rem; }
+        .info-value { font-size: 1rem; font-weight: 500; }
+        @media (max-width: 480px) { .info-grid { grid-template-columns: 1fr; } }
+        
+        .form-footer { text-align: center; margin-top: 15px; font-size: 13px; color: #666666; }
+        .form-footer a { color: #4472c4; text-decoration: none; }
+        
+        h1 { color: #333; }
+        .vehicle-card { background: #fff; border: 1px solid #ddd; padding: 15px 20px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .vehicle-card h3 { margin-top: 0; color: #007BFF; }
+        .vehicle-card p { margin: 5px 0; color: #555; }
+        .loading { color: #666; font-style: italic; }
+        .error { color: #d9534f; }
+        
+        .map-link {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 12px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .map-link:hover { background-color: #0056b3; }
+        .no-location { font-size: 13px; color: #888; text-align: center; }
+        .nav-links { margin-top: 1.5rem; text-align: center; display: flex; flex-direction: column; gap: 8px; }
+        .nav-links a { color: #4f46e5; text-decoration: none; font-weight: 600; font-size: 14px; }
+        .nav-links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. LOGIN INTERFACE -->
+    <div class="card auth-card" id="loginView">
+        <h2>Account Sign In</h2>
+        <p class="subtitle">Enter your credentials to query your live authenticated profile session.</p>
+        
+        <form id="loginForm" onsubmit="handleAuthSubmission(event)">
+            <div class="form-group">
+                <label for="userInput">User Name</label>
+                <input type="text" id="userInput" placeholder="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="passwordInput">Password</label>
+                <input type="password" id="passwordInput" placeholder="••••••••" required>
+            </div>
+
+            <div class="error-message" id="authFeedback"></div>
+            
+            <button type="submit" class="btn btn-primary" id="submitBtn" style="margin-top: 1rem;">Sign In</button>
+            <div class="form-footer">
+                If not registered yet. <a href="user_registration.html">Sign Up</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- 2. SECURE PROFILE DASHBOARD INTERFACE -->
+    <div class="card profile-card hidden" id="profileView">
+        <div class="profile-banner"></div>
+        
+        <div class="profile-header-content">
+            <div class="avatar" id="profileInitials">??</div>
+            <h2 id="profileDisplayName">Loading Profile...</h2>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">Verified Network Session</p>
+        </div>
+
+        <div class="profile-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Profile Identifier (ID)</label>
+                    <div class="info-value" id="profileUID">---</div>
+                </div>
+                <div class="info-item">
+                    <label>User Name</label>
+                    <div class="info-value" id="userName">---</div>
+                </div>
+                <div class="info-item">
+                    <label>Registered Email</label>
+                    <div class="info-value" id="profileEmail">---</div>
+                </div>
+                <div class="info-item">
+                    <label>User Role</label>
+                    <div class="info-value" id="userRole">---</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem;" id="vehicleView">
+                <h3 style="margin-bottom: 10px;">My Registered Vehicles</h3>
+                <div id="vehicle-container" class="loading">Loading your vehicles...</div>
+            </div>
+
+            <div class="nav-links">
+				<!-- Owner Only -->
+				<a href="vehicle_registration.html" id="link-register-vehicle" class="role-nav hidden">➕ Register New Vehicle</a>
+				<a href="track_fleet.html" id="link-track-fleet" class="role-nav hidden">🗺️ Track Fleet Vehicles</a>
+				<!-- <a href="track_vehicles.html" id="link-track-vehicles" class="role-nav hidden">🚚 Track Vehicles/Deliveries</a> -->
+				
+				<!-- Customer Only -->
+				<a href="create_order.html" id="link-create-order" class="role-nav hidden">📦 Put New Supply Order</a>
+				<a href="customer_orders.html" id="link-customer-orders" class="role-nav hidden">📦 See Orders</a>
+				
+				<!-- Driver Only -->
+				<a href="driver_orders.html" id="link-driver-orders" class="role-nav hidden">🚚 View / Accept Deliveries</a>
+				
+				
+				<a href="assign_vehicle.html" id="link-assign-vehicle" class="role-nav hidden">🧑‍✈️ Assign Driver</a>
+				
+			</div>
+            
+            <button class="btn btn-outline" style="margin-top: 2rem;" onclick="handleLogout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
+
+        // DOM Elements
+        const loginView = document.getElementById('loginView');
+        const profileView = document.getElementById('profileView');
+        const authFeedback = document.getElementById('authFeedback');
+        const loginForm = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const profileDisplayName = document.getElementById('profileDisplayName');
+        const profileEmail = document.getElementById('profileEmail');
+        const profileInitials = document.getElementById('profileInitials');
+        const profileUID = document.getElementById('profileUID');
+        const userName = document.getElementById('userName');
+        const userRole = document.getElementById('userRole');
+
+        // Check auth status on load
+        window.addEventListener('DOMContentLoaded', () => {
+            if (getAccessToken()) {
+                fetchUserProfile();
+            }
+        });
+
+        function setTokens(accessToken, refreshToken) {
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
+        }
+
+        function getAccessToken() { return localStorage.getItem('accessToken'); }
+        function getRefreshToken() { return localStorage.getItem('refreshToken'); }
+
+        async function authorizedFetch(url, options = {}) {
+            options.headers = options.headers || {};
+            let token = getAccessToken();
+            if (token) {
+                options.headers['Authorization'] = `Bearer ${token}`;
+				options.headers['ngrok-skip-browser-warning'] = 'true' // <-- Add this exact line! 
+            }
+
+            let response = await fetch(url, options);
+
+            if (response.status === 401) {
+                const refreshSuccessful = await attemptTokenRotation();
+                if (refreshSuccessful) {
+                    options.headers['Authorization'] = `Bearer ${getAccessToken()}`;
+					options.headers['ngrok-skip-browser-warning'] = 'true' // <-- Add this exact line! 
+                    response = await fetch(url, options);
+                } else {
+                    handleLogout();
+                    throw new Error("Session expired. Please log in again.");
+                }
+            }
+            return response;
+        }
+
+        async function attemptTokenRotation() {
+            const refreshToken = getRefreshToken();
+            if (!refreshToken) return false;
+
+            try {
+                const response = await fetch(`${API_URL}/token/refresh/`, {
+                    method: 'POST',
+                    headers: { 
+						'Content-Type': 'application/json', 
+						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+						},
+                    body: JSON.stringify({ refresh: refreshToken })
+                });
+
+                if (!response.ok) return false;
+
+                const data = await response.json();
+                if (data.access) {
+                    setTokens(data.access, data.refresh || refreshToken);
+                    return true;
+                }
+                return false;
+            } catch (err) {
+                console.error("Token rotation failure:", err);
+                return false;
+            }
+        }
+
+        async function handleAuthSubmission(event) {
+            event.preventDefault();
+            const username = document.getElementById('userInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Connecting...";
+            authFeedback.textContent = "";
+
+            try {
+                const response = await fetch(`${API_URL}/token/`, {
+                    method: 'POST',
+                    headers: { 
+						'Content-Type': 'application/json', 
+						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+						},
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.detail || data.message || "Invalid username or password combination.");
+                }
+
+                if (data.access && data.refresh) {
+                    setTokens(data.access, data.refresh);
+                    await fetchUserProfile();
+                } else if (data.token) {
+                    // Fallback for standard DRF Token Authentication
+                    localStorage.setItem('accessToken', data.token);
+                    await fetchUserProfile();
+                } else {
+                    throw new Error("Missing access tokens from API response schema mapping.");
+                }
+            } catch (error) {
+                authFeedback.textContent = error.message;
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Sign In";
+            }
+        }
+        
+        async function fetchUserProfile() {
+            try {
+                const response = await authorizedFetch(`${API_URL}/users/me/`, { method: 'GET' });
+                const user = await response.json();
+                
+                const role = user.profile?.role || user.role || 'customer';
+
+                // Render dashboard data
+                renderProfileDashboard(user, role);
+                loadUserVehicles(user);
+                
+            } catch (error) {
+                console.error("Profile retrieval broken:", error);
+                handleLogout();
+            }
+        }
+
+        function renderProfileDashboard(user, role) {
+            const firstName = user.first_name || "";
+            const lastName = user.last_name || "";
+            const fullname = (firstName + ' ' + lastName).trim() || user.username;
+            
+            profileDisplayName.textContent = fullname;
+            userName.textContent = user.username || "---";
+            userRole.textContent = role.toUpperCase();
+            profileEmail.textContent = user.email || "---";
+            profileUID.textContent = user.id || "---";
+            
+            if (firstName && lastName) {
+                profileInitials.textContent = (firstName.substring(0, 1) + lastName.substring(0, 1)).toUpperCase();
+            } else {
+                profileInitials.textContent = user.username.substring(0, 2).toUpperCase();
+            }
+			// --- ROLE-BASED NAVIGATION VISIBILITY ---
+			// First, hide all role-specific navigation links
+			document.querySelectorAll('.role-nav').forEach(el => el.classList.add('hidden'));
+			document.getElementById('vehicleView').classList.add('hidden');
+
+			// Then, show links based on the user role
+			if (role === 'owner') {
+				document.getElementById('vehicleView').classList.remove('hidden');
+				document.getElementById('link-register-vehicle').classList.remove('hidden');
+				document.getElementById('link-track-fleet').classList.remove('hidden');
+				document.getElementById('link-assign-vehicle').classList.remove('hidden');
+			} else if (role === 'customer') {
+				document.getElementById('link-create-order').classList.remove('hidden');
+				document.getElementById('link-customer-orders').classList.remove('hidden');
+				
+			} else if (role === 'driver') {
+				document.getElementById('vehicleView').classList.remove('hidden');
+				document.getElementById('link-driver-orders').classList.remove('hidden');
+				document.getElementById('link-register-vehicle').classList.remove('hidden');
+				document.getElementById('link-assign-vehicle').classList.remove('hidden');
+			}
+			// ----------------------------------------
+            loginView.classList.add('hidden');
+            profileView.classList.remove('hidden');
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Sign In";
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            loginForm.reset();
+            profileView.classList.add('hidden');
+            loginView.classList.remove('hidden');
+        }
+
+        async function loadUserVehicles(user) {
+            const token = getAccessToken();
+            const container = document.getElementById('vehicle-container');
+
+            if (!token) {
+                container.innerHTML = '<p class="error">Authentication token not found. Please log in first.</p>';
+                return;
+            }
+            
+            try {
+                const response = await authorizedFetch(`${API_URL}/vehicles/`, { method: 'GET' });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                const userData = await response.json();
+                
+                if (userData && userData.length > 0) {
+                    container.innerHTML = ''; 
+                    
+                    userData.forEach(vehicle => {
+                        const card = document.createElement('div');
+                        card.className = 'vehicle-card';
+                        
+                        let mapLinkHtml = '';
+                        if (vehicle.currlat && vehicle.currlon) {
+                            const mapUrl = `https://www.google.com/maps/search/?api=1&query=${vehicle.currlat},${vehicle.currlon}`;
+                            mapLinkHtml = `<p><a href="${mapUrl}" target="_blank" class="map-link">📍 View Location on Map</a></p>`;
+                        } else {
+                            mapLinkHtml = `<p class="no-location"><em>Location coordinates not currently available.</em></p>`;
+                        }
+						
+						const role = user.profile.role; 
+						let trackHistoryHtml = null
+						// Add history tracking link for owners
+						if (role === 'owner') {
+							trackHistoryHtml = `<p><a href="vehicle_history.html?id=${vehicle.id}" class="map-link" style="background-color: #10b981;">📜 View Vehicle History Trail</a></p>`;
+						} else {
+							trackHistoryHtml = `<p><a href="vehicle_history.html?id=${vehicle.id}" class="map-link" style="background-color: #10b981;">📜 View Vehicle History Trail</a></p>`;
+						}
+                        
+                        card.innerHTML = `
+                            <h3>Vehicle No: ${vehicle.vehicle_no}</h3>
+                            <p><strong>Type:</strong> ${vehicle.vehicle_type}</p>
+                            <p><strong>Chassis No:</strong> ${vehicle.chesis_no}</p>
+                            <p><strong>Engine No:</strong> ${vehicle.engine_no}</p>
+                            ${mapLinkHtml}
+							${trackHistoryHtml}
+                        `;
+                        container.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = '<p>You have not registered any vehicles yet.</p>';
+                }
+
+            } catch (error) {
+                console.error('Error fetching vehicles:', error);
+                container.innerHTML = '<p class="error">Failed to load vehicles. Please check your connection or login status.</p>';
+            }
+        }
+    </script>
+</body>
+</html>

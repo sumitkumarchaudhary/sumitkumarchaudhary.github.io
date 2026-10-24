@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver - Available Orders</title>
+    <style>
+        body { 
+			font-family: system-ui, -apple-system, sans-serif; 
+			background-color: #f4f6f9; 
+			margin: 0; 
+			padding: 20px; 
+			color: #1e293b;
+		}
+        .card { 
+			background: white; 
+			padding: 20px; 
+			border-radius: 8px; 
+			box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+			margin-bottom: 15px auto; 
+			box-sizing: border-box;
+			width: 100%;
+			max-width: 550px;
+		}
+		.back-btn { display: inline-block; margin-bottom: 1.5rem; color: #4f46e5; text-decoration: none; font-weight: 600; }
+        .back-btn:hover { text-decoration: underline; }
+        h2 { color: #007BFF; margin-top: 0; }
+        .order-item { border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 15px; background: #fafafa; border-radius: 4px; }
+        .assigned { border-left-color: #28a745; }
+        button { padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #218838; }
+        .status-badge { font-weight: bold; text-transform: uppercase; font-size: 12px; padding: 3px 8px; border-radius: 3px; color: white; background: #ffc107; }
+        .status-badge.assigned { background: #28a745; }
+        #msg { margin-bottom: 20px; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+	<a href="index.html" class="back-btn">← Back to Dashboard</a>
+    <div class="card">
+        <h2>🚚 Driver Portal - Delivery Queue</h2>
+        <p>Accept pending supply orders and start your deliveries.</p>
+        <div id="msg"></div>
+		
+		<!-- Tab Navigation Buttons -->
+		<div style="margin-bottom: 20px;">
+			<button onclick="switchTab('active')" id="btn-active" style="padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Active Queue</button>
+			<button onclick="switchTab('history')" id="btn-history" style="padding: 8px 16px; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-left: 10px;">Delivery History</button>
+		</div>
+        
+        <div id="orders-container"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://upheaval-revise-fit.ngrok-free.dev/etransport/api';
+        const token = localStorage.getItem('accessToken');
+
+        async function fetchOrders() {
+            const container = document.getElementById('orders-container');
+            const msg = document.getElementById('msg');
+			
+            if (!token) {
+                container.innerHTML = '<p style="color: red;">Authentication token missing. Please log in as a driver.</p>';
+                return;
+            }
+
+			let url = `${API_BASE}/orders/`;
+			let radius = 25;			
+			try {
+				const position = await new Promise((resolve, reject) => {
+					if (!navigator.geolocation) {
+						reject(new Error("Geolocation is not supported by your browser"));
+					} else {
+						navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+					}
+				});
+
+				const lat = position.coords.latitude;
+				const lon = position.coords.longitude;
+
+				if (lat && lon) {
+					url += `?lat=${lat}&lon=${lon}&radius=${radius}`;
+				}
+			} catch (error) {
+				console.warn("Geolocation denied or unavailable. Fetching all orders without distance filter.", error.message);
+			}
+
+            try {
+                const response = await fetch(url, {
+                    headers: { 
+						'Authorization': `Bearer ${token}`,
+						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 					
+					}
+                });
+                if (!response.ok) throw new Error("Failed to fetch orders.");
+
+                const orders = await response.json();
+                if (orders.length === 0) {
+                    container.innerHTML = '<p>No orders available at the moment.</p>';
+                    return;
+                }
+
+                orders.sort((a, b) => {
+                    const activeStatuses = ['assigned', 'in_transit'];
+                    const aIsActive = activeStatuses.includes(a.status);
+                    const bIsActive = activeStatuses.includes(b.status);
+
+                    if (aIsActive && !bIsActive) return -1;
+                    if (!aIsActive && bIsActive) return 1;
+                    return 0;
+                });
+				
+                const hasActiveOrder = orders.some(o => o.status === 'assigned' || o.status === 'in_transit');
+				if (hasActiveOrder) {
+                    msg.innerHTML = '<span class="error">⚠️ You have an active ongoing delivery. Complete or reject it before accepting new orders.</span>';
+                } else {
+                    msg.innerHTML = '';
+                }
+				
+				container.innerHTML = orders.map(o => {
+                    const isAcceptedByMe = o.status === 'assigned' || o.status === 'in_transit';
+                    
+                    let actionHtml = '';
+                    if (o.status === 'pending') {
+                        if (hasActiveOrder) {
+                            actionHtml = `<button disabled style="background: #cbd5e1; cursor: not-allowed;">Accept Order (Complete current first)</button>`;
+                        } else {
+                            actionHtml = `<button onclick="acceptOrder(${o.id})" style="background: #007BFF;">Accept Order</button>`;
+                        }
+                    } else if (isAcceptedByMe) {
+						actionHtml = `
+							<p><em>Current Status: <strong>${o.status.toUpperCase()}</strong></em></p>
+							
+							<button onclick="startNavigation('${o.status}', '${o.pickup_address}', '${o.delivery_address}')" style="background: #8b5cf6; margin-bottom: 8px; display: block; width: 100%;">
+								🧭 ${o.status === 'assigned' ? 'Navigate to Pickup' : 'Navigate to Delivery'}
+							</button>
+
+							${o.status === 'assigned' ? `
+								<button onclick="updateOrderStatus(${o.id}, 'in_transit')" style="background: #ffc107; color: black; margin-bottom: 8px; width: 100%;">Start In Transit</button>
+								<button onclick="rejectOrder(${o.id})" style="background: #ef4444; color: white; width: 100%;">❌ Reject Order</button>
+							` : ''}
+
+							${o.status === 'in_transit' ? `<button onclick="updateOrderStatus(${o.id}, 'delivered')" style="background: #28a745; width: 100%;">Mark as Delivered</button>` : ''}
+						`;
+                    } else if (o.status === 'delivered') {
+						actionHtml = `
+							<p><em>Current Status: <strong style="color: #10b981;">DELIVERED</strong></em></p>
+							<a href="vehicle_history.html?id=${o.vehicle}" target="_blank" class="btn-link" style="display: inline-block; padding: 8px 14px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 5px;">
+								🗺️ See Route Trail
+							</a>
+						`;
+					}
+
+                    return `
+                        <div class="order-item ${isAcceptedByMe ? 'assigned' : ''}">
+                            <p><strong>Order ID:</strong> #${o.id}</p>
+                            <p><strong>Material:</strong> ${o.material_description}</p>
+							<p><strong>Ordered By:</strong> ${o.customer_first_name} ${o.customer_last_name}</p>
+                            <p><strong>Pickup:</strong> ${o.pickup_address}</p>
+                            <p><strong>Delivery:</strong> ${o.delivery_address}</p>
+                            <div style="margin-top: 10px;">${actionHtml}</div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+            }
+        }
+
+        async function acceptOrder(orderId) {
+            const msg = document.getElementById('msg');
+            msg.innerText = `Accepting Order #${orderId}...`;
+            msg.style.color = "#007BFF";
+
+            try {
+                const response = await fetch(`${API_BASE}/orders/${orderId}/accept-order/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+					body: JSON.stringify({ vehicle_id: 1 }) 
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "Failed to accept order.");
+
+                msg.innerText = `Success! Order #${orderId} accepted.`;
+                msg.style.color = "green";
+                fetchOrders();
+            } catch (err) {
+                console.error(err);
+                msg.innerText = `Error: ${err.message}`;
+                msg.style.color = "red";
+            }
+        }
+
+        async function rejectOrder(orderId) {
+            if (!confirm(`Are you sure you want to reject Order #${orderId}? It will be returned to the general queue.`)) return;
+
+            const msg = document.getElementById('msg');
+            msg.innerText = `Rejecting Order #${orderId}...`;
+            msg.style.color = "#ef4444";
+
+            try {
+                const response = await fetch(`${API_BASE}/orders/${orderId}/reject_order/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "Failed to reject order.");
+
+                msg.innerText = `Order #${orderId} successfully rejected.`;
+                msg.style.color = "green";
+                fetchOrders();
+            } catch (err) {
+                console.error(err);
+                msg.innerText = `Error: ${err.message}`;
+                msg.style.color = "red";
+            }
+        }
+		
+		async function updateOrderStatus(orderId, newStatus) {
+			const msg = document.getElementById('msg');
+			msg.innerText = `Updating Order #${orderId} to ${newStatus}...`;
+			msg.style.color = "#007BFF";
+
+			try {
+				const response = await fetch(`${API_BASE}/orders/${orderId}/update-status/`, {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${token}`,
+						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+					},
+					body: JSON.stringify({ status: newStatus })
+				});
+
+				const data = await response.json();
+				if (!response.ok) throw new Error(data.error || "Failed to update status.");
+
+				msg.innerText = `Success! ${data.message}`;
+				msg.style.color = "green";
+				fetchOrders();
+			} catch (err) {
+				console.error(err);
+				msg.innerText = `Error: ${err.message}`;
+				msg.style.color = "red";
+			}
+		}
+		
+		function startNavigation(status, pickupAddress, deliveryAddress) {
+			let targetAddress = status === 'assigned' ? pickupAddress : deliveryAddress;
+			if (!targetAddress) {
+				alert("Address not available for navigation.");
+				return;
+			}
+			const mapUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(targetAddress)}&travelmode=driving`;
+			window.open(mapUrl, '_blank');
+		}
+		
+		let currentTab = 'active';
+		function switchTab(tab) {
+			currentTab = tab;
+			document.getElementById('btn-active').style.background = tab === 'active' ? '#4f46e5' : '#e2e8f0';
+			document.getElementById('btn-active').style.color = tab === 'active' ? 'white' : '#334155';
+			
+			document.getElementById('btn-history').style.background = tab === 'history' ? '#4f46e5' : '#e2e8f0';
+			document.getElementById('btn-history').style.color = tab === 'history' ? 'white' : '#334155';
+
+			if (tab === 'active') {
+				fetchOrders();
+			} else {
+				fetchHistory();
+			}
+		}
+
+		async function fetchHistory() {
+			const container = document.getElementById('orders-container');
+			container.innerHTML = '<p>Loading delivery history...</p>';
+
+			try {
+				const response = await fetch(`${API_BASE}/orders/history/`, {
+					headers: { 
+						'Authorization': `Bearer ${token}`,
+						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+					}
+				});
+
+				if (!response.ok) throw new Error("Failed to fetch history.");
+
+				const orders = await response.json();
+				if (orders.length === 0) {
+					container.innerHTML = '<p>No completed delivery history found.</p>';
+					return;
+				}
+
+				container.innerHTML = orders.map(o => `
+					<div class="order-item" style="border-left: 4px solid #10b981;">
+						<p><strong>Order ID:</strong> #${o.id}</p>
+						<p><strong>Material:</strong> ${o.material_description}</p>
+						<p><strong>Pickup:</strong> ${o.pickup_address}</p>
+						<p><strong>Delivery:</strong> ${o.delivery_address}</p>
+						<p><em>Status: <strong style="color: #10b981;">DELIVERED</strong></em></p>
+						<a href="vehicle_history.html?id=${o.vehicle}" target="_blank" style="display: inline-block; padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; margin-top: 5px;">
+							🗺️ See Route Trail
+						</a>
+					</div>
+				`).join('');
+			} catch (err) {
+				console.error(err);
+				container.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+			}
+		}
+
+        document.addEventListener('DOMContentLoaded', fetchOrders);
+    </script>
+</body>
+</html>
