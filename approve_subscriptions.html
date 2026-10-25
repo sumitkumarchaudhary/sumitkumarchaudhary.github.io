@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Subscription Management</title>
+    <style>
+        body { font-family: system-ui, sans-serif; background: #f4f6f9; padding: 20px; color: #1e293b; }
+        .card { background: white; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+        button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; color: white; }
+        .btn-activate { background: #10b981; }
+        .btn-revoke { background: #ef4444; }
+		button:disabled {
+			cursor: not-allowed;
+			opacity: 0.6;
+			pointer-events: none; /* Prevents any click or hover states from firing */
+		}
+        #msg { margin-bottom: 15px; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>🛠️ Admin Portal: User Subscriptions</h2>
+        <div id="msg"></div>
+        <div id="users-table-container">Loading users...</div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://upheaval-revise-fit.ngrok-free.dev/etransport/api';
+        const token = localStorage.getItem('accessToken');
+
+        async function fetchAllUsers() {
+            const container = document.getElementById('users-table-container');
+            try {
+                const response = await fetch(`${API_BASE}/users/`, {
+                    headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' }
+                });
+                if (!response.ok) throw new Error("Failed to load user profiles. Ensure you are logged in as staff.");
+
+                const users = await response.json();
+                if (users.length === 0) {
+                    container.innerHTML = '<p>No users found.</p>';
+                    return;
+                }
+				console.log(users);
+				
+                container.innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+								<th>User Id</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+							${users.map(u => `
+								<tr>
+									<td>${u.id}</td>
+									<td>${u.username}</td>
+									<td>${u.role}</td>
+									${u.profile ? `
+										<td>${u.profile.is_subscribed ? '<span style="color: #10b981; font-weight: bold;">Active</span>' : '<span style="color: #64748b;">Inactive</span>'}</td>
+										<td>
+											<!-- Disables this button if u.profile.is_subscribed is true -->
+											<button class="btn-activate" onclick="modifySubscription(${u.id}, 'activate', 30)" ${u.profile.is_subscribed ? 'disabled' : ''}>+30 Days</button>
+											<button class="btn-revoke" onclick="modifySubscription(${u.id}, 'revoke', 0)">Revoke</button>
+										</td>
+									` : `
+										<td><span style="color: #64748b;">No profile</span></td>
+										<td>
+											<button class="btn-activate" disabled>+30 Days</button>
+											<button class="btn-revoke" disabled>Revoke</button>
+										</td>
+									`}
+								</tr>
+							`).join('')}
+
+                        </tbody>
+                    </table>
+                `;
+            } catch (err) {
+                container.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+            }
+        }
+
+        async function modifySubscription(userId, actionType, days) {
+            const msg = document.getElementById('msg');
+            msg.innerText = `Processing ${actionType}...`;
+            msg.style.color = "#007BFF";
+
+            try {
+                const response = await fetch(`${API_BASE}/user_profiles/${userId}/manage_subscription/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify({ action_type: actionType, days: days })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "Action failed.");
+
+                msg.innerText = data.message;
+                msg.style.color = "green";
+                fetchAllUsers(); // Refresh the table
+            } catch (err) {
+                msg.innerText = `Error: ${err.message}`;
+                msg.style.color = "red";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchAllUsers);
+    </script>
+</body>
+</html>

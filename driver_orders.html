@@ -228,18 +228,37 @@
 		
 		async function updateOrderStatus(orderId, newStatus) {
 			const msg = document.getElementById('msg');
-			msg.innerText = `Updating Order #${orderId} to ${newStatus}...`;
+			msg.innerText = `Getting your GPS location...`;
 			msg.style.color = "#007BFF";
 
 			try {
+				const position = await new Promise((resolve, reject) => {
+					if (!navigator.geolocation) {
+						reject(new Error("Geolocation is not supported by your browser"));
+					} else {
+						navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+					}
+				});
+
+				const lat = position.coords.latitude;
+				const lon = position.coords.longitude;
+
+				msg.innerText = `Validating location buffer and updating Order #${orderId}...`;
+				let payload = { 
+						'status': newStatus,
+						'lat': lat,
+						'lon': lon,
+					}
+					 
+				<!-- console.log(payload); -->
 				const response = await fetch(`${API_BASE}/orders/${orderId}/update-status/`, {
 					method: 'PATCH',
 					headers: {
 						'Content-Type': 'application/json',
 						'Authorization': `Bearer ${token}`,
-						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+						'ngrok-skip-browser-warning': 'true'
 					},
-					body: JSON.stringify({ status: newStatus })
+					body: JSON.stringify(payload)
 				});
 
 				const data = await response.json();
@@ -248,6 +267,7 @@
 				msg.innerText = `Success! ${data.message}`;
 				msg.style.color = "green";
 				fetchOrders();
+
 			} catch (err) {
 				console.error(err);
 				msg.innerText = `Error: ${err.message}`;
@@ -261,9 +281,16 @@
 				alert("Address not available for navigation.");
 				return;
 			}
+			<!-- console.log("Tracker Started"); -->
+			initSilentTracker()
 			const mapUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(targetAddress)}&travelmode=driving`;
 			window.open(mapUrl, '_blank');
 		}
+		
+		
+		
+		
+		
 		
 		let currentTab = 'active';
 		function switchTab(tab) {
@@ -318,6 +345,95 @@
 				container.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
 			}
 		}
+		
+		// Silently fetch the driver's assigned vehicle ID on load
+		let apiUrl = "";
+        async function initSilentTracker() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                console.warn("Authentication token not found. Background tracking paused.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/users/me/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+
+                if (!response.ok) throw new Error("Failed to fetch driver profile.");
+
+                const userData = await response.json();
+                
+                // Check if vehicle is assigned
+                if (userData.assigned_vehicle && userData.assigned_vehicle.id) {
+                    const vehicleId = userData.assigned_vehicle.id;
+                    
+                    // Build dynamic update endpoint URL silently
+                    apiUrl = `${API_BASE}/vehicles/${vehicleId}/update-location/`;
+                    
+                    // Start background GPS watch loop automatically
+                    startSilentWatch();
+                } else {
+                    console.warn("No vehicle currently assigned to this driver account.");
+                }
+
+            } catch (err) {
+                console.error("Silent tracker initialization error:", err);
+            }
+        }
+
+        // 2. Start continuous silent GPS watching
+        function startSilentWatch() {
+            if (!navigator.geolocation) {
+                console.error("Geolocation is not supported by this browser.");
+                return;
+            }
+
+            navigator.geolocation.watchPosition(
+                position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    // Send update to backend without alerting UI
+                    sendLocationSilently(lat, lon);
+                },
+                error => {
+                    console.warn(`GPS Watch Warning: ${error.message}`);
+                },
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 10000,
+                    timeout: 5000
+                }
+            );
+        }
+
+        // 3. Send location payload via PATCH in the background
+        async function sendLocationSilently(lat, lon) {
+            const token = localStorage.getItem('accessToken');
+            if (!apiUrl || !token) return;
+
+            try {
+                await fetch(apiUrl, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify({ lat: lat, lon: lon })
+                });
+				<!-- console.log("send location", { lat: lat, lon: lon }); -->
+            } catch (err) {
+                console.error("Silent location sync network error:", err);
+            }
+        }
+		
 
         document.addEventListener('DOMContentLoaded', fetchOrders);
     </script>

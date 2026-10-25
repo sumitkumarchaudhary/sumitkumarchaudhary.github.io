@@ -39,6 +39,53 @@
 			color: #1e293b;
 			font-size: 14px;
 		}
+		
+		.vehicle-type-group {
+			display: flex;
+			gap: 12px;
+			flex-wrap: wrap;
+			margin-bottom: 16px;
+		}
+
+		.vehicle-option {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 10px 14px;
+			background: #f8fafc;
+			border: 1px solid #cbd5e1;
+			border-radius: 8px;
+			cursor: pointer;
+			font-size: 14px;
+			font-weight: 500;
+			color: #1e293b;
+			transition: all 0.2s ease;
+			flex: 1;
+			min-width: 110px;
+		}
+
+		.vehicle-option:hover {
+			border-color: #4f46e5;
+			background: #eef2ff;
+		}
+
+		.vehicle-option input[type="radio"] {
+			accent-color: #4f46e5;
+			cursor: pointer;
+		}
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin: 20px 0;
+            font-size: 13px;
+            color: #666666;
+        }
+
+        .checkbox-group input {
+            margin-top: 3px;
+        }
 
 		.location-grid {
 			display: grid;
@@ -131,16 +178,31 @@
         <h2>📦 Place a Material Order</h2>
         <form id="order-form" onsubmit="submitOrder(event)">
             
+			<div class="form-group">
+				<label>Required Vehicle Type</label>
+				<div class="vehicle-type-group">
+					<label class="vehicle-option">
+						<input type="radio" name="vehicle_type" value="light" required>
+						Commercial (Light)
+					</label>
+					<label class="vehicle-option">
+						<input type="radio" name="vehicle_type" value="heavy">
+						Commercial (Heavy)
+					</label>
+					<label class="vehicle-option">
+						<input type="radio" name="vehicle_type" value="other">
+						Other
+					</label>
+				</div>
+			</div>
             <div class="form-group">
                 <label for="material_description">Material Description</label>
                 <input type="text" id="material_description" placeholder="e.g., Sand, Bricks, Cement" required>
-            </div>
-
             <!-- Pickup / Source Address Search -->
 			<div class="form-group" style="position: relative;">
-				<label for="pickup_address">Pickup Address (Source)</label>
+				<label for="pickup_address">Pickup Location (Source)</label>
 				<div class="location-grid">
-					<input type="text" id="pickup_address" placeholder="Type source location..." autocomplete="off" oninput="searchAddress('pickup_address', 'pickup-suggestions')" required>
+					<input type="text" id="pickup_address" placeholder="Type source address..." autocomplete="off" oninput="searchAddress('pickup_address', 'pickup-suggestions')" required>
 					<!-- Shortened label to save space -->
 					<button type="button" onclick="useCurrentLocationForPickup()" title="Use Current Location">📍</button>
 				</div>
@@ -149,14 +211,22 @@
 				<input type="hidden" id="pickup_lat">
 				<input type="hidden" id="pickup_lon">
 			</div>
+			<div class="form-group">
+                <label for="local_pickup_address">Local Pickup Address</label>
+                <input type="text" id="local_pickup_address" placeholder="Type local pickup address">
+            </div>
             <!-- Delivery / Destination Address Search -->
             <div class="form-group">
-                <label for="delivery_address">Delivery Address (Destination)</label>
+                <label for="delivery_address">Delivery Location (Destination)</label>
                 <input type="text" id="delivery_address" placeholder="Type destination location..." autocomplete="off" oninput="searchAddress('delivery_address', 'delivery-suggestions')" required>
                 <div id="delivery-suggestions" class="suggestions-box"></div>
                 <!-- Hidden coordinate holders -->
                 <input type="hidden" id="drop_lat">
                 <input type="hidden" id="drop_lon">
+            </div>
+			<div class="form-group">
+                <label for="local_delivery_address">Local Pickup Delivery</label>
+                <input type="text" id="local_delivery_address" placeholder="Type local delivery address">
             </div>
 
             <button type="submit">Submit Order</button>
@@ -230,12 +300,18 @@
 			
 			const payload = {
 				material_description: document.getElementById('material_description').value,
-				pickup_address: document.getElementById('pickup_address').value,
-				delivery_address: document.getElementById('delivery_address').value,
+				pickup_address: (document.getElementById('local_pickup_address') && document.getElementById('local_pickup_address').value) 
+					? document.getElementById('local_pickup_address').value 
+					: (document.getElementById('pickup_address') ? document.getElementById('pickup_address').value : "Null"),
+
+				delivery_address: (document.getElementById('local_delivery_address') && document.getElementById('local_delivery_address').value) 
+					? document.getElementById('local_delivery_address').value 
+					: (document.getElementById('delivery_address') ? document.getElementById('delivery_address').value : "Null"),
 				pickup_lat: document.getElementById('pickup_lat').value ? parseFloat(document.getElementById('pickup_lat').value) : null,
 				pickup_lon: document.getElementById('pickup_lon').value ? parseFloat(document.getElementById('pickup_lon').value) : null,
 				dropoff_lat: document.getElementById('drop_lat').value ? parseFloat(document.getElementById('drop_lat').value) : null,
-				dropoff_lon: document.getElementById('drop_lon').value ? parseFloat(document.getElementById('drop_lon').value) : null
+				dropoff_lon: document.getElementById('drop_lon').value ? parseFloat(document.getElementById('drop_lon').value) : null,
+				req_vehicle_type: document.querySelector('input[name="vehicle_type"]:checked')?.value || ""
 			};
 			
 			console.log(payload);

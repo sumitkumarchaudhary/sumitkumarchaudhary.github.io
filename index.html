@@ -158,6 +158,8 @@
 				
 				
 				<a href="assign_vehicle.html" id="link-assign-vehicle" class="role-nav hidden">🧑‍✈️ Assign Driver</a>
+	
+				<a href="approve_subscriptions.html" id="link-approve-subscriptions" class="role-nav hidden">🧑‍✈️ Approve User Subscriptions</a>
 				
 			</div>
             
@@ -166,7 +168,7 @@
     </div>
 
     <script>
-        const API_URL = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
+        const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
 
         // DOM Elements
         const loginView = document.getElementById('loginView');
@@ -225,7 +227,7 @@
             if (!refreshToken) return false;
 
             try {
-                const response = await fetch(`${API_URL}/token/refresh/`, {
+                const response = await fetch(`${API_BASE}/token/refresh/`, {
                     method: 'POST',
                     headers: { 
 						'Content-Type': 'application/json', 
@@ -258,7 +260,7 @@
             authFeedback.textContent = "";
 
             try {
-                const response = await fetch(`${API_URL}/token/`, {
+                const response = await fetch(`${API_BASE}/token/`, {
                     method: 'POST',
                     headers: { 
 						'Content-Type': 'application/json', 
@@ -291,7 +293,7 @@
         
         async function fetchUserProfile() {
             try {
-                const response = await authorizedFetch(`${API_URL}/users/me/`, { method: 'GET' });
+                const response = await authorizedFetch(`${API_BASE}/users/me/`, { method: 'GET' });
                 const user = await response.json();
                 
                 const role = user.profile?.role || user.role || 'customer';
@@ -342,6 +344,9 @@
 				document.getElementById('link-driver-orders').classList.remove('hidden');
 				document.getElementById('link-register-vehicle').classList.remove('hidden');
 				document.getElementById('link-assign-vehicle').classList.remove('hidden');
+				
+			} else if (role == "admin"){
+				document.getElementById('link-approve-subscriptions').classList.remove('hidden');
 			}
 			// ----------------------------------------
             loginView.classList.add('hidden');
@@ -368,7 +373,7 @@
             }
             
             try {
-                const response = await authorizedFetch(`${API_URL}/vehicles/`, { method: 'GET' });
+                const response = await authorizedFetch(`${API_BASE}/vehicles/`, { method: 'GET' });
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
                 const userData = await response.json();
@@ -415,7 +420,11 @@
                 console.error('Error fetching vehicles:', error);
                 container.innerHTML = '<p class="error">Failed to load vehicles. Please check your connection or login status.</p>';
             }
-        }
+        }        
+		
+		// Run automatically when the driver dashboard loads
+        <!-- document.addEventListener('DOMContentLoaded', initSilentTracker);	 -->
+		
     </script>
 </body>
 </html>

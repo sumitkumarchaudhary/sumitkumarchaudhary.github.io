@@ -3,47 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Vehicle GPS Tracker</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background: #f4f4f9; }
-        .card { background: white; padding: 25px; border-radius: 8px; display: inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 400px; width: 100%; }
-        button { padding: 10px 20px; font-size: 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 15px; }
-        button.stop { background: #dc3545; }
-        button:disabled { background: #cccccc; cursor: not-allowed; }
-        .status { margin-top: 15px; font-weight: bold; color: #333; }
-        .error { color: #dc3545; font-size: 14px; margin-top: 10px; }
-    </style>
+    <title>Silent Background GPS Tracker</title>
 </head>
 <body>
-
-    <div class="card">
-        <h2>Live Vehicle Tracker</h2>
-        <p>Assigned Vehicle: <strong id="vehicle-info-display">Loading vehicle...</strong></p>
-        
-        <button id="toggle-btn" onclick="toggleTracking()" disabled>Start Tracking</button>
-        <div class="status" id="status-text">Status: Checking driver credentials...</div>
-        <p id="coords-display"></p>
-        <p id="error-msg" class="error"></p>
-    </div>
-
+    <!-- Optional minimal indicator or keep completely blank -->
     <script>
         const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api";
-        let watchId = null;
-        let isTracking = false;
-        let assignedVehicleId = null;
         let apiUrl = "";
 
-        // 1. Fetch assigned vehicle automatically on page load
-        async function initDriverVehicle() {
+        // 1. Silently fetch the driver's assigned vehicle ID on load
+        async function initSilentTracker() {
             const token = localStorage.getItem('accessToken');
-            const statusText = document.getElementById('status-text');
-            const vehicleInfoDisplay = document.getElementById('vehicle-info-display');
-            const toggleBtn = document.getElementById('toggle-btn');
-            const errorMsg = document.getElementById('error-msg');
-
             if (!token) {
-                errorMsg.innerText = "Authentication token not found. Please log in first.";
-                statusText.innerText = "Status: Unauthorized";
+                console.warn("Authentication token not found. Background tracking paused.");
                 return;
             }
 
@@ -52,112 +24,81 @@
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`, // Use 'Token ${token}' if using DRF Token auth
-						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line!
+                        'Authorization': `Bearer ${token}`,
+                        'ngrok-skip-browser-warning': 'true'
                     }
                 });
 
                 if (!response.ok) throw new Error("Failed to fetch driver profile.");
 
                 const userData = await response.json();
-				
-				// Check if an assigned vehicle exists for this driver
-				if (userData.assigned_vehicle) {
-					const vehicle = userData.assigned_vehicle;
-					assignedVehicleId = vehicle.id;
-					
-					// Display vehicle details
-					vehicleInfoDisplay.innerText = `${vehicle.vehicle_no} (${vehicle.vehicle_type})`;
-					
-					// Build dynamic update URL
-					apiUrl = `${API_BASE}/vehicles/${assignedVehicleId}/update-location/`;
-					
-					toggleBtn.disabled = false;
-					statusText.innerText = "Status: Ready to track";
-				} else {
-					vehicleInfoDisplay.innerText = "None assigned";
-					errorMsg.innerText = "No vehicle has been assigned to you by an owner yet.";
-					statusText.innerText = "Status: Waiting for assignment";
-				}
-
-            } catch (err) {
-                console.error(err);
-                errorMsg.innerText = "Network error connecting to server.";
-                statusText.innerText = "Status: Error";
-            }
-        }
-
-        // 2. Toggle GPS Tracking
-        function toggleTracking() {
-            const btn = document.getElementById('toggle-btn');
-            const statusText = document.getElementById('status-text');
-
-            if (!isTracking) {
-                if (!navigator.geolocation) {
-                    alert("Geolocation is not supported by your browser");
-                    return;
+                
+                // Check if vehicle is assigned
+                if (userData.assigned_vehicle && userData.assigned_vehicle.id) {
+                    const vehicleId = userData.assigned_vehicle.id;
+                    
+                    // Build dynamic update endpoint URL silently
+                    apiUrl = `${API_BASE}/vehicles/${vehicleId}/update-location/`;
+                    
+                    // Start background GPS watch loop automatically
+                    startSilentWatch();
+                } else {
+                    console.warn("No vehicle currently assigned to this driver account.");
                 }
 
-                statusText.innerText = "Status: Acquiring GPS signal...";
-                
-                watchId = navigator.geolocation.watchPosition(
-                    position => {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-                        
-                        document.getElementById('coords-display').innerText = `Lat: ${lat.toFixed(5)}, Lon: ${lon.toFixed(5)}`;
-                        statusText.innerText = "Status: Tracking active & syncing...";
-                        
-                        // Send location update to backend
-                        sendLocationToBackend(lat, lon);
-                    },
-                    error => {
-                        statusText.innerText = `GPS Error: ${error.message}`;
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        maximumAge: 10000,
-                        timeout: 5000
-                    }
-                );
-
-                btn.innerText = "Stop Tracking";
-                btn.className = "stop";
-                isTracking = true;
-            } else {
-                navigator.geolocation.clearWatch(watchId);
-                statusText.innerText = "Status: Tracking stopped";
-                btn.innerText = "Start Tracking";
-                btn.className = "";
-                isTracking = false;
+            } catch (err) {
+                console.error("Silent tracker initialization error:", err);
             }
         }
 
-        // 3. Send location payload via PATCH
-        async function sendLocationToBackend(lat, lon) {
+        // 2. Start continuous silent GPS watching
+        function startSilentWatch() {
+            if (!navigator.geolocation) {
+                console.error("Geolocation is not supported by this browser.");
+                return;
+            }
+
+            navigator.geolocation.watchPosition(
+                position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    // Send update to backend without alerting UI
+                    sendLocationSilently(lat, lon);
+                },
+                error => {
+                    console.warn(`GPS Watch Warning: ${error.message}`);
+                },
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 10000,
+                    timeout: 5000
+                }
+            );
+        }
+
+        // 3. Send location payload via PATCH in the background
+        async function sendLocationSilently(lat, lon) {
             const token = localStorage.getItem('accessToken');
+            if (!apiUrl || !token) return;
 
             try {
-                const response = await fetch(apiUrl, {
+                await fetch(apiUrl, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`, // Use 'Token ${token}' if using DRF Token auth
-						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line!
+                        'Authorization': `Bearer ${token}`,
+                        'ngrok-skip-browser-warning': 'true'
                     },
                     body: JSON.stringify({ lat: lat, lon: lon })
                 });
-
-                if (!response.ok) {
-                    console.error("Failed to sync location with server");
-                }
             } catch (err) {
-                console.error("Network error during location sync:", err);
+                console.error("Silent location sync network error:", err);
             }
         }
 
-        // Run initialization on load
-        document.addEventListener('DOMContentLoaded', initDriverVehicle);
+        // Run automatically when the driver dashboard loads
+        document.addEventListener('DOMContentLoaded', initSilentTracker);
     </script>
 </body>
 </html>
