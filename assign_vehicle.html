@@ -117,11 +117,20 @@
                 const vehicles = await vehiclesRes.json();
                 const users = await usersRes.json();
 				
+				<!-- console.log('vehicles', vehicles) -->
+				<!-- console.log('users', users) -->
+				// Collect IDs of all drivers who are already assigned to ANY vehicle
 				
-
                 // Filter users who have the role of 'driver'
-                const drivers = users.filter(u => (u.profile?.role || u.role) === 'driver');
-
+                const drivers = users.filter(u => (u.profile?.role || u.role) === 'driver')// && u?.assigned_vehicle === null);
+				const assignedDriverIds = new Set([
+												...vehicles.map(v => v.driver).filter(Boolean),
+												...drivers.filter(d => d.assigned_vehicle != null).map(d => d.id)
+											]);
+				
+				
+				<!-- console.log('drivers', drivers) -->
+				<!-- console.log('assignedDriverIds', assignedDriverIds) -->
                 if (!vehicles || vehicles.length === 0) {
                     container.innerHTML = '<p>You have no registered vehicles in your fleet.</p>';
                     return;
@@ -137,15 +146,19 @@
                     let driverOptions = '<option value="">-- Unassigned --</option>';
                     drivers.forEach(driver => {
                         // Check if this driver is currently assigned to this vehicle
-                        const isSelected = (vehicle.driver === driver.id || vehicle.driver_id === driver.id) ? 'selected' : '';
-                        driverOptions += `<option value="${driver.id}" ${isSelected}>${driver.username} (${driver.first_name || 'Driver'})</option>`;
+						const isAssignedElsewhere = assignedDriverIds.has(driver.id) && vehicle.driver !== driver.id;
+						if (!isAssignedElsewhere) {
+							const isSelected = vehicle.driver === driver.id ? 'selected' : '';
+							driverOptions += `<option value="${driver.id}" ${isSelected}>${driver.username} (${driver.first_name || 'Driver'})</option>`;
+						}
                     });
-
+					
+					vehicle.driver
                     row.innerHTML = `
                         <div class="vehicle-info">
                             <h3>${vehicle.vehicle_no} (${vehicle.vehicle_type})</h3>
                             <p><strong>Chassis:</strong> ${vehicle.chesis_no}</p>
-                            <p><strong>Current Driver:</strong> <span id="current-driver-${vehicle.id}">${vehicle.driver_username || vehicle.driver ? 'Assigned' : 'None'}</span></p>
+                            <p><strong>Current Driver:</strong> <span id="current-driver-${vehicle.id}">${vehicle.driver || vehicle.driver ? 'Assigned' : 'None'}</span></p>
                         </div>
                         <div class="assignment-controls">
                             <select id="driver-select-${vehicle.id}">
@@ -169,7 +182,7 @@
             const selectEl = document.getElementById(`driver-select-${vehicleId}`);
             const driverId = selectEl.value ? parseInt(selectEl.value) : null;
             const token = getToken();
-
+			
             msg.innerText = "Updating assignment...";
             msg.className = "";
 
@@ -186,7 +199,7 @@
 
                 const data = await response.json();
 
-                if (!response.ok) throw new Error(data.detail || "Failed to assign driver.");
+                if (!response.ok) throw new Error(data.detail || "Failed to assign driver. Verify if the driver has been assigned to a different vehicle.");
 
                 msg.innerText = `Success! Vehicle #${vehicleId} driver assignment updated.`;
                 msg.className = "success";

@@ -2,21 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Subscription Management</title>
     <style>
-        body { font-family: system-ui, sans-serif; background: #f4f6f9; padding: 20px; color: #1e293b; }
-        .card { background: white; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
-        button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; color: white; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: system-ui, sans-serif; 
+            background: #f4f6f9; 
+            padding: 10px; 
+            color: #1e293b; 
+            margin: 0;
+        }
+        .card { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            max-width: 800px; 
+            margin: auto; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            width: 100%;
+        }
+        h2 { font-size: 1.25rem; margin-top: 0; }
+        #msg { margin-bottom: 15px; font-weight: bold; text-align: center; font-size: 14px; }
+
+        /* Mobile-First Card View for Users */
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .user-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .user-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        .user-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .user-actions button {
+            flex: 1;
+        }
+
+        button { 
+            padding: 8px 12px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            color: white; 
+            font-size: 13px;
+        }
         .btn-activate { background: #10b981; }
         .btn-revoke { background: #ef4444; }
-		button:disabled {
-			cursor: not-allowed;
-			opacity: 0.6;
-			pointer-events: none; /* Prevents any click or hover states from firing */
-		}
-        #msg { margin-bottom: 15px; font-weight: bold; text-align: center; }
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Desktop Table View (Hidden on mobile, shown on wider screens) */
+        .desktop-table { display: none; }
+        .mobile-cards { display: block; }
+
+        @media (min-width: 768px) {
+            body { padding: 20px; }
+            .card { padding: 20px; }
+            h2 { font-size: 1.5rem; }
+            
+            .mobile-cards { display: none; }
+            .desktop-table { display: block; width: 100%; overflow-x: auto; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+            .user-actions button { flex: unset; }
+        }
     </style>
 </head>
 <body>
@@ -43,44 +114,71 @@
                     container.innerHTML = '<p>No users found.</p>';
                     return;
                 }
-				console.log(users);
-				
+                <!-- console.log(users); -->
+                
                 container.innerHTML = `
-                    <table>
-                        <thead>
-                            <tr>
-								<th>User Id</th>
-                                <th>Username</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-							${users.map(u => `
-								<tr>
-									<td>${u.id}</td>
-									<td>${u.username}</td>
-									<td>${u.role}</td>
-									${u.profile ? `
-										<td>${u.profile.is_subscribed ? '<span style="color: #10b981; font-weight: bold;">Active</span>' : '<span style="color: #64748b;">Inactive</span>'}</td>
-										<td>
-											<!-- Disables this button if u.profile.is_subscribed is true -->
-											<button class="btn-activate" onclick="modifySubscription(${u.id}, 'activate', 30)" ${u.profile.is_subscribed ? 'disabled' : ''}>+30 Days</button>
-											<button class="btn-revoke" onclick="modifySubscription(${u.id}, 'revoke', 0)">Revoke</button>
-										</td>
-									` : `
-										<td><span style="color: #64748b;">No profile</span></td>
-										<td>
-											<button class="btn-activate" disabled>+30 Days</button>
-											<button class="btn-revoke" disabled>Revoke</button>
-										</td>
-									`}
-								</tr>
-							`).join('')}
+                    <!-- Mobile Card View -->
+                    <div class="mobile-cards">
+                        <div class="user-list">
+                            ${users.map(u => {
+                                const isSubscribed = u.profile && u.profile.is_subscribed;
+                                const hasProfile = !!u.profile;
+                                return `
+                                    <div class="user-item">
+                                        <div class="user-info-row">
+                                            <strong>${u.first_name} ${u.last_name}</strong>
+                                            <span style="font-size: 12px; background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${u.role}</span>
+                                        </div>
+                                        <div class="user-info-row">
+                                            <span>Status:</span>
+                                            <span>${hasProfile ? (isSubscribed ? '<span style="color: #10b981; font-weight: bold;">Active</span>' : '<span style="color: #64748b;">Inactive</span>') : '<span style="color: #64748b;">No profile</span>'}</span>
+                                        </div>
+                                        <div class="user-actions">
+                                            <button class="btn-activate" onclick="modifySubscription(${u.id}, 'activate', 30)" ${!hasProfile || isSubscribed ? 'disabled' : ''}>+30 Days</button>
+                                            <button class="btn-revoke" onclick="modifySubscription(${u.id}, 'revoke', 0)" ${!hasProfile ? 'disabled' : ''}>Revoke</button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
 
-                        </tbody>
-                    </table>
+                    <!-- Desktop Table View -->
+                    <div class="desktop-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <!-- <th>User Id</th> -->
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${users.map(u => `
+                                    <tr>
+                                        <!-- <td>${u.id}</td> -->
+                                        <td>${u.username}</td>
+                                        <td>${u.role}</td>
+                                        ${u.profile ? `
+                                            <td>${u.profile.is_subscribed ? '<span style="color: #10b981; font-weight: bold;">Active</span>' : '<span style="color: #64748b;">Inactive</span>'}</td>
+                                            <td>
+                                                <button class="btn-activate" onclick="modifySubscription(${u.id}, 'activate', 30)" ${u.profile.is_subscribed ? 'disabled' : ''}>+30 Days</button>
+                                                <button class="btn-revoke" onclick="modifySubscription(${u.id}, 'revoke', 0)">Revoke</button>
+                                            </td>
+                                        ` : `
+                                            <td><span style="color: #64748b;">No profile</span></td>
+                                            <td>
+                                                <button class="btn-activate" disabled>+30 Days</button>
+                                                <button class="btn-revoke" disabled>Revoke</button>
+                                            </td>
+                                        `}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 `;
             } catch (err) {
                 container.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
@@ -108,7 +206,7 @@
 
                 msg.innerText = data.message;
                 msg.style.color = "green";
-                fetchAllUsers(); // Refresh the table
+                fetchAllUsers();
             } catch (err) {
                 msg.innerText = `Error: ${err.message}`;
                 msg.style.color = "red";

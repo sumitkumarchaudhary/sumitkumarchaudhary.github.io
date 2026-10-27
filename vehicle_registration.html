@@ -235,12 +235,12 @@
 		
 		// Convert FormData to a standard JavaScript object
 		const formProps = Object.fromEntries(formData);
-		console.log(JSON.stringify(formProps));
+		<!-- console.log(JSON.stringify(formProps)); -->
 		
 		const requestBody = {
 			vehicles: [formProps]// <-- Pass the object directly, NOT JSON.stringify(formProps)
 		};
-		console.log(requestBody)
+		<!-- console.log(requestBody) -->
 		// 5. Send data via Fetch API
 		try {
 			const response = await fetch(`${API_URL}/users/me/`, {
@@ -260,7 +260,7 @@
 				form.reset(); // Clear the form fields
 				alert('Vehicle added successful! Redirecting...');
 				// Optional: Redirect the user to a dashboard or login page
-				window.location.href = 'index.html';				
+				<!-- window.location.href = 'index.html';				 -->
 			} else {
 				// Handle server-side errors (e.g., email already taken)
 				const errorData = await response.json();

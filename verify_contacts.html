@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Verification</title>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --bg-body: #f9fafb;
+            --bg-card: #ffffff;
+            --border-color: #d1d5db;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .verification-container {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 32px;
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .user-target {
+            font-weight: 600;
+            color: var(--text-main);
+            word-break: break-all;
+        }
+
+        /* Input Styles */
+        .otp-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .otp-input {
+            width: 56px;
+            height: 56px;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .otp-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        /* Action Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f3f4f6;
+        }
+
+        /* Footers & Utilities */
+        .footer-actions {
+            margin-top: 24px;
+            font-size: 14px;
+        }
+
+        .link-action {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .link-action:hover {
+            text-decoration: underline;
+        }
+
+        .timer-text {
+            color: var(--text-muted);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- STATE 1: EMAIL VERIFICATION VIEW -->
+    <div id="email-view" class="verification-container">
+        <h1>Check your email</h1>
+        <p>We sent a verification link and code to <br><span class="user-target">alex.designer@gmail.com</span></p>
+        
+        <!-- Direct Quick Link to Provider -->
+        <a href="https://google.com" target="_blank" class="btn btn-primary">Open Gmail</a>
+        
+        <p style="margin: 16px 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Or enter code inline</p>
+        
+        <!-- Alphanumeric/Numeric Input Friendly Layout -->
+        <div class="otp-container">
+            <input type="text" class="otp-input email-code" maxlength="1" inputmode="numeric" autocomplete="one-time-code" aria-label="Digit 1">
+            <input type="text" class="otp-input email-code" maxlength="1" inputmode="numeric" autocomplete="one-time-code" aria-label="Digit 2">
+            <input type="text" class="otp-input email-code" maxlength="1" inputmode="numeric" autocomplete="one-time-code" aria-label="Digit 3">
+            <input type="text" class="otp-input email-code" maxlength="1" inputmode="numeric" autocomplete="one-time-code" aria-label="Digit 4">
+        </div>
+
+        <div class="footer-actions">
+            <span class="timer-text">Didn't get the email? <span class="link-action">Resend</span></span>
+            <br><br>
+            <span class="link-action" onclick="switchView('sms-view')">Verify with phone number instead</span>
+        </div>
+    </div>
+
+    <!-- STATE 2: MOBILE SMS OTP VIEW -->
+    <div id="sms-view" class="verification-container hidden">
+        <h1>Enter verification code</h1>
+        <p>We sent a 4-digit security code via SMS to <br><span class="user-target">+1 (555) •••-••89</span></p>
+        
+        <div class="otp-container">
+            <!-- inputmode="numeric" ensures mobile browsers call the number pad, not full keyboard -->
+            <input type="text" class="otp-input sms-code" maxlength="1" inputmode="numeric" autocomplete="one-time-code" aria-label="Digit 1">
+            <input type="text" class="otp-input sms-code" maxlength="1" inputmode="numeric" autocomplete="one-time-code" aria-label="Digit 2">
+            <input type="text" class="otp-input sms-code" maxlength="1" inputmode="numeric" autocomplete="one-time-code" aria-label="Digit 3">
+            <input type="text" class="otp-input sms-code" maxlength="1" inputmode="numeric" autocomplete="one-time-code" aria-label="Digit 4">
+        </div>
+
+        <button class="btn btn-primary" onclick="alert('Verifying...')">Verify Code</button>
+
+        <div class="footer-actions">
+            <span class="timer-text">Resend code in <span id="countdown">0:45</span></span>
+            <br><br>
+            <span class="link-action" onclick="switchView('email-view')">Back to email verification</span>
+        </div>
+    </div>
+
+    <script>
+        // Simple view switching architecture for UI demonstration
+        function switchView(viewId) {
+            document.getElementById('email-view').classList.add('hidden');
+            document.getElementById('sms-view').classList.add('hidden');
+            document.getElementById(viewId).classList.remove('hidden');
+            
+            // Focus on the first slot of the active panel
+            const activeInputs = document.querySelectorAll(`#${viewId} .otp-input`);
+            if(activeInputs.length > 0) activeInputs[0].focus();
+        }
+
+        // Setup individual auto-focusing behavior for both input sets
+        setupAutoTab('.email-code');
+        setupAutoTab('.sms-code');
+
+        function setupAutoTab(selector) {
+            const inputs = document.querySelectorAll(selector);
+            
+            inputs.forEach((input, index) => {
+                // Advance cursor as user types
+                input.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    if (value.length === 1 && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+                });
+
+                // Handle backspace mechanics natively across browsers
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && input.value.length === 0 && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                });
+
+                // Desktop Clipboard Handling: intercept string-paste actions and distribute values
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const pastedData = (e.clipboardData || window.clipboardData).getData('text').trim();
+                    
+                    // Filter numbers only if necessary, match required slot count
+                    if (pastedData.length <= inputs.length) {
+                        for (let i = 0; i < pastedData.length; i++) {
+                            if (inputs[i]) {
+                                inputs[i].value = pastedData[i];
+                                if (inputs[i + 1]) inputs[i + 1].focus();
+                            }
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

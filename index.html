@@ -295,7 +295,7 @@
             try {
                 const response = await authorizedFetch(`${API_BASE}/users/me/`, { method: 'GET' });
                 const user = await response.json();
-                
+                <!-- console.log(user); -->
                 const role = user.profile?.role || user.role || 'customer';
 
                 // Render dashboard data
@@ -376,12 +376,13 @@
                 const response = await authorizedFetch(`${API_BASE}/vehicles/`, { method: 'GET' });
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-                const userData = await response.json();
+                const userVehicleData = await response.json();
+				<!-- console.log(userVehicleData); -->
                 
-                if (userData && userData.length > 0) {
+                if (userVehicleData && userVehicleData.length > 0) {
                     container.innerHTML = ''; 
                     
-                    userData.forEach(vehicle => {
+                    userVehicleData.forEach(vehicle => {
                         const card = document.createElement('div');
                         card.className = 'vehicle-card';
                         
