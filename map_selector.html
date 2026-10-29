@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Location on Map</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        body { margin: 0; font-family: system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; background: #f8fafc; }
+        #info-bar { padding: 15px; background: white; font-size: 14px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        #map { flex-grow: 1; width: 100%; cursor: pointer; }
+        button { background: #4f46e5; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.2s; }
+        button:hover { background: #4338ca; }
+        button:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .loading { color: #64748b; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <div id="info-bar">
+        <span id="instruction" class="loading">Click anywhere on the map to pin a location...</span>
+        <button id="confirm-btn" disabled onclick="confirmLocation()">Confirm Location</button>
+    </div>
+    
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <script>
+        // Read URL query parameter to see if this is for 'pickup' or 'delivery'
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetType = urlParams.get('type') || 'pickup';
+
+        // Initialize Map centered globally
+        const map = L.map('map').setView([20.5937, 78.9629], 5);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            crossOrigin: true,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        let selectedLat = null;
+        let selectedLon = null;
+        let selectedAddress = "";
+        let marker;
+
+        // Map Click Event Listener
+        map.on('click', async function(e) {
+            selectedLat = e.latlng.lat;
+            selectedLon = e.latlng.lng;
+            
+            const instruction = document.getElementById('instruction');
+            const confirmBtn = document.getElementById('confirm-btn');
+
+            instruction.className = "loading";
+            instruction.textContent = "Resolving address from coordinates...";
+
+            if (marker) {
+                marker.setLatLng([selectedLat, selectedLon]);
+            } else {
+                marker = L.marker([selectedLat, selectedLon]).addTo(map);
+            }
+
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${selectedLat}&lon=${selectedLon}&zoom=18`, {
+                    headers: { 'Accept-Language': 'en', 'User-Agent': 'eTransportApp/1.0' }
+                });
+                
+                if (!res.ok) throw new Error("Failed to fetch address.");
+
+                const data = await res.json();
+                selectedAddress = data.display_name || `${selectedLat}, ${selectedLon}`;
+                
+                instruction.className = "";
+                instruction.innerHTML = `<b>Selected:</b> ${selectedAddress}`;
+                confirmBtn.disabled = false; // Enable confirmation button
+
+                marker.bindPopup(`<b>Pinned Location:</b><br><span style="font-size:11px;">${selectedAddress}</span>`).openPopup();
+            } catch (err) {
+                console.error("Geocoding error:", err);
+                selectedAddress = `${selectedLat}, ${selectedLon}`;
+                instruction.className = "";
+                instruction.innerHTML = `<b>Selected Coordinates:</b> ${selectedAddress}`;
+                confirmBtn.disabled = false;
+            }
+        });
+
+        // Pass data back to parent window and close popup
+        function confirmLocation() {
+            if (selectedLat !== null && selectedLon !== null && window.opener) {
+                // Calls function defined on create_order.html parent window
+                window.opener.setSelectedLocation(targetType, selectedLat, selectedLon, selectedAddress);
+                window.close(); // Closes popup and shifts focus back to parent form
+            } else {
+                alert("Please select a location on the map first.");
+            }
+        }
+    </script>
+</body>
+</html>
