@@ -160,7 +160,8 @@
 				<a href="assign_vehicle.html" id="link-assign-vehicle" class="role-nav hidden">🧑‍✈️ Assign Driver</a>
 	
 				<a href="approve_subscriptions.html" id="link-approve-subscriptions" class="role-nav hidden">🧑‍✈️ Approve User Subscriptions</a>
-				
+				<a href="verify_vehicles.html" id="link-verify_vehicles" class="role-nav hidden">Verify Vehicles</a>
+
 			</div>
             
             <button class="btn btn-outline" style="margin-top: 2rem;" onclick="handleLogout()">Logout</button>
@@ -347,6 +348,7 @@
 				
 			} else if (role == "admin"){
 				document.getElementById('link-approve-subscriptions').classList.remove('hidden');
+				document.getElementById('link-verify_vehicles').classList.remove('hidden');
 			}
 			// ----------------------------------------
             loginView.classList.add('hidden');

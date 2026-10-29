@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Vehicle Document Verification</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: system-ui, sans-serif; 
+            background: #f4f6f9; 
+            padding: 10px; 
+            color: #1e293b; 
+            margin: 0;
+        }
+        .card { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            max-width: 900px; 
+            margin: auto; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            width: 100%;
+        }
+        h2 { font-size: 1.25rem; margin-top: 0; }
+        #msg { margin-bottom: 15px; font-weight: bold; text-align: center; font-size: 14px; }
+
+        /* Vehicle List Card View for Mobile */
+        .vehicle-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .vehicle-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .vehicle-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        .vehicle-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .vehicle-actions button {
+            flex: 1;
+        }
+
+        button { 
+            padding: 8px 12px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            color: white; 
+            font-size: 13px;
+        }
+        .btn-approve { background: #10b981; }
+        .btn-reject { background: #ef4444; }
+        .btn-view { background: #3b82f6; text-decoration: none; display: inline-block; text-align: center; }
+        
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        @media (min-width: 768px) {
+            body { padding: 20px; }
+            .card { padding: 20px; }
+            h2 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>📋 Admin Portal: Vehicle Document Verification</h2>
+        <div id="msg"></div>
+        <div id="vehicles-container">Loading vehicles...</div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://upheaval-revise-fit.ngrok-free.dev/etransport/api';
+        const token = localStorage.getItem('accessToken');
+
+        async function fetchVehiclesForVerification() {
+            const container = document.getElementById('vehicles-container');
+            try {
+                const response = await fetch(`${API_BASE}/vehicles/`, {
+                    headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' }
+                });
+                if (!response.ok) throw new Error("Failed to load vehicle list.");
+
+                const vehicles = await response.json();
+				
+				console.log(vehicles);
+                if (vehicles.length === 0) {
+                    container.innerHTML = '<p>No vehicles found.</p>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div class="vehicle-list">
+                        ${vehicles.map(v => `
+                            <div class="vehicle-item">
+                                <div class="vehicle-info-row">
+                                    <strong>Vehicle: ${v.vehicle_no} (${v.vehicle_type})</strong>
+                                    <span>${v.is_verified ? '<span style="color: #10b981; font-weight: bold;">Verified ✓</span>' : '<span style="color: #f59e0b; font-weight: bold;">Pending Review</span>'}</span>
+                                </div>
+                                <div class="vehicle-info-row" style="font-size: 13px; color: #64748b;">
+                                    <span>Chassis: ${v.chesis_no} | Engine: ${v.engine_no}</span>
+                                </div>
+                                <div class="vehicle-actions">
+                                    <a href="${v.certificate_url}" target="_blank" class="btn-view">View RC Certificate</a>
+                                    <button class="btn-approve" onclick="verifyVehicle(${v.id}, 'approve')" ${!v.certificate_url ? 'disabled' : ''}>Approve</button>
+                                    <button class="btn-reject" onclick="verifyVehicle(${v.id}, 'reject')" ${!v.certificate_url ? 'disabled' : ''}>Reject</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (err) {
+                container.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+            }
+        }
+
+        async function verifyVehicle(vehicleId, actionType) {
+            const msg = document.getElementById('msg');
+            msg.innerText = `Processing ${actionType}...`;
+            msg.style.color = "#007BFF";
+
+            try {
+                const response = await fetch(`${API_BASE}/vehicles/${vehicleId}/verify-document/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify({ action_type: actionType })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "Action failed.");
+
+                msg.innerText = data.message;
+                msg.style.color = "green";
+                fetchVehiclesForVerification(); // Refresh the list
+            } catch (err) {
+                msg.innerText = `Error: ${err.message}`;
+                msg.style.color = "red";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchVehiclesForVerification);
+    </script>
+</body>
+</html>

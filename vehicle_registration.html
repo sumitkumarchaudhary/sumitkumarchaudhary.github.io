@@ -167,6 +167,94 @@
             color: #4472c4;
             text-decoration: none;
         }
+		/* Core Layout Box */
+		.upload-container {
+		  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+		  display: flex;
+		  flex-direction: column;
+		  gap: 8px;
+		  max-width: 650px;
+		  width: 100%;
+		  box-sizing: border-box;
+		  margin-bottom: 8px;
+		}
+
+		.upload-label {
+		  font-size: 14px;
+		  font-weight: 600;
+		  color: #374151;
+		}
+
+		/* The Invisible Input Trick */
+		#certInput {
+		  position: absolute;
+		  width: 1px;
+		  height: 1px;
+		  padding: 0;
+		  margin: -1px;
+		  overflow: hidden;
+		  clip: rect(0, 0, 0, 0);
+		  border: 0;
+		}
+
+		/* Custom Interactive Label Box */
+		.custom-file-upload {
+		  display: flex;
+		  flex-direction: column;
+		  align-items: center;
+		  justify-content: center;
+		  border: 2px dashed #d1d5db;
+		  border-radius: 12px;
+		  padding: 24px 16px;
+		  background-color: #f9fafb;
+		  cursor: pointer;
+		  transition: all 0.2s ease-in-out;
+		  text-align: center;
+		  min-height: 140px; /* Touch-friendly size limit */
+		}
+
+		/* Hover State */
+		.custom-file-upload:hover {
+		  border-color: #3b82f6;
+		  background-color: #eff6ff;
+		}
+
+		/* Accessibility Focus Indicator (Fires when user tabs via keyboard) */
+		#certInput:focus-visible + .custom-file-upload {
+		  outline: 2px solid #3b82f6;
+		  outline-offset: 2px;
+		  border-color: #3b82f6;
+		}
+
+		/* Decorative UI Elements */
+		.upload-icon {
+		  font-size: 32px;
+		  margin-bottom: 8px;
+		}
+
+		.upload-text {
+		  font-size: 14px;
+		  color: #4b5563;
+		  margin-bottom: 4px;
+		}
+
+		.upload-text strong {
+		  color: #2563eb;
+		}
+
+		.upload-hint {
+		  font-size: 12px;
+		  color: #9ca3af;
+		}
+
+		.file-name-text {
+		  margin-top: 12px;
+		  font-size: 13px;
+		  font-weight: 500;
+		  color: #10b981; /* Changes color dynamically when file is ready */
+		  word-break: break-all;
+		}
+
 		
     </style>
 </head>
@@ -176,13 +264,30 @@
     <h2>Add Vehicle</h2>
     
     <form id="vehicleRegistrationForm">
+        <div class="form-group">
+            <label>Vehicle Type</label>
+            <div class="vehicle-type-group">
+                <label class="vehicle-option">
+                    <input type="radio" name="vehicle_type" value="light" required>
+                    Commercial (Light)
+                </label>
+                <label class="vehicle-option">
+                    <input type="radio" name="vehicle_type" value="heavy">
+                    Commercial (Heavy)
+                </label>
+                <label class="vehicle-option">
+                    <input type="radio" name="vehicle_type" value="other">
+                    Other
+                </label>
+            </div>
+        </div>
         
         <div class="form-group">
             <label for="vehicle_no">Vehicle Number </label>
             <input type="text" id="vehicle_no" name="vehicle_no" placeholder="Enter Vehicle Number" required>
         </div>
-		
-		<div class="form-group">
+        
+        <div class="form-group">
             <label for="chesis_no">Chesis Number</label>
             <input type="text" id="chesis_no" name="chesis_no" placeholder="Enter Chesis Number" required>
         </div>
@@ -191,32 +296,29 @@
             <label for="engine_no">Engine Number</label>
             <input type="text" id="engine_no" name="engine_no" placeholder="Enter Engine Number" required>
         </div>
-		<!-- <div class="form-group"> -->
-            <!-- <label for="owner_name">Owner Name</label> -->
-            <!-- <input type="text" id="owner_name" name="owner_name" placeholder="Enter Owner Name" required> -->
-        <!-- </div> -->
-
-
-		<div class="form-group">
-			<label>Vehicle Type</label>
-			<div class="vehicle-type-group">
-				<label class="vehicle-option">
-					<input type="radio" name="vehicle_type" value="light" required>
-					Commercial (Light)
-				</label>
-				<label class="vehicle-option">
-					<input type="radio" name="vehicle_type" value="heavy">
-					Commercial (Heavy)
-				</label>
-				<label class="vehicle-option">
-					<input type="radio" name="vehicle_type" value="other">
-					Other
-				</label>
-			</div>
-		</div>
+        
+        <div class="upload-container">
+            <span class="upload-label">Vehicle Registration Certificate (PDF/DOCX)</span>
+            
+            <!-- Clickable custom label box linked via 'for' attribute -->
+            <label for="certInput" class="custom-file-upload">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">
+                    <strong>Click to upload</strong> or drag and drop
+                </div>
+                <span class="upload-hint">PDF or DOCX only (Max 5MB)</span>
+                <!-- Dynamic placeholder to show chosen filename -->
+                <span id="fileNameDisplay" class="file-name-text">No file chosen</span>
+            </label>
+            
+            <!-- ⚡ FIXED: Added name="vehicle_rc" to map directly to your Django fields array -->
+            <input type="file" id="certInput" name="vehicle_rc" accept=".pdf, .docx" required>
+        </div>
+        
         <button type="submit" class="btn-submit">Register</button>
     </form>
 </div>
+
 
 <script>
 	const API_URL = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
@@ -229,29 +331,59 @@
 	form.addEventListener('submit', async function(event) {
 		// 1. Prevent the default browser form submission (page reload)
 		event.preventDefault();
-
-		// 4. Gather form data automatically
+		const form = event.target;
+    
+		// 🚀 Grabs vehicle_type, vehicle_no, chesis_no, engine_no, AND vehicle_rc automatically!
 		const formData = new FormData(form);
+		<!-- // 1. Manually extract text inputs using their element IDs -->
+		<!-- const vehicleNoValue = document.getElementById('vehicle_no').value; -->
+		<!-- const chesisNoValue = document.getElementById('chesis_no').value; -->
+		<!-- const engineNoValue = document.getElementById('engine_no').value; -->
+
+		<!-- // 2. Manually extract the selected Radio button value -->
+		<!-- const selectedRadio = document.querySelector('input[name="vehicle_type"]:checked'); -->
+		<!-- const vehicleTypeValue = selectedRadio ? selectedRadio.value : null; -->
+
+		<!-- // 3. Manually extract the raw binary file instance -->
+		<!-- const certInput = document.getElementById('certInput'); -->
+		<!-- const certFile = certInput.files[0]; // Gets the first actual file object (not an array) -->
+
+		<!-- // 🔍 Test Logs: Print manual values to inspect them in your browser console -->
+		<!-- console.log("--- Manually Extracted Fields ---"); -->
+		<!-- console.log("Vehicle Type:", vehicleTypeValue); -->
+		<!-- console.log("Vehicle No:", vehicleNoValue); -->
+		<!-- console.log("Chesis No:", chesisNoValue); -->
+		<!-- console.log("Engine No:", engineNoValue); -->
+		<!-- console.log("File Binary Object:", certFile); -->
+
+		<!-- // 4. Manually construct the FormData payload for the API request -->
+		<!-- const formData = new FormData(); -->
 		
-		// Convert FormData to a standard JavaScript object
-		const formProps = Object.fromEntries(formData);
-		<!-- console.log(JSON.stringify(formProps)); -->
+		<!-- // The keys added here MUST match your Django model/serializer field names exactly		 -->
+		<!-- formData.append('vehicle_type', vehicleTypeValue); -->
+		<!-- formData.append('vehicle_no', vehicleNoValue); -->
+		<!-- formData.append('chesis_no', chesisNoValue); -->
+		<!-- formData.append('engine_no', engineNoValue); -->
 		
-		const requestBody = {
-			vehicles: [formProps]// <-- Pass the object directly, NOT JSON.stringify(formProps)
-		};
-		<!-- console.log(requestBody) -->
-		// 5. Send data via Fetch API
+		
+		
+		
+		<!-- // Append the file binary payload if it exists -->
+		<!-- if (certFile) { -->
+			<!-- formData.append('vehicle_rc', certFile); -->
+		<!-- } -->
+				
+		// Send data via Fetch API
 		try {
-			const response = await fetch(`${API_URL}/users/me/`, {
-				method: 'PATCH',
+			const response = await fetch(`${API_URL}/vehicles/`, {
+				method: 'POST',
 				headers: {
 					'Authorization': `Bearer ${getAccessToken()}`,
-					'Content-Type': 'application/json',
+					<!-- 'Content-Type': 'application/json', -->
 					'ngrok-skip-browser-warning': 'true' // <-- Add this exact line!
 					// Optional: include authentication tokens or cross-site request forgery (CSRF) tokens here if required
 				},
-				body: JSON.stringify(requestBody) // Send data as JSON string
+				body: formData // Send data as JSON string
 			});
 
 			// 6. Handle the server response
@@ -260,7 +392,7 @@
 				form.reset(); // Clear the form fields
 				alert('Vehicle added successful! Redirecting...');
 				// Optional: Redirect the user to a dashboard or login page
-				<!-- window.location.href = 'index.html';				 -->
+				window.location.href = 'index.html';				
 			} else {
 				// Handle server-side errors (e.g., email already taken)
 				const errorData = await response.json();
@@ -271,6 +403,19 @@
 			console.error('Network Error:', error);
 			alert('A network error occurred. Please check your connection and try again.');
 		}
+	});
+	
+	document.getElementById('certInput').addEventListener('change', function(event) {
+	  const fileDisplay = document.getElementById('fileNameDisplay');
+	  
+	  if (this.files && this.files.length > 0) {
+		// Show the selected filename cleanly
+		fileDisplay.innerText = `Selected: ${this.files[0].name}`;
+		fileDisplay.style.color = '#10b981'; // Green active status indication
+	  } else {
+		fileDisplay.innerText = "No file chosen";
+		fileDisplay.style.color = '#9ca3af';
+	  }
 	});
 </script>
 
