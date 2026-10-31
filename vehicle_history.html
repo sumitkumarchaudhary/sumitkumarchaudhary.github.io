@@ -74,7 +74,7 @@
                 }
 
                 const data = await response.json();
-                
+                console.log(data);
                 titleElement.textContent = `History Trail: ${data.vehicle_no} (${data.vehicle_type})`;
 
                 // 1. Render Coordinate History Trail

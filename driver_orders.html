@@ -64,7 +64,7 @@
             }
 
 			let url = `${API_BASE}/orders/`;
-			let radius = 25;			
+			let radius = 25;			// fetch order within 10km radius
 			try {
 				const position = await new Promise((resolve, reject) => {
 					if (!navigator.geolocation) {
@@ -94,6 +94,8 @@
                 if (!response.ok) throw new Error("Failed to fetch orders.");
 
                 const orders = await response.json();
+				console.log(orders);
+				
                 if (orders.length === 0) {
                     container.innerHTML = '<p>No orders available at the moment.</p>';
                     return;
@@ -323,6 +325,7 @@
 				if (!response.ok) throw new Error("Failed to fetch history.");
 
 				const orders = await response.json();
+				console.log('orders_history', orders);
 				if (orders.length === 0) {
 					container.innerHTML = '<p>No completed delivery history found.</p>';
 					return;
@@ -335,7 +338,7 @@
 						<p><strong>Pickup:</strong> ${o.pickup_address}</p>
 						<p><strong>Delivery:</strong> ${o.delivery_address}</p>
 						<p><em>Status: <strong style="color: #10b981;">DELIVERED</strong></em></p>
-						<a href="vehicle_history.html?id=${o.vehicle}" target="_blank" style="display: inline-block; padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; margin-top: 5px;">
+						<a href="order_history.html?id=${o.id}" target="_blank" style="display: inline-block; padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; margin-top: 5px;">
 							🗺️ See Route Trail
 						</a>
 					</div>

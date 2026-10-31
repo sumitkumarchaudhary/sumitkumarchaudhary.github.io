@@ -8,19 +8,26 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
         body { margin: 0; font-family: system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; background: #f8fafc; }
-        #info-bar { padding: 15px; background: white; font-size: 14px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        #map { flex-grow: 1; width: 100%; cursor: pointer; }
-        button { background: #4f46e5; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.2s; }
+        #info-bar { padding: 12px 20px; background: white; font-size: 14px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); gap: 10px; }
+        #instruction { flex-grow: 1; }
+        .btn-group { display: flex; gap: 10px; align-items: center; }
+        button { background: #4f46e5; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: background 0.2s; white-space: nowrap; }
         button:hover { background: #4338ca; }
         button:disabled { background: #cbd5e1; cursor: not-allowed; }
+        #gps-btn { background: #0ea5e9; }
+        #gps-btn:hover { background: #0284c7; }
+        #map { flex-grow: 1; width: 100%; cursor: pointer; }
         .loading { color: #64748b; font-style: italic; }
     </style>
 </head>
 <body>
 
     <div id="info-bar">
-        <span id="instruction" class="loading">Click anywhere on the map to pin a location...</span>
-        <button id="confirm-btn" disabled onclick="confirmLocation()">Confirm Location</button>
+        <span id="instruction" class="loading">Click anywhere on the map or use your current location...</span>
+        <div class="btn-group">
+            <button id="gps-btn" onclick="panToCurrentLocation()">📍 Zoom to Current Location</button>
+            <button id="confirm-btn" disabled onclick="confirmLocation()">Confirm Location</button>
+        </div>
     </div>
     
     <div id="map"></div>
@@ -29,11 +36,9 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     
     <script>
-        // Read URL query parameter to see if this is for 'pickup' or 'delivery'
         const urlParams = new URLSearchParams(window.location.search);
         const targetType = urlParams.get('type') || 'pickup';
 
-        // Initialize Map centered globally
         const map = L.map('map').setView([20.5937, 78.9629], 5);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -47,16 +52,18 @@
         let selectedAddress = "";
         let marker;
 
-        // Map Click Event Listener
-        map.on('click', async function(e) {
-            selectedLat = e.latlng.lat;
-            selectedLon = e.latlng.lng;
+        // Function to handle reverse geocoding for any lat/lon
+        async function selectCoordinates(lat, lon, zoomLevel = 18) {
+            selectedLat = lat;
+            selectedLon = lon;
             
             const instruction = document.getElementById('instruction');
             const confirmBtn = document.getElementById('confirm-btn');
 
             instruction.className = "loading";
             instruction.textContent = "Resolving address from coordinates...";
+
+            map.setView([selectedLat, selectedLon], zoomLevel);
 
             if (marker) {
                 marker.setLatLng([selectedLat, selectedLon]);
@@ -76,7 +83,7 @@
                 
                 instruction.className = "";
                 instruction.innerHTML = `<b>Selected:</b> ${selectedAddress}`;
-                confirmBtn.disabled = false; // Enable confirmation button
+                confirmBtn.disabled = false;
 
                 marker.bindPopup(`<b>Pinned Location:</b><br><span style="font-size:11px;">${selectedAddress}</span>`).openPopup();
             } catch (err) {
@@ -86,14 +93,45 @@
                 instruction.innerHTML = `<b>Selected Coordinates:</b> ${selectedAddress}`;
                 confirmBtn.disabled = false;
             }
+        }
+
+        // Map Click Event Listener
+        map.on('click', function(e) {
+            selectCoordinates(e.latlng.lat, e.latlng.lng);
         });
+
+        // Geolocation handler for the "My Location" button
+        function panToCurrentLocation() {
+            const instruction = document.getElementById('instruction');
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser.");
+                return;
+            }
+
+            instruction.className = "loading";
+            instruction.textContent = "Detecting your current location...";
+
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    selectCoordinates(lat, lon, 16); // Zoom closer to user location
+                },
+                error => {
+                    console.error(error);
+                    instruction.className = "";
+                    instruction.textContent = "Unable to retrieve your location. Please check browser permissions.";
+                    alert("Unable to retrieve your location. Please check browser permissions.");
+                },
+                { timeout: 10000, enableHighAccuracy: true }
+            );
+        }
 
         // Pass data back to parent window and close popup
         function confirmLocation() {
             if (selectedLat !== null && selectedLon !== null && window.opener) {
-                // Calls function defined on create_order.html parent window
                 window.opener.setSelectedLocation(targetType, selectedLat, selectedLon, selectedAddress);
-                window.close(); // Closes popup and shifts focus back to parent form
+                window.close();
             } else {
                 alert("Please select a location on the map first.");
             }

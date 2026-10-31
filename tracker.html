@@ -6,11 +6,11 @@
     <title>Silent Background GPS Tracker</title>
 </head>
 <body>
+	
     <!-- Optional minimal indicator or keep completely blank -->
     <script>
         const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api";
         let apiUrl = "";
-
         // 1. Silently fetch the driver's assigned vehicle ID on load
         async function initSilentTracker() {
             const token = localStorage.getItem('accessToken');
@@ -32,10 +32,10 @@
                 if (!response.ok) throw new Error("Failed to fetch driver profile.");
 
                 const userData = await response.json();
-                
+                console.log(userData);
                 // Check if vehicle is assigned
-                if (userData.assigned_vehicle && userData.assigned_vehicle.id) {
-                    const vehicleId = userData.assigned_vehicle.id;
+                if (userData.assigned_vehicle) {
+                    const vehicleId = userData.assigned_vehicle;
                     
                     // Build dynamic update endpoint URL silently
                     apiUrl = `${API_BASE}/vehicles/${vehicleId}/update-location/`;
@@ -81,7 +81,7 @@
         async function sendLocationSilently(lat, lon) {
             const token = localStorage.getItem('accessToken');
             if (!apiUrl || !token) return;
-
+			console.log(lat, lon);
             try {
                 await fetch(apiUrl, {
                     method: 'PATCH',

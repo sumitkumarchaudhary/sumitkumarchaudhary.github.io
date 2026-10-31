@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle History Trail</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: #f8fafc; color: #0f172a; padding: 2rem; max-width: 800px; margin: 0 auto; }
+        .card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
+        h2 { color: #4f46e5; margin-bottom: 1rem; }
+        .back-btn { display: inline-block; margin-bottom: 1.5rem; color: #4f46e5; text-decoration: none; font-weight: 600; }
+        .back-btn:hover { text-decoration: underline; }
+        .history-item, .order-item { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; }
+        .loading { font-style: italic; color: #64748b; }
+        .error { color: #ef4444; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">← Back to Dashboard</a>
+
+    <div class="card">
+        <h2 id="vehicle-title">Vehicle History Timeline</h2>
+        <div id="content-area" class="loading">Loading vehicle history data...</div>
+    </div>
+
+    <div class="card">
+        <h2>📦 Associated Delivery Orders</h2>
+        <div id="orders-area" class="loading">Loading order history...</div>
+    </div>
+
+    <script>
+        const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api";
+        
+        // Extract vehicle ID from URL query parameters (e.g., vehicle_history.html?id=3)
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('id');
+
+        function getAccessToken() {
+            return localStorage.getItem('accessToken');
+        }
+		
+		
+		async function fetchHistory() {
+		    const container = document.getElementById('content-area');
+            const ordersContainer = document.getElementById('orders-area');
+            const titleElement = document.getElementById('vehicle-title');
+			const token = getAccessToken();
+			if (!orderId) {
+                container.innerHTML = '<p class="error">No vehicle ID provided in the URL.</p>';
+                ordersContainer.innerHTML = '';
+                return;
+            }
+
+            if (!token) {
+                container.innerHTML = '<p class="error">Authentication token not found. Please log in.</p>';
+                return;
+            }
+			
+			try {
+				const response = await fetch(`${API_BASE}/orders/history/`, {
+					headers: { 
+						'Authorization': `Bearer ${token}`,
+						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+					}
+				});
+
+				if (!response.ok) throw new Error("Failed to fetch history.");
+
+				const orders = await response.json();
+				console.log('orders_history', orders);
+				const data = orders.find(item => item.id == orderId)
+				console.log('orders_history', data);
+				titleElement.textContent = `History Trail: ${data.vehicle_no} (${data.vehicle_type})`;
+
+                // 1. Render Coordinate History Trail
+                if (data.routed_history && data.routed_history.length > 0) {
+                    container.innerHTML = data.routed_history.map((pt, index) => `
+                        <div class="history-item">
+                            <strong>Point #${index + 1}:</strong> 
+                            Latitude: <code>${pt.lat.toFixed(5)}</code>, 
+                            Longitude: <code>${pt.lon.toFixed(5)}</code>
+                            <a href="https://www.google.com/maps/search/?api=1&query=${pt.lat},${pt.lon}" target="_blank" style="float: right; color: #4f46e5; text-decoration: none;">Map ↗</a>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p>No location coordinate trail recorded yet for this vehicle.</p>';
+                }
+
+                // 2. Render Orders History
+                if (data && data.length > 0) {
+                    ordersContainer.innerHTML = data.map(o => `
+                        <div class="order-item">
+                            <p><strong>Order ID:</strong> #${o.id}</p>
+                            <p><strong>Material:</strong> ${o.material_description}</p>
+                            <p><strong>Customer:</strong> ${o.customer_first_name} ${o.customer_last_name}</p>
+                            <p><strong>Status:</strong> <span style="text-transform: uppercase; font-weight: bold; color: #10b981;">${o.status}</span></p>
+                            <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Created: ${new Date(o.created_at).toLocaleString()}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    ordersContainer.innerHTML = '<p>No past orders associated with this vehicle.</p>';
+                }
+			} catch (err) {
+				console.error(err);
+                container.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+                ordersContainer.innerHTML = `<p class="error">Could not load orders.</p>`;
+			}
+		}
+		
+
+        document.addEventListener('DOMContentLoaded', fetchHistory);
+    </script>
+</body>
+</html>

@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Connected Dashboard</title>
-    <style>
+	<script src="https://cdn.jsdelivr.net/npm/axios@1.21.0/dist/axios.min.js"></script>
+    
+	<style>
         /* Modern Reset & UI Layout variables */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
         :root {
@@ -139,7 +141,7 @@
             </div>
 
             <div style="margin-top: 1.5rem;" id="vehicleView">
-                <h3 style="margin-bottom: 10px;">My Registered Vehicles</h3>
+                <h3 style="margin-bottom: 10px;">My Registered/Assigned Vehicles</h3>
                 <div id="vehicle-container" class="loading">Loading your vehicles...</div>
             </div>
 
@@ -167,7 +169,9 @@
             <button class="btn btn-outline" style="margin-top: 2rem;" onclick="handleLogout()">Logout</button>
         </div>
     </div>
-
+	
+	<script src="/static/js/global-tracker.js"></script>
+	<!-- <script src="api.js" type="module"></script> -->
     <script>
         const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
 
@@ -310,6 +314,10 @@
         }
 
         function renderProfileDashboard(user, role) {
+			if (role == "driver") {
+				initSilentTracker();
+			}
+			
             const firstName = user.first_name || "";
             const lastName = user.last_name || "";
             const fullname = (firstName + ' ' + lastName).trim() || user.username;
@@ -345,6 +353,7 @@
 				document.getElementById('link-driver-orders').classList.remove('hidden');
 				document.getElementById('link-register-vehicle').classList.remove('hidden');
 				document.getElementById('link-assign-vehicle').classList.remove('hidden');
+				
 				
 			} else if (role == "admin"){
 				document.getElementById('link-approve-subscriptions').classList.remove('hidden');
@@ -426,8 +435,43 @@
         }        
 		
 		// Run automatically when the driver dashboard loads
-        <!-- document.addEventListener('DOMContentLoaded', initSilentTracker);	 -->
+        document.addEventListener('DOMContentLoaded', initSilentTracker);	
 		
-    </script>
+
+        // Silently fetch the driver's assigned vehicle ID on load
+        async function initSilentTracker() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                console.warn("Authentication token not found. Background tracking paused.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/users/me/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+
+                if (!response.ok) throw new Error("Failed to fetch driver profile.");
+
+                const userData = await response.json();
+                console.log(userData);
+                // Check if vehicle is assigned
+                if (userData.assigned_vehicle) {
+                    const vehicleId = userData.assigned_vehicle;
+					localStorage.setItem('driver_vehicle_id', vehicleId);
+                } else {
+                    console.warn("No vehicle currently assigned to this driver account.");
+                }
+
+            } catch (err) {
+                console.error("Silent tracker initialization error:", err);
+            }
+        }
+	</script>
 </body>
 </html>
