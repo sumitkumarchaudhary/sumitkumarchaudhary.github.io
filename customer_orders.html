@@ -185,7 +185,7 @@
                 if (!response.ok) throw new Error("Failed to fetch order history.");
 
                 const orders = await response.json();
-
+				console.log(orders)
                 if (orders.length === 0) {
                     container.innerHTML = '<p>No completed order history found.</p>';
                     return;
@@ -206,7 +206,7 @@
 							<p><strong>Status:</strong> <span class="status-badge" style="background: ${statusColor};">${statusText}</span></p>
 							
 							${!isCancelled && o.vehicle ? `
-								<a href="vehicle_history.html?id=${o.vehicle}" target="_blank" style="display: inline-block; padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; margin-top: 5px;">
+								<a href="order_routed_path.html?id=${o.id}" target="_blank" style="display: inline-block; padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; margin-top: 5px;">
 									🗺️ See Route Trail
 								</a>
 							` : ''}

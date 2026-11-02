@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Route Path</title>
+    <!-- Include Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: 500px; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <!-- Include Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+		const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api";
+        
+        // Extract vehicle ID from URL query parameters (e.g., vehicle_history.html?id=3)
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('id');
+		function getAccessToken() {
+            return localStorage.getItem('accessToken');
+        }
+		
+		
+        // 1. Initialize the map
+        const map = L.map('map').setView([28.5355, 77.3910], 13); // Default center (e.g., Noida)
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // 2. Fetch the path data from your Django backend API
+        async function loadOrderRoute() {
+			const token = getAccessToken();
+			if (!orderId) {
+                container.innerHTML = '<p class="error">No vehicle ID provided in the URL.</p>';
+                ordersContainer.innerHTML = '';
+                return;
+            }
+
+            if (!token) {
+                container.innerHTML = '<p class="error">Authentication token not found. Please log in.</p>';
+                return;
+            }
+			
+            try {
+                const response = await fetch(`${API_BASE}/orders/${orderId}/routed-path/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+						'ngrok-skip-browser-warning': 'true', // <-- Add this exact line!
+						'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch route path");
+                }
+
+                const data = await response.json();
+                const coordinates = data.coordinates; // Expects [[lng, lat], [lng, lat], ...]
+				
+				console.log(data)
+                if (!coordinates || coordinates.length === 0) {
+                    console.warn("No route coordinates found for this order.");
+                    return;
+                }
+
+                // 3. Leaflet expects coordinates as [latitude, longitude], 
+                // but GeoJSON/Backend typically outputs [longitude, latitude]. Map them:
+                const latLngs = coordinates.map(coord => [coord[1], coord[0]]);
+
+                // 4. Draw the Polyline on the map
+                const polyline = L.polyline(latLngs, { color: 'blue', weight: 4 }).addTo(map);
+
+                // Zoom map to fit the path perfectly
+                map.fitBounds(polyline.getBounds());
+
+            } catch (error) {
+                console.error("Error loading route path:", error);
+            }
+        }
+
+        // Example trigger: Load route for Order ID 5
+		document.addEventListener('DOMContentLoaded', loadOrderRoute);
+        <!-- loadOrderRoute(orderId, localStorage.getItem('accessToken')); -->
+    </script>
+</body>
+</html>
