@@ -319,7 +319,7 @@
     </form>
 </div>
 
-
+<script src="/static/js/tracker.js"></script>
 <script>
 	const API_URL = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
 	// Grab form and input elements
@@ -417,6 +417,18 @@
 		fileDisplay.style.color = '#9ca3af';
 	  }
 	});
+	
+	document.addEventListener('DOMContentLoaded', () => {
+			const token = localStorage.getItem('accessToken');
+			const userRole = localStorage.getItem('userRole');
+			const vehicleId = localStorage.getItem('driver_vehicle_id');
+
+			if (token && vehicleId && userRole === 'driver') {
+				startBackgroundDriverTracker();
+			}
+	});
+	
+	
 </script>
 
 </body>

@@ -206,7 +206,7 @@
 							<p><strong>Status:</strong> <span class="status-badge" style="background: ${statusColor};">${statusText}</span></p>
 							
 							${!isCancelled && o.vehicle ? `
-								<a href="order_routed_path.html?id=${o.id}" target="_blank" style="display: inline-block; padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; margin-top: 5px;">
+								<a href="order_history.html?id=${o.id}" target="_blank" style="display: inline-block; padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; margin-top: 5px;">
 									🗺️ See Route Trail
 								</a>
 							` : ''}

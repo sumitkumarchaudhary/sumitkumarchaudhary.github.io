@@ -175,7 +175,8 @@
         </div>
     </div>
 	
-	<script src="/static/js/global-tracker.js"></script>
+	<!-- <script src="/static/js/global-tracker.js"></script> -->
+	<script src="/static/js/tracker.js"></script>
 	<!-- <script src="api.js" type="module"></script> -->
     <script>
         const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
@@ -207,6 +208,47 @@
 
         function getAccessToken() { return localStorage.getItem('accessToken'); }
         function getRefreshToken() { return localStorage.getItem('refreshToken'); }
+
+		function loadMyIIFE() {
+		  return new Promise((resolve, reject) => {
+			const script = document.createElement('script');
+			script.src = '/static/js/global-tracker.js';
+			
+			// Resolve when the script is loaded and executed
+			script.onload = () => resolve();
+			script.onerror = () => reject(new Error(`Failed to load script: ${script.src}`));
+			
+			document.body.appendChild(script);
+		  });
+		}
+		
+		
+		
+		function rerunScript(scriptSrc) {
+			// 1. Find and remove the existing script tag (if it exists)
+			const existingScript = document.querySelector(`script[src^="${scriptSrc}"]`);
+			if (existingScript) {
+				existingScript.remove();
+			}
+
+			// 2. Create a new script element
+			const newScript = document.createElement('script');
+			
+			// 3. Append a timestamp to bypass browser caching and force a reload
+			const uniqueUrl = `${scriptSrc}?t=${Date.now()}`;
+			newScript.src = uniqueUrl;
+
+			// 4. Append to the document head to execute the script immediately
+			document.head.appendChild(newScript);
+		}
+		
+		
+		
+		<!-- function loadMyIIFE() { -->
+			<!-- const script = document.createElement('script'); -->
+			<!-- script.src = '/static/js/global-tracker.js'; // Path to your file -->
+			<!-- document.body.appendChild(script); // Triggers immediate execution -->
+		<!-- } -->
 
         async function authorizedFetch(url, options = {}) {
             options.headers = options.headers || {};
@@ -287,6 +329,7 @@
                 if (data.access && data.refresh) {
                     setTokens(data.access, data.refresh);
                     await fetchUserProfile();
+					
                 } else if (data.token) {
                     // Fallback for standard DRF Token Authentication
                     localStorage.setItem('accessToken', data.token);
@@ -305,9 +348,13 @@
             try {
                 const response = await authorizedFetch(`${API_BASE}/users/me/`, { method: 'GET' });
                 const user = await response.json();
+				localStorage.setItem('userRole', user.role);
                 <!-- console.log(user); -->
                 const role = user.profile?.role || user.role || 'customer';
-
+				if (role == "driver") {
+					await initSilentTracker();
+					if (localStorage.getItem('driver_vehicle_id')) startBackgroundDriverTracker();
+				}
                 // Render dashboard data
                 renderProfileDashboard(user, role);
                 loadUserVehicles(user);
@@ -319,9 +366,7 @@
         }
 
         function renderProfileDashboard(user, role) {
-			if (role == "driver") {
-				initSilentTracker();
-			}
+
 			
             const firstName = user.first_name || "";
             const lastName = user.last_name || "";
@@ -369,11 +414,14 @@
             profileView.classList.remove('hidden');
             submitBtn.disabled = false;
             submitBtn.textContent = "Sign In";
+			rerunScript('/static/js/global-tracker.js')
         }
 
         function handleLogout() {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
+			localStorage.removeItem('userRole');
+			stopDriverTracker();
             loginForm.reset();
             profileView.classList.add('hidden');
             loginView.classList.remove('hidden');
@@ -439,8 +487,8 @@
             }
         }        
 		
-		// Run automatically when the driver dashboard loads
-        document.addEventListener('DOMContentLoaded', initSilentTracker);	
+		<!-- // Run automatically when the driver dashboard loads -->
+        <!-- document.addEventListener('DOMContentLoaded', initSilentTracker);	 -->
 		
 
         // Silently fetch the driver's assigned vehicle ID on load
@@ -469,6 +517,7 @@
                 if (userData.assigned_vehicle) {
                     const vehicleId = userData.assigned_vehicle;
 					localStorage.setItem('driver_vehicle_id', vehicleId);
+					
                 } else {
                     console.warn("No vehicle currently assigned to this driver account.");
                 }
@@ -477,6 +526,65 @@
                 console.error("Silent tracker initialization error:", err);
             }
         }
+		
+		<!-- let watchId = null; -->
+
+		<!-- function startBackgroundDriverTracker() { -->
+			<!-- if (!navigator.geolocation) { -->
+				<!-- console.warn("Geolocation is not supported by this browser."); -->
+				<!-- return; -->
+			<!-- } -->
+
+			<!-- // Prevent starting multiple loops if already running -->
+			<!-- if (watchId !== null) return; -->
+
+			<!-- const token = localStorage.getItem('accessToken'); -->
+			<!-- const vehicleId = localStorage.getItem('driver_vehicle_id'); -->
+			<!-- const trackingApiUrl = `https://upheaval-revise-fit.ngrok-free.dev/etransport/api/vehicles/${vehicleId}/update-location/`; // Adjust to your endpoint -->
+
+			<!-- watchId = navigator.geolocation.watchPosition( -->
+				<!-- async position => { -->
+					<!-- const lat = position.coords.latitude; -->
+					<!-- const lon = position.coords.longitude; -->
+					<!-- console.log({'lat': lat, 'lon': lon}) -->
+					<!-- try { -->
+						<!-- const response = await fetch(trackingApiUrl, { -->
+							<!-- method: 'PATCH', -->
+							<!-- headers: { -->
+								<!-- 'Content-Type': 'application/json', -->
+								<!-- 'Authorization': `Bearer ${token}`, -->
+								<!-- 'ngrok-skip-browser-warning': 'true' -->
+							<!-- }, -->
+							<!-- body: JSON.stringify({ lat: lat, lon: lon }) -->
+						<!-- }); -->
+
+						<!-- if (!response.ok) { -->
+							<!-- console.error("Failed to sync driver location to server."); -->
+						<!-- } else { -->
+							<!-- console.log(`Location synced: [${lat}, ${lon}]`); -->
+						<!-- } -->
+					<!-- } catch (error) { -->
+						<!-- console.error("Network error while syncing location:", error); -->
+					<!-- } -->
+				<!-- }, -->
+				<!-- error => { -->
+					<!-- console.error("Geolocation tracking error code:", error.code, error.message); -->
+				<!-- }, -->
+				<!-- { -->
+					<!-- enableHighAccuracy: true, -->
+					<!-- maximumAge: 10000,     // Accept cached position up to 10 seconds old -->
+					<!-- timeout: 15000         // Time out if position takes longer than 15 seconds -->
+				<!-- } -->
+			<!-- ); -->
+		<!-- } -->
+
+		<!-- // Optional cleanup function if the driver explicitly logs out -->
+		<!-- function stopDriverTracker() { -->
+			<!-- if (watchId !== null) { -->
+				<!-- navigator.geolocation.clearWatch(watchId); -->
+				<!-- watchId = null; -->
+			<!-- } -->
+		<!-- } -->
 	</script>
 	<!-- Register the Service Worker -->
     <script>
