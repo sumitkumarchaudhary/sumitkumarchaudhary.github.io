@@ -37,6 +37,7 @@
     </div>
 	<!-- Include Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+	<script src="/static/js/tracker.js"></script>
 	
     <script>
         const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api";
@@ -174,6 +175,15 @@
 		
 
         document.addEventListener('DOMContentLoaded', fetchHistory);
+		document.addEventListener('DOMContentLoaded', () => {
+			const token = localStorage.getItem('accessToken');
+			const userRole = localStorage.getItem('userRole');
+			const vehicleId = localStorage.getItem('driver_vehicle_id');
+
+			if (token && vehicleId && userRole === 'driver') {
+				startBackgroundDriverTracker();
+			}
+		});
     </script>
 </body>
 </html>

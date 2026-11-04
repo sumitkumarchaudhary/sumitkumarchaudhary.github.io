@@ -36,7 +36,8 @@
 </head>
 <body>
 	<a href="index.html" class="back-btn">← Back to Dashboard</a>
-    <div class="card">
+    
+	<div class="card">
         <h2>🚚 Driver Portal - Delivery Queue</h2>
         <p>Accept pending supply orders and start your deliveries.</p>
         <div id="msg"></div>
@@ -149,7 +150,7 @@
                     } else if (o.status === 'delivered') {
 						actionHtml = `
 							<p><em>Current Status: <strong style="color: #10b981;">DELIVERED</strong></em></p>
-							<a href="order_routed_path.html?id=${o.id}" target="_blank" class="btn-link" style="display: inline-block; padding: 8px 14px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 5px;">
+							<a href="order_history.html?id=${o.id}" target="_blank" class="btn-link" style="display: inline-block; padding: 8px 14px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 5px;">
 								🗺️ See Route Trail
 							</a>
 						`;
@@ -341,7 +342,7 @@
 						<p><strong>Pickup:</strong> ${o.pickup_address}</p>
 						<p><strong>Delivery:</strong> ${o.delivery_address}</p>
 						<p><em>Status: <strong style="color: #10b981;">DELIVERED</strong></em></p>
-						<a href="order_history.html?id=${o.id}" target="_blank" style="display: inline-block; padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; margin-top: 5px;">
+						<a href="order_history.html?id=${o.id}" style="display: inline-block; padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; margin-top: 5px;">
 							🗺️ See Route Trail
 						</a>
 					</div>

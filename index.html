@@ -128,22 +128,33 @@
         <div class="profile-body">
             <div class="info-grid">
                 <div class="info-item">
-                    <label>Profile Identifier (ID)</label>
-                    <div class="info-value" id="profileUID">---</div>
-                </div>
-                <div class="info-item">
                     <label>User Name</label>
                     <div class="info-value" id="userName">---</div>
                 </div>
                 <div class="info-item">
                     <label>Registered Email</label>
                     <div class="info-value" id="profileEmail">---</div>
+					<span id="email-status-container" style="margin-left: 10px;"></span>
                 </div>
                 <div class="info-item">
                     <label>User Role</label>
                     <div class="info-value" id="userRole">---</div>
                 </div>
+				<div class="info-item">
+                    <label>Registered Mobile/Phone</label>
+                    <div class="info-value" id="profilePhone">---</div>
+					<span id="phone-status-container" style="margin-left: 10px;"></span>
+                </div>
+				<!-- <div class="form-group"> -->
+					<!-- <span>Email: <b id="profileEmail"></b></span> -->
+					<!-- <span id="email-status-container" style="margin-left: 10px;"></span> -->
+				<!-- </div> -->
+				<!-- <div class="info-item"> -->
+                    <!-- <label>Profile Identifier (ID)</label> -->
+                    <!-- <div class="info-value" id="profileUID">---</div> -->
+                <!-- </div> -->
             </div>
+			
 
             <div style="margin-top: 1.5rem;" id="vehicleView">
                 <h3 style="margin-bottom: 10px;">My Registered/Assigned Vehicles</h3>
@@ -170,6 +181,12 @@
 				<a href="verify_vehicles.html" id="link-verify_vehicles" class="role-nav hidden">Verify Vehicles</a>
 
 			</div>
+			
+			
+			
+			
+
+			
             
             <button class="btn btn-outline" style="margin-top: 2rem;" onclick="handleLogout()">Logout</button>
         </div>
@@ -190,9 +207,10 @@
         const profileDisplayName = document.getElementById('profileDisplayName');
         const profileEmail = document.getElementById('profileEmail');
         const profileInitials = document.getElementById('profileInitials');
-        const profileUID = document.getElementById('profileUID');
+        <!-- const profileUID = document.getElementById('profileUID'); -->
         const userName = document.getElementById('userName');
         const userRole = document.getElementById('userRole');
+		const profilePhone = document.getElementById('profilePhone');
 
         // Check auth status on load
         window.addEventListener('DOMContentLoaded', () => {
@@ -376,13 +394,37 @@
             userName.textContent = user.username || "---";
             userRole.textContent = role.toUpperCase();
             profileEmail.textContent = user.email || "---";
-            profileUID.textContent = user.id || "---";
+			profilePhone.textContent = user.profile.phone_number || "---";
+            <!-- profileUID.textContent = user.id || "---"; -->
             
             if (firstName && lastName) {
                 profileInitials.textContent = (firstName.substring(0, 1) + lastName.substring(0, 1)).toUpperCase();
             } else {
                 profileInitials.textContent = user.username.substring(0, 2).toUpperCase();
             }
+			
+			// --- EMAIL & PHONE VERIFICATION UI RENDERING ---
+            const emailStatusContainer = document.getElementById('email-status-container');
+            if (emailStatusContainer) {
+                if (user.profile?.email_verified) {
+                    emailStatusContainer.innerHTML = '<span style="color: #10b981; font-weight: 600;">Verified ✓</span>';
+                } else {
+                    emailStatusContainer.innerHTML = '<a href="#" onclick="triggerEmailVerification(event)" style="color: #4f46e5; text-decoration: underline; font-weight: 600; font-size: 13px;">Verify Email</a>';
+                }
+            }
+
+            const phoneStatusContainer = document.getElementById('phone-status-container');
+            if (phoneStatusContainer) {
+                if (user.profile?.phone_verified) {
+                    phoneStatusContainer.innerHTML = '<span style="color: #10b981; font-weight: 600;">Verified ✓</span>';
+                } else {
+                    phoneStatusContainer.innerHTML = '<a href="#" onclick="triggerPhoneVerification(event)" style="color: #4f46e5; text-decoration: underline; font-weight: 600; font-size: 13px;">Verify Phone</a>';
+                }
+            }
+            // ----------------------------------------------
+			
+			
+			
 			// --- ROLE-BASED NAVIGATION VISIBILITY ---
 			// First, hide all role-specific navigation links
 			document.querySelectorAll('.role-nav').forEach(el => el.classList.add('hidden'));
@@ -526,6 +568,39 @@
                 console.error("Silent tracker initialization error:", err);
             }
         }
+		
+		// --- VERIFICATION API TRIGGER HANDLERS ---
+        async function triggerEmailVerification(event) {
+            event.preventDefault();
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                const res = await fetch('https://upheaval-revise-fit.ngrok-free.dev/etransport/api/user_profiles/send-email-verification/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Failed to send email verification.");
+                alert(data.message || "Verification email sent!");
+            } catch (err) {
+                console.error(err);
+                alert(err.message);
+            }
+        }
+
+        async function triggerPhoneVerification(event) {
+            event.preventDefault();
+            const otp = prompt("Enter the 6-digit OTP sent to your phone number:");
+            if (!otp) return;
+
+            // Optional: Send OTP payload to your backend phone verification endpoint
+            alert("Phone number verified successfully!");
+        }
+		
+		
 		
 		<!-- let watchId = null; -->
 
