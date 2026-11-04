@@ -15,6 +15,11 @@
         .loading { font-style: italic; color: #64748b; }
         .error { color: #ef4444; font-weight: bold; }
     </style>
+	<!-- Include Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: 300px; width: 100%; }
+    </style>
 </head>
 <body>
 
@@ -22,14 +27,17 @@
 
     <div class="card">
         <h2 id="vehicle-title">Vehicle History Timeline</h2>
-        <div id="content-area" class="loading">Loading vehicle history data...</div>
+		<div id="map"></div>
+        <!-- <div id="content-area" class="loading">Loading vehicle history data...</div> -->
     </div>
 
     <div class="card">
         <h2>📦 Associated Delivery Orders</h2>
         <div id="orders-area" class="loading">Loading order history...</div>
     </div>
-
+	<!-- Include Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+	
     <script>
         const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api";
         
@@ -41,6 +49,14 @@
             return localStorage.getItem('accessToken');
         }
 		
+		// 1. Initialize the map
+        const map = L.map('map').setView([28.5355, 77.3910], 13); // Default center (e.g., Noida)
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
 		
 		async function fetchHistory() {
 		    const container = document.getElementById('content-area');
@@ -76,14 +92,61 @@
 
                 // 1. Render Coordinate History Trail
                 if (data.routed_history && data.routed_history.length > 0) {
-                    container.innerHTML = data.routed_history.map((pt, index) => `
-                        <div class="history-item">
-                            <strong>Point #${index + 1}:</strong> 
-                            Latitude: <code>${pt.lat.toFixed(5)}</code>, 
-                            Longitude: <code>${pt.lon.toFixed(5)}</code>
-                            <a href="https://www.google.com/maps/search/?api=1&query=${pt.lat},${pt.lon}" target="_blank" style="float: right; color: #4f46e5; text-decoration: none;">Map ↗</a>
-                        </div>
-                    `).join('');
+					const coordinates = data.routed_history; 
+					if (!coordinates || coordinates.length === 0) {
+						console.warn("No route coordinates found for this order.");
+						return;
+					}
+					
+					// 3. Leaflet expects coordinates as [latitude, longitude], 
+					// but GeoJSON/Backend typically outputs [longitude, latitude]. Map them:
+					const latLngs = coordinates.map(coord => [coord['lat'], coord['lon']]);
+					
+					console.log(latLngs);
+					
+					// 4. Draw the Polyline on the map
+					const polyline = L.polyline(latLngs, { color: 'blue', weight: 4 }).addTo(map);
+					
+					
+					// 2. Add invisible or small circle markers at each vertex to hold the timestamps
+					gpsTrack = coordinates.map(coord => [coord['lat'], coord['lon'], coord['timestamp']])
+					gpsTrack.forEach(coord => {
+						const [lat, lng, timestamp] = coord;
+						
+						L.circleMarker([lat, lng], {
+							radius: 2,
+							fillColor: "#ff7800",
+							color: "#000",
+							weight: 1,
+							opacity: 1,
+							fillOpacity: 0.8
+						})
+						.bindTooltip(`<b>Time:</b> ${new Date(timestamp).toLocaleTimeString()}`)
+						.addTo(map);
+					});
+
+					
+					// Zoom map to fit the path perfectly
+					map.fitBounds(polyline.getBounds());
+					
+					
+					
+					
+
+					
+					
+					
+					
+					
+					
+                    <!-- container.innerHTML = data.routed_history.map((pt, index) => ` -->
+                        <!-- <div class="history-item"> -->
+                            <!-- <strong>Point #${index + 1}:</strong>  -->
+                            <!-- Latitude: <code>${pt.lat.toFixed(5)}</code>,  -->
+                            <!-- Longitude: <code>${pt.lon.toFixed(5)}</code> -->
+                            <!-- <a href="https://www.google.com/maps/search/?api=1&query=${pt.lat},${pt.lon}" target="_blank" style="float: right; color: #4f46e5; text-decoration: none;">Map ↗</a> -->
+                        <!-- </div> -->
+                    <!-- `).join(''); -->
                 } else {
                     container.innerHTML = '<p>No location coordinate trail recorded yet for this vehicle.</p>';
                 }

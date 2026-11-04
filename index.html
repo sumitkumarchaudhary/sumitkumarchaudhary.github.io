@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Connected Dashboard</title>
+    <title>My Dashboard</title>
+	 
+	 <!-- Link to Manifest file -->
+	<link rel="manifest" href="/manifest.json">
+	<meta name="theme-color" content="#007bff">
+	
 	<script src="https://cdn.jsdelivr.net/npm/axios@1.21.0/dist/axios.min.js"></script>
     
 	<style>
@@ -473,5 +478,15 @@
             }
         }
 	</script>
+	<!-- Register the Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered successfully!', reg))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>
