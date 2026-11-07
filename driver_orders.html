@@ -95,7 +95,11 @@
 						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 					
 					}
                 });
-                if (!response.ok) throw new Error("Failed to fetch orders.");
+				// Check for specific status codes first
+				if (response.status === 403) {
+					throw new Error("Access denied. You do not have active subscription to view these orders.");
+				}
+                if (!response.ok) throw new Error(`Failed to fetch orders. Status: ${response.status}`);
 
                 const orders = await response.json();
 				console.log(orders);
@@ -326,8 +330,12 @@
 					}
 				});
 
-				if (!response.ok) throw new Error("Failed to fetch history.");
-
+				if (response.status === 403) {
+					throw new Error("Access denied. You do not have active subscription to view these orders.");
+				}
+                if (!response.ok) throw new Error(`Failed to fetch order history. Status: ${response.status}`);
+				
+		
 				const orders = await response.json();
 				console.log('orders_history', orders);
 				if (orders.length === 0) {

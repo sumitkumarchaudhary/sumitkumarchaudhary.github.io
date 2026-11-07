@@ -97,7 +97,7 @@
 
             try {
                 // 1. Fetch Owner's Vehicles and Available Drivers concurrently
-                const [vehiclesRes, usersRes] = await Promise.all([
+                const [vehiclesRes, usersRes, currUser] = await Promise.all([
                     fetch(`${API_BASE}/vehicles/`, { 
 						headers: { 
 							'Authorization': `Bearer ${token}`, 
@@ -109,6 +109,12 @@
 							'Authorization': `Bearer ${token}`,
 							'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
 						} 
+					}),
+					fetch(`${API_BASE}/users/me/`, { 
+						headers: { 
+							'Authorization': `Bearer ${token}`,
+							'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
+						} 
 					})
                 ]);
 
@@ -116,29 +122,35 @@
 
                 const vehicles = await vehiclesRes.json();
                 const users = await usersRes.json();
+
+				const userData = await currUser.json();
+				let myVehicles = vehicles.filter(v => v.user === userData.id);
 				
-				<!-- console.log('vehicles', vehicles) -->
-				<!-- <!-- console.log('users', users) --> -->
+				console.log('vehicles', myVehicles);
+				console.log('users', users);
+				console.log("Current User Loaded:", userData);
+				
+				
 				// Collect IDs of all drivers who are already assigned to ANY vehicle
-				
                 // Filter users who have the role of 'driver'
                 const drivers = users.filter(u => (u.profile?.role || u.role) === 'driver')// && u?.assigned_vehicle === null);
 				const assignedDriverIds = new Set([
-												...vehicles.map(v => v.driver).filter(Boolean),
+												...myVehicles.map(v => v.driver).filter(Boolean),
 												...drivers.filter(d => d.assigned_vehicle != null).map(d => d.id)
 											]);
 				
 				
 				<!-- console.log('drivers', drivers) -->
 				<!-- console.log('assignedDriverIds', assignedDriverIds) -->
-                if (!vehicles || vehicles.length === 0) {
+                if (!myVehicles || myVehicles.length === 0) {
                     container.innerHTML = '<p>You have no registered vehicles in your fleet.</p>';
                     return;
                 }
 
                 // 2. Render vehicles list with assignment controls
                 container.innerHTML = '';
-                vehicles.forEach(vehicle => {
+                myVehicles.forEach(vehicle => {
+					console.log(vehicle);
                     const row = document.createElement('div');
                     row.className = 'vehicle-row';
 
@@ -153,7 +165,6 @@
 						}
                     });
 					
-					vehicle.driver
                     row.innerHTML = `
                         <div class="vehicle-info">
                             <h3>${vehicle.vehicle_no} (${vehicle.vehicle_type})</h3>

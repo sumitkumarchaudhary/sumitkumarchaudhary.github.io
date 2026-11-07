@@ -156,9 +156,14 @@
             </div>
 			
 
-            <div style="margin-top: 1.5rem;" id="vehicleView">
-                <h3 style="margin-bottom: 10px;">My Registered/Assigned Vehicles</h3>
-                <div id="vehicle-container" class="loading">Loading your vehicles...</div>
+            <div style="margin-top: 1.5rem;" id="registeredVehicleView">
+                <h3 style="margin-bottom: 10px;">My Registered Vehicles</h3>
+                <div id="vehicle-container-registered" class="loading">Loading your vehicles...</div>
+            </div>
+			
+			<div style="margin-top: 1.5rem;" id="assignedVehicleView">
+                <h3 style="margin-bottom: 10px;">My Assigned Vehicles</h3>
+                <div id="vehicle-container-assigned" class="loading">Loading your vehicles...</div>
             </div>
 
             <div class="nav-links">
@@ -428,11 +433,13 @@
 			// --- ROLE-BASED NAVIGATION VISIBILITY ---
 			// First, hide all role-specific navigation links
 			document.querySelectorAll('.role-nav').forEach(el => el.classList.add('hidden'));
-			document.getElementById('vehicleView').classList.add('hidden');
+			document.getElementById('registeredVehicleView').classList.add('hidden');
+			document.getElementById('assignedVehicleView').classList.add('hidden');
+			
 
 			// Then, show links based on the user role
 			if (role === 'owner') {
-				document.getElementById('vehicleView').classList.remove('hidden');
+				document.getElementById('registeredVehicleView').classList.remove('hidden');
 				document.getElementById('link-register-vehicle').classList.remove('hidden');
 				document.getElementById('link-track-fleet').classList.remove('hidden');
 				document.getElementById('link-assign-vehicle').classList.remove('hidden');
@@ -441,7 +448,8 @@
 				document.getElementById('link-customer-orders').classList.remove('hidden');
 				
 			} else if (role === 'driver') {
-				document.getElementById('vehicleView').classList.remove('hidden');
+				document.getElementById('registeredVehicleView').classList.remove('hidden');
+				document.getElementById('assignedVehicleView').classList.remove('hidden');
 				document.getElementById('link-driver-orders').classList.remove('hidden');
 				document.getElementById('link-register-vehicle').classList.remove('hidden');
 				document.getElementById('link-assign-vehicle').classList.remove('hidden');
@@ -471,11 +479,13 @@
 
         async function loadUserVehicles(user) {
             const token = getAccessToken();
-            const container = document.getElementById('vehicle-container');
+            const container_registered = document.getElementById('vehicle-container-registered');
+			const container_assigned = document.getElementById('vehicle-container-assigned');
 
             if (!token) {
-                container.innerHTML = '<p class="error">Authentication token not found. Please log in first.</p>';
-                return;
+                container_registered.innerHTML = '<p class="error">Authentication token not found. Please log in first.</p>';
+                container_assigned.innerHTML = '<p class="error">Authentication token not found. Please log in first.</p>';
+				return;
             }
             
             try {
@@ -483,12 +493,17 @@
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
                 const userVehicleData = await response.json();
-				<!-- console.log(userVehicleData); -->
+				console.log(userVehicleData);
                 
-                if (userVehicleData && userVehicleData.length > 0) {
-                    container.innerHTML = ''; 
+				let user_registered_vehicle = userVehicleData.filter(v => v.user === user.id);
+				let user_assigned_vehicle = userVehicleData.filter(v => v.driver === user.id);
+				
+				console.log(user_registered_vehicle, user_assigned_vehicle)
+				
+                if (user_registered_vehicle && user_registered_vehicle.length > 0) {
+                    container_registered.innerHTML = ''; 
                     
-                    userVehicleData.forEach(vehicle => {
+                    user_registered_vehicle.forEach(vehicle => {
                         const card = document.createElement('div');
                         card.className = 'vehicle-card';
                         
@@ -517,15 +532,54 @@
                             ${mapLinkHtml}
 							${trackHistoryHtml}
                         `;
-                        container.appendChild(card);
+                        container_registered.appendChild(card);
                     });
                 } else {
-                    container.innerHTML = '<p>You have not registered any vehicles yet.</p>';
+                    container_registered.innerHTML = '<p>You have not registered any vehicles yet.</p>';
                 }
+				
+				if (user_assigned_vehicle && user_assigned_vehicle.length > 0) {
+                    container_assigned.innerHTML = ''; 
+                    
+                    user_assigned_vehicle.forEach(vehicle => {
+                        const card = document.createElement('div');
+                        card.className = 'vehicle-card';
+                        
+                        let mapLinkHtml = '';
+                        if (vehicle.currlat && vehicle.currlon) {
+                            const mapUrl = `https://www.google.com/maps/search/?api=1&query=${vehicle.currlat},${vehicle.currlon}`;
+                            mapLinkHtml = `<p><a href="${mapUrl}" target="_blank" class="map-link">📍 View Location on Map</a></p>`;
+                        } else {
+                            mapLinkHtml = `<p class="no-location"><em>Location coordinates not currently available.</em></p>`;
+                        }
+						
+						const role = user.profile.role; 
+						let trackHistoryHtml = null
+						// Add history tracking link for owners
+						if (role === 'owner') {
+							trackHistoryHtml = `<p><a href="vehicle_history.html?id=${vehicle.id}" class="map-link" style="background-color: #10b981;">📜 View Vehicle History Trail</a></p>`;
+						} else {
+							trackHistoryHtml = `<p><a href="vehicle_history.html?id=${vehicle.id}" class="map-link" style="background-color: #10b981;">📜 View Vehicle History Trail</a></p>`;
+						}
+                        
+                        card.innerHTML = `
+                            <h3>Vehicle No: ${vehicle.vehicle_no}</h3>
+                            <p><strong>Type:</strong> ${vehicle.vehicle_type}</p>
+                            <p><strong>Chassis No:</strong> ${vehicle.chesis_no}</p>
+                            <p><strong>Engine No:</strong> ${vehicle.engine_no}</p>
+                            ${mapLinkHtml}
+							${trackHistoryHtml}
+                        `;
+                        container_assigned.appendChild(card);
+                    });
+                } else {
+                    container_assigned.innerHTML = '<p>You have not assigned any vehicles yet.</p>';
+                }
+				
 
             } catch (error) {
                 console.error('Error fetching vehicles:', error);
-                container.innerHTML = '<p class="error">Failed to load vehicles. Please check your connection or login status.</p>';
+                container_registered.innerHTML = '<p class="error">Failed to load vehicles. Please check your connection or login status.</p>';
             }
         }        
 		

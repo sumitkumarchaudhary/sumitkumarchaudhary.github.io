@@ -92,7 +92,7 @@
                 }
 
                 const data = await response.json();
-                console.log(data.coordinate_history);
+                console.log(data);
                 titleElement.textContent = `History Trail: ${data.vehicle_no} (${data.vehicle_type})`;
 				
 				
@@ -110,7 +110,7 @@
 					// but GeoJSON/Backend typically outputs [longitude, latitude]. Map them:
 					const latLngs = coordinates.map(coord => [coord['lat'], coord['lon']]);
 					
-					console.log(latLngs);
+					<!-- console.log(latLngs); -->
 					
 					// 4. Draw the Polyline on the map
 					const polyline = L.polyline(latLngs, { color: 'blue', weight: 4 }).addTo(map);
@@ -121,22 +121,18 @@
 						const [lat, lng, timestamp] = coord;
 						
 						L.circleMarker([lat, lng], {
-							radius: 2,
+							radius: 8,
 							fillColor: "#ff7800",
 							color: "#000",
 							weight: 1,
-							opacity: 1,
-							fillOpacity: 0.8
+							opacity: 0,
+							fillOpacity: 0
 						})
 						.bindTooltip(`<b>Time:</b> ${new Date(timestamp).toLocaleTimeString()}`)
 						.addTo(map);
-					});
-
-					
+					});					
 					// Zoom map to fit the path perfectly
 					map.fitBounds(polyline.getBounds());
-					
-
 
                     <!-- container.innerHTML = data.coordinate_history.map((pt, index) => ` -->
                         <!-- <div class="history-item"> -->
@@ -171,8 +167,100 @@
                 ordersContainer.innerHTML = `<p class="error">Could not load orders.</p>`;
             }
         }
+		
+		let driverMarker = null;
+		// Function to fetch latest coordinates and update the map marker
+        async function fetchAndUpdateLiveLocation() {
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                const response = await fetch(`${API_BASE}/vehicles/${vehicleId}/history/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
 
-        document.addEventListener('DOMContentLoaded', fetchVehicleHistory);
+                if (!response.ok) throw new Error("Failed to fetch location");
+
+                const data = await response.json();
+				// 1. Render Coordinate History Trail
+                if (data.coordinate_history && data.coordinate_history.length > 0) {
+					const coordinates = data.coordinate_history; 
+					if (!coordinates || coordinates.length === 0) {
+						console.warn("No route coordinates found for this order.");
+						return;
+					}
+					
+					// 3. Leaflet expects coordinates as [latitude, longitude], 
+					// but GeoJSON/Backend typically outputs [longitude, latitude]. Map them:
+					const latLngs = coordinates.map(coord => [coord['lat'], coord['lon']]);
+					
+					<!-- console.log(latLngs); -->
+					
+					// 4. Draw the Polyline on the map
+					const polyline = L.polyline(latLngs, { color: 'blue', weight: 4 }).addTo(map);
+					
+					// 2. Add invisible or small circle markers at each vertex to hold the timestamps
+					gpsTrack = coordinates.map(coord => [coord['lat'], coord['lon'], coord['timestamp']])
+					gpsTrack.forEach(coord => {
+						const [lat, lng, timestamp] = coord;
+						
+						L.circleMarker([lat, lng], {
+							radius: 8,
+							fillColor: "#ff7800",
+							color: "#000",
+							weight: 1,
+							opacity: 0,
+							fillOpacity: 0
+						})
+						.bindTooltip(`<b>Date:</b> ${new Date(timestamp).toLocaleDateString()} <b>Time:</b> ${new Date(timestamp).toLocaleTimeString()}`)
+						.addTo(map);
+					});					
+					<!-- // Zoom map to fit the path perfectly -->
+					<!-- map.fitBounds(polyline.getBounds()); -->
+					
+					
+					<!-- container.innerHTML = data.coordinate_history.map((pt, index) => ` -->
+                        <!-- <div class="history-item"> -->
+                            <!-- <strong>Point #${index + 1}:</strong>  -->
+                            <!-- Latitude: <code>${pt.lat.toFixed(5)}</code>,  -->
+                            <!-- Longitude: <code>${pt.lon.toFixed(5)}</code> -->
+                            <!-- <a href="https://www.google.com/maps/search/?api=1&query=${pt.lat},${pt.lon}" target="_blank" style="float: right; color: #4f46e5; text-decoration: none;">Map ↗</a> -->
+                        <!-- </div> -->
+                    <!-- `).join(''); -->
+                }
+				
+                const lat = data.currlat;
+                const lon = data.currlon;
+
+                if (lat && lon) {
+                    const latLng = [lat, lon];
+
+                    if (driverMarker) {
+                        // 🚀 Smoothly update existing marker position without re-centering map forcibly
+                        driverMarker.setLatLng(latLng);
+                    } else {
+                        // Create marker on first load and center map on it
+                        driverMarker = L.marker(latLng).addTo(map)
+                            .bindPopup("<b>Live Driver Location</b>").openPopup();
+                        map.setView(latLng, 15);
+                    }
+                }
+            } catch (err) {
+                console.error("Tracking fetch error:", err);
+            }
+        }
+
+        // Run immediately on load, then poll every 5 seconds       
+		<!-- document.addEventListener('DOMContentLoaded', () => { -->
+			<!-- fetchAndUpdateLiveLocation(); -->
+		<!-- }); -->
+		<!-- setInterval(fetchAndUpdateLiveLocation, 5000); -->
+		
+		
+		
+        <!-- document.addEventListener('DOMContentLoaded', fetchVehicleHistory); -->
 		document.addEventListener('DOMContentLoaded', () => {
 			const token = localStorage.getItem('accessToken');
 			const userRole = localStorage.getItem('userRole');
@@ -180,6 +268,12 @@
 
 			if (token && vehicleId && userRole === 'driver') {
 				startBackgroundDriverTracker();
+			}
+			if (token && userRole === 'owner'){
+				fetchAndUpdateLiveLocation();
+				setInterval(fetchAndUpdateLiveLocation, 5000);
+			} else {
+				fetchVehicleHistory();
 			}
 		});
     </script>
