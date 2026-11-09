@@ -10,195 +10,332 @@
 	<meta name="theme-color" content="#007bff">
 	
 	<script src="https://cdn.jsdelivr.net/npm/axios@1.21.0/dist/axios.min.js"></script>
-    
+	
+	<!-- Local Bootstrap Compiled CSS -->
+    <link href="static/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Local FontAwesome Icons -->
+	<link href="static/css/all.min.css" rel="stylesheet">
 	<style>
-        /* Modern Reset & UI Layout variables */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-        :root {
-            --bg-workspace: #f8fafc;
-            --surface: #ffffff;
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --error: #ef4444;
-            --success: #10b981;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
         }
-        body { background-color: var(--bg-workspace); color: var(--text-dark); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1.5rem; }
-        .hidden { display: none !important; }
-        
-        /* Cards */
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; }
-        .auth-card { max-width: 440px; padding: 2.5rem; }
-        .profile-card { max-width: 600px; overflow: hidden; padding-bottom: 2rem; }
-        
-        /* Typography & Controls */
-        h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.025em; }
-        .subtitle { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem; }
-        .form-group { margin-bottom: 1.25rem; }
-        label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
-        input { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; outline: none; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
-        .error-message { color: var(--error); font-size: 0.875rem; margin-top: 0.5rem; min-height: 1.25rem; }
-        
-        /* Buttons */
-        .btn { width: 100%; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; border: none; transition: background-color 0.2s; }
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: var(--primary-hover); }
-        .btn-primary:disabled { background-color: #a5b4fc; cursor: not-allowed; }
-        .btn-outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-dark); }
-        .btn-outline:hover { background-color: var(--bg-workspace); }
-        
-        /* Profile Details Layout */
-        .profile-banner { height: 120px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
-        .profile-header-content { padding: 0 2rem 1.5rem 2rem; text-align: center; border-bottom: 1px solid var(--border); }
-        .avatar { width: 100px; height: 100px; border-radius: 50%; background: #e2e8f0; border: 4px solid var(--surface); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; color: var(--text-muted); margin: -50px auto 1rem auto; }
-        .profile-body { padding: 2rem; }
-        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-        .info-item label { color: var(--text-muted); margin-bottom: 0.25rem; }
-        .info-value { font-size: 1rem; font-weight: 500; }
-        @media (max-width: 480px) { .info-grid { grid-template-columns: 1fr; } }
-        
-        .form-footer { text-align: center; margin-top: 15px; font-size: 13px; color: #666666; }
-        .form-footer a { color: #4472c4; text-decoration: none; }
-        
-        h1 { color: #333; }
-        .vehicle-card { background: #fff; border: 1px solid #ddd; padding: 15px 20px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .vehicle-card h3 { margin-top: 0; color: #007BFF; }
-        .vehicle-card p { margin: 5px 0; color: #555; }
-        .loading { color: #666; font-style: italic; }
-        .error { color: #d9534f; }
-        
-        .map-link {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 6px 12px;
-            background-color: #007BFF;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 14px;
-            text-align: center;
+        .toast-container {
+            z-index: 1080;
         }
-        .map-link:hover { background-color: #0056b3; }
-        .no-location { font-size: 13px; color: #888; text-align: center; }
-        .nav-links { margin-top: 1.5rem; text-align: center; display: flex; flex-direction: column; gap: 8px; }
-        .nav-links a { color: #4f46e5; text-decoration: none; font-weight: 600; font-size: 14px; }
-        .nav-links a:hover { text-decoration: underline; }
+		.hidden { display: none !important; }
     </style>
+	
+	<!-- <stylestyle> -->
+        <!-- /* Modern Reset & UI Layout variables */ -->
+        <!-- * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; } -->
+        <!-- :root { -->
+            <!-- --bg-workspace: #f8fafc; -->
+            <!-- --surface: #ffffff; -->
+            <!-- --primary: #4f46e5; -->
+            <!-- --primary-hover: #4338ca; -->
+            <!-- --text-dark: #0f172a; -->
+            <!-- --text-muted: #64748b; -->
+            <!-- --border: #e2e8f0; -->
+            <!-- --error: #ef4444; -->
+            <!-- --success: #10b981; -->
+        <!-- } -->
+        <!-- body { background-color: var(--bg-workspace); color: var(--text-dark); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1.5rem; } -->
+        <!-- .hidden { display: none !important; } -->
+        
+        <!-- /* Cards */ -->
+        <!-- .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; } -->
+        <!-- .auth-card { max-width: 440px; padding: 2.5rem; } -->
+        <!-- .profile-card { max-width: 600px; overflow: hidden; padding-bottom: 2rem; } -->
+        
+        <!-- /* Typography & Controls */ -->
+        <!-- h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.025em; } -->
+        <!-- .subtitle { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem; } -->
+        <!-- .form-group { margin-bottom: 1.25rem; } -->
+        <!-- label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; } -->
+        <!-- input { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; outline: none; } -->
+        <!-- input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); } -->
+        <!-- .error-message { color: var(--error); font-size: 0.875rem; margin-top: 0.5rem; min-height: 1.25rem; } -->
+        
+        <!-- /* Buttons */ -->
+        <!-- .btn { width: 100%; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; border: none; transition: background-color 0.2s; } -->
+        <!-- .btn-primary { background-color: var(--primary); color: white; } -->
+        <!-- .btn-primary:hover { background-color: var(--primary-hover); } -->
+        <!-- .btn-primary:disabled { background-color: #a5b4fc; cursor: not-allowed; } -->
+        <!-- .btn-outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-dark); } -->
+        <!-- .btn-outline:hover { background-color: var(--bg-workspace); } -->
+        
+        <!-- /* Profile Details Layout */ -->
+        <!-- .profile-banner { height: 120px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); } -->
+        <!-- .profile-header-content { padding: 0 2rem 1.5rem 2rem; text-align: center; border-bottom: 1px solid var(--border); } -->
+        <!-- .avatar { width: 100px; height: 100px; border-radius: 50%; background: #e2e8f0; border: 4px solid var(--surface); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; color: var(--text-muted); margin: -50px auto 1rem auto; } -->
+        <!-- .profile-body { padding: 2rem; } -->
+        <!-- .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; } -->
+        <!-- .info-item label { color: var(--text-muted); margin-bottom: 0.25rem; } -->
+        <!-- .info-value { font-size: 1rem; font-weight: 500; } -->
+        <!-- @media (max-width: 480px) { .info-grid { grid-template-columns: 1fr; } } -->
+        
+        <!-- .form-footer { text-align: center; margin-top: 15px; font-size: 13px; color: #666666; } -->
+        <!-- .form-footer a { color: #4472c4; text-decoration: none; } -->
+        
+        <!-- h1 { color: #333; } -->
+        <!-- .vehicle-card { background: #fff; border: 1px solid #ddd; padding: 15px 20px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); } -->
+        <!-- .vehicle-card h3 { margin-top: 0; color: #007BFF; } -->
+        <!-- .vehicle-card p { margin: 5px 0; color: #555; } -->
+        <!-- .loading { color: #666; font-style: italic; } -->
+        <!-- .error { color: #d9534f; } -->
+        
+        <!-- .map-link { -->
+            <!-- display: inline-block; -->
+            <!-- margin-top: 8px; -->
+            <!-- padding: 6px 12px; -->
+            <!-- background-color: #007BFF; -->
+            <!-- color: white; -->
+            <!-- text-decoration: none; -->
+            <!-- border-radius: 4px; -->
+            <!-- font-size: 14px; -->
+            <!-- text-align: center; -->
+        <!-- } -->
+        <!-- .map-link:hover { background-color: #0056b3; } -->
+        <!-- .no-location { font-size: 13px; color: #888; text-align: center; } -->
+        <!-- .nav-links { margin-top: 1.5rem; text-align: center; display: flex; flex-direction: column; gap: 8px; } -->
+        <!-- .nav-links a { color: #4f46e5; text-decoration: none; font-weight: 600; font-size: 14px; } -->
+        <!-- .nav-links a:hover { text-decoration: underline; } -->
+    <!-- </style> -->
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100 justify-content-between">
 
     <!-- 1. LOGIN INTERFACE -->
-    <div class="card auth-card" id="loginView">
-        <h2>Account Sign In</h2>
-        <p class="subtitle">Enter your credentials to query your live authenticated profile session.</p>
-        
-        <form id="loginForm" onsubmit="handleAuthSubmission(event)">
-            <div class="form-group">
-                <label for="userInput">User Name</label>
-                <input type="text" id="userInput" placeholder="username" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="passwordInput">Password</label>
-                <input type="password" id="passwordInput" placeholder="••••••••" required>
-            </div>
+    <div class="container" id="loginView" style="max-width: 100%;">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                
+                <!-- Login Card -->
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4 p-sm-5">
+                        
+                        <!-- Header / Logo Area -->
+                        <div class="text-center mb-4">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                <i class="fa-solid fa-truck-fast"></i>
+                            </div>
+                            <h4 class="fw-bold text-dark">Welcome Back</h4>
+                            <p class="text-muted small">Please sign in to your account</p>
+                        </div>
 
-            <div class="error-message" id="authFeedback"></div>
-            
-            <button type="submit" class="btn btn-primary" id="submitBtn" style="margin-top: 1rem;">Sign In</button>
-            <div class="form-footer">
-                If not registered yet. <a href="user_registration.html">Sign Up</a>
+                        <!-- Login Form -->
+                        <form id="loginForm" novalidate onsubmit="handleAuthSubmission(event)">
+                            
+                            <!-- Email Field -->
+                            <div class="mb-3">
+                                <label for="userInput" class="form-label text-muted small fw-semibold">Email or Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-envelope"></i></span>
+                                    <input type="text" class="form-control bg-light border-start-0 ps-0 shadow-none" id="userInput" placeholder="manish@man.com" required>
+                                </div>
+                                <div class="invalid-feedback">Please enter a valid email or username.</div>
+                            </div>
+
+                            <!-- Password Field -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label for="passwordInput" class="form-label text-muted small fw-semibold">Password</label>
+                                    <a href="#" class="small text-decoration-none text-primary">Forgot?</a>
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-lock"></i></span>
+                                    <input type="password" class="form-control bg-light border-start-0 ps-0 shadow-none" id="passwordInput" placeholder="••••••••" required>
+                                    <button class="btn btn-light border border-start-0 text-muted" type="button" id="togglePassword">
+                                        <i class="fa-solid fa-eye-slash" id="eyeIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="invalid-feedback">Please enter your password.</div>
+                            </div>
+
+                            <!-- Remember Me Checkbox -->
+                            <div class="mb-4 form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberMe">
+                                <label class="form-check-label text-muted small" for="rememberMe">Remember me for 30 days</label>
+                            </div>
+							<div class="error-message" id="authFeedback"></div>
+                            <!-- Submit Button -->
+                            <div class="d-grid">
+                                <button type="submit" id="submitBtn" class="btn btn-primary py-2 fw-semibold rounded-3 shadow-sm" >
+                                    Sign In <i class="fa-solid fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+
+                <!-- Footer text -->
+                <div class="text-center mt-4">
+                    <p class="text-muted small">Don't have an account? <a href="user_registration.html" class="text-primary fw-semibold text-decoration-none">Register</a></p>
+                </div>
+
             </div>
-        </form>
+        </div>
     </div>
 
     <!-- 2. SECURE PROFILE DASHBOARD INTERFACE -->
-    <div class="card profile-card hidden" id="profileView">
-        <div class="profile-banner"></div>
-        
-        <div class="profile-header-content">
-            <div class="avatar" id="profileInitials">??</div>
-            <h2 id="profileDisplayName">Loading Profile...</h2>
-            <p style="color: var(--text-muted); font-size: 0.875rem;">Verified Network Session</p>
-        </div>
-
-        <div class="profile-body">
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>User Name</label>
-                    <div class="info-value" id="userName">---</div>
+    <div class="container max-w-3xl py-4 hidden" id="profileView" style="max-width: 100%;">
+    
+        <!-- Header / Navigation Bar -->
+		<header class="d-flex align-items-center justify-between pb-4 mb-4 border-bottom">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary text-white rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; font-size: 1.25rem;">
+                    <i class="fa-solid fa-user"></i>
                 </div>
-                <div class="info-item">
-                    <label>Registered Email</label>
-                    <div class="info-value" id="profileEmail">---</div>
-					<span id="email-status-container" style="margin-left: 10px;"></span>
+                <div>
+                    <h1 id="profileDisplayName" class="h5 fw-bold text-dark mb-0">Loading Profile...</h1>
+                    <p class="text-muted small mb-0">Verified Session</p>
                 </div>
-                <div class="info-item">
-                    <label>User Role</label>
-                    <div class="info-value" id="userRole">---</div>
-                </div>
-				<div class="info-item">
-                    <label>Registered Mobile/Phone</label>
-                    <div class="info-value" id="profilePhone">---</div>
-					<span id="phone-status-container" style="margin-left: 10px;"></span>
-                </div>
-				<!-- <div class="form-group"> -->
-					<!-- <span>Email: <b id="profileEmail"></b></span> -->
-					<!-- <span id="email-status-container" style="margin-left: 10px;"></span> -->
-				<!-- </div> -->
-				<!-- <div class="info-item"> -->
-                    <!-- <label>Profile Identifier (ID)</label> -->
-                    <!-- <div class="info-value" id="profileUID">---</div> -->
-                <!-- </div> -->
             </div>
-			
+            <!-- <div> -->
+                <!-- <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-2 rounded-pill"> -->
+                    <!-- <i class="fa-solid fa-circle text-success small me-1"></i>Online -->
+                <!-- </span> -->
+            <!-- </div> -->
+        </header>
+		
+		
+        <!-- User Profile Information Card -->
+        <section class="card shadow-sm border-0 rounded-4 p-4 mb-4">
+            <div class="row g-4">
+                <!-- User Name & Role -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <span class="text-uppercase text-muted fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">User Name</span>
+                        <div id="userName" class="fs-5 fw-bold text-dark mt-1">---</div>
+                    </div>
+                    <div>
+                        <span class="text-uppercase text-muted fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">User Role</span>
+                        <div class="mt-1 d-flex align-items-center gap-2">
+                            <span id="userRole" class="badge bg-primary-subtle text-primary border border-primary-subtle fw-bold px-3 py-2">
+                                <i class="fa-solid fa-id-badge me-1"></i>---
+                            </span>
+                            <!-- <span class="text-muted small fst-italic">---</span> -->
+                        </div>
+                    </div>
+                </div>
 
-            <div style="margin-top: 1.5rem;" id="registeredVehicleView">
-                <h3 style="margin-bottom: 10px;">My Registered Vehicles</h3>
-                <div id="vehicle-container-registered" class="loading">Loading your vehicles...</div>
+                <!-- Email & Phone with Verification -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <span class="text-uppercase text-muted fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">Registered Email</span>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <span id="profileEmail" class="fw-medium text-dark">---</span>
+							<span id="email-status-container" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold">Verify Email</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-uppercase text-muted fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">Registered Mobile/Phone</span>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <span id="profilePhone" class="fw-medium text-dark">---</span>
+                            <span id="phone-status-container" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold">Verify Phone</span>
+
+                        </div>
+                    </div>
+                </div>
             </div>
-			
-			<div style="margin-top: 1.5rem;" id="assignedVehicleView">
-                <h3 style="margin-bottom: 10px;">My Assigned Vehicles</h3>
-                <div id="vehicle-container-assigned" class="loading">Loading your vehicles...</div>
+        </section>
+
+        <!-- My Registered Vehicles Section -->
+        <section class="mb-4" id="registeredVehicleView">
+            <div class="d-flex align-items-center justify-content-between mb-3" >
+                <h2 class="h6 fw-bold text-dark mb-0 d-flex align-items-center">
+                    <i class="fa-solid fa-car text-primary me-2"></i> My Registered Vehicles
+                </h2>
+				<span id="registered-count" class="badge bg-light text-secondary border"></span>
+				<!-- Vehicles Container -->
+				
             </div>
-
-            <div class="nav-links">
-				<!-- Owner Only -->
-				<a href="vehicle_registration.html" id="link-register-vehicle" class="role-nav hidden">➕ Register New Vehicle</a>
-				<a href="track_fleet.html" id="link-track-fleet" class="role-nav hidden">🗺️ Track Fleet Vehicles</a>
-				<!-- <a href="track_vehicles.html" id="link-track-vehicles" class="role-nav hidden">🚚 Track Vehicles/Deliveries</a> -->
-				
-				<!-- Customer Only -->
-				<a href="create_order.html" id="link-create-order" class="role-nav hidden">📦 Put New Supply Order</a>
-				<a href="customer_orders.html" id="link-customer-orders" class="role-nav hidden">📦 See Orders</a>
-				
-				<!-- Driver Only -->
-				<a href="driver_orders.html" id="link-driver-orders" class="role-nav hidden">🚚 View / Accept Deliveries</a>
-				
-				
-				<a href="assign_vehicle.html" id="link-assign-vehicle" class="role-nav hidden">🧑‍✈️ Assign Driver</a>
-	
-				<a href="approve_subscriptions.html" id="link-approve-subscriptions" class="role-nav hidden">🧑‍✈️ Approve User Subscriptions</a>
-				<a href="verify_vehicles.html" id="link-verify_vehicles" class="role-nav hidden">Verify Vehicles</a>
-
-			</div>
-			
-			
-			
-			
-
-			
+			<div class="vstack gap-3" id="vehicle-container-registered"></div>
             
-            <button class="btn btn-outline" style="margin-top: 2rem;" onclick="handleLogout()">Logout</button>
-        </div>
+        </section>
+		
+		<section class="mb-4" id="assignedVehicleView">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 class="h6 fw-bold text-dark mb-0 d-flex align-items-center">
+                    <i class="fa-solid fa-car text-primary me-2"></i> My Assigned Vehicle
+                </h2>
+				<span id="assinged-count" class="badge bg-light text-secondary border"></span>
+				
+            </div>
+			<div class="vstack gap-3" id="vehicle-container-assigned"></div>
+			
+		 </section>
+
+
+		<div id="message-container"> <p style="color: red; margin-top:15px; text-align:center;"> You do not have active subscription. Kindly subscribe to avail the services.</p> </div>
+
+        <!-- Quick Action Links -->
+        <section class="mb-4 card shadow-sm border-0 rounded-4 p-4">
+            <span class="text-uppercase text-muted fw-semibold mb-3 d-block" style="font-size: 0.7rem; letter-spacing: 0.05em;">Quick Management Actions</span>
+            <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                
+				<a href="vehicle_registration.html" id="link-register-vehicle" class="btn btn-outline-purple btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-purple bg-purple-subtle border-purple-subtle" style="color: #6f42c1; background-color: #f3e8ff; border-color: #e9d5ff;">
+                    <i class="fa-solid fa-plus me-1"></i> Register New Vehicle
+                </a>
+				
+                <a href="track_fleet.html"  id="link-track-fleet" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-warning-emphasis bg-warning-subtle border border-warning-subtle" style="background-color: #fef3c7; color: #b45309; border-color: #fde68a;">
+                    <i class="fa-solid fa-truck-arrow-right me-1"></i> Track Fleet Vehicles
+                </a>
+                <a href="create_order.html" id="link-create-order" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
+                    <i class="fa-solid fa-user-gear me-1"></i> Put New Supply Order
+                </a>
+				
+				<a href="customer_orders.html" id="link-customer-orders" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
+                    <i class="fa-solid fa-user-gear me-1"></i> See Orders
+                </a>
+				
+				<a href="driver_orders.html" id="link-driver-orders" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
+                    <i class="fa-solid fa-truck-arrow-right me-1"></i> View / Accept Deliveries
+                </a>
+				
+								
+				<a href="assign_vehicle.html" id="link-assign-vehicle" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
+                    <i class="fa-solid fa-user-gear me-1"></i> Assign Driver
+                </a>
+				
+								
+				<a href="approve_subscriptions.html" id="link-approve-subscriptions" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
+                    <i class="fa-solid fa-user-gear me-1"></i> ‍Approve User Subscriptions
+                </a>
+				
+								
+				<a href="verify_vehicles.html" id="link-verify_vehicles" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
+                    <i class="fa-solid fa-user-gear me-1"></i> Verify Vehicles
+                </a>
+				
+								
+				<a href="pricing_subscription.html" id="link-take-subscriptions" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
+                    <i class="fa-solid fa-user-gear me-1"></i> Subscribe Now
+                </a>
+					
+				
+            </div>
+        </section>
+
+        <!-- Logout Action Button -->
+        <section class="mb-4">
+            <button onclick="handleLogout()" class="btn btn-light w-100 py-3 rounded-4 border text-danger fw-semibold shadow-sm d-flex align-items-center justify-content-center gap-2">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </button>
+        </section>
+	    <!-- Footer -->
+		<footer class="bg-white border-top py-4 text-center text-muted small">
+			<p class="mb-0">&copy; 2026 FleetPro Telematics & Logistics Inc. All rights reserved.</p>
+		</footer>
     </div>
+
+
 	
 	<!-- <script src="/static/js/global-tracker.js"></script> -->
 	<script src="/static/js/tracker.js"></script>
+	<script src="/static/js/bootstrap.bundle.min.js"></script>
 	<!-- <script src="api.js" type="module"></script> -->
     <script>
         const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
@@ -402,11 +539,11 @@
 			profilePhone.textContent = user.profile.phone_number || "---";
             <!-- profileUID.textContent = user.id || "---"; -->
             
-            if (firstName && lastName) {
-                profileInitials.textContent = (firstName.substring(0, 1) + lastName.substring(0, 1)).toUpperCase();
-            } else {
-                profileInitials.textContent = user.username.substring(0, 2).toUpperCase();
-            }
+            <!-- if (firstName && lastName) { -->
+                <!-- profileInitials.textContent = (firstName.substring(0, 1) + lastName.substring(0, 1)).toUpperCase(); -->
+            <!-- } else { -->
+                <!-- profileInitials.textContent = user.username.substring(0, 2).toUpperCase(); -->
+            <!-- } -->
 			
 			// --- EMAIL & PHONE VERIFICATION UI RENDERING ---
             const emailStatusContainer = document.getElementById('email-status-container');
@@ -414,8 +551,8 @@
                 if (user.profile?.email_verified) {
                     emailStatusContainer.innerHTML = '<span style="color: #10b981; font-weight: 600;">Verified ✓</span>';
                 } else {
-                    emailStatusContainer.innerHTML = '<a href="#" onclick="triggerEmailVerification(event)" style="color: #4f46e5; text-decoration: underline; font-weight: 600; font-size: 13px;">Verify Email</a>';
-                }
+                    emailStatusContainer.innerHTML = '<button onclick="triggerEmailVerification(event)" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold"> Verify Email</button>'
+				}
             }
 
             const phoneStatusContainer = document.getElementById('phone-status-container');
@@ -423,10 +560,11 @@
                 if (user.profile?.phone_verified) {
                     phoneStatusContainer.innerHTML = '<span style="color: #10b981; font-weight: 600;">Verified ✓</span>';
                 } else {
-                    phoneStatusContainer.innerHTML = '<a href="#" onclick="triggerPhoneVerification(event)" style="color: #4f46e5; text-decoration: underline; font-weight: 600; font-size: 13px;">Verify Phone</a>';
+                    phoneStatusContainer.innerHTML = '<button onclick="triggerPhoneVerification(event)" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold"> Verify Phone</button>';
                 }
             }
             // ----------------------------------------------
+			
 			
 			
 			
@@ -435,29 +573,43 @@
 			document.querySelectorAll('.role-nav').forEach(el => el.classList.add('hidden'));
 			document.getElementById('registeredVehicleView').classList.add('hidden');
 			document.getElementById('assignedVehicleView').classList.add('hidden');
+			document.getElementById('message-container').classList.remove('hidden');
+			document.getElementById('link-take-subscriptions').classList.remove('hidden');
 			
 
 			// Then, show links based on the user role
-			if (role === 'owner') {
+			if (role === 'owner' && user.profile?.is_subscribed) {
 				document.getElementById('registeredVehicleView').classList.remove('hidden');
 				document.getElementById('link-register-vehicle').classList.remove('hidden');
 				document.getElementById('link-track-fleet').classList.remove('hidden');
 				document.getElementById('link-assign-vehicle').classList.remove('hidden');
+				
+				document.getElementById('message-container').classList.add('hidden');
+				document.getElementById('link-take-subscriptions').classList.add('hidden');
 			} else if (role === 'customer') {
 				document.getElementById('link-create-order').classList.remove('hidden');
 				document.getElementById('link-customer-orders').classList.remove('hidden');
 				
-			} else if (role === 'driver') {
+				document.getElementById('message-container').classList.add('hidden');
+				document.getElementById('link-take-subscriptions').classList.add('hidden');
+				
+			} else if (role === 'driver' && user.profile?.is_subscribed) {
 				document.getElementById('registeredVehicleView').classList.remove('hidden');
 				document.getElementById('assignedVehicleView').classList.remove('hidden');
 				document.getElementById('link-driver-orders').classList.remove('hidden');
 				document.getElementById('link-register-vehicle').classList.remove('hidden');
 				document.getElementById('link-assign-vehicle').classList.remove('hidden');
 				
+				document.getElementById('message-container').classList.add('hidden');
+				document.getElementById('link-take-subscriptions').classList.add('hidden');
+				
+				
 				
 			} else if (role == "admin"){
 				document.getElementById('link-approve-subscriptions').classList.remove('hidden');
 				document.getElementById('link-verify_vehicles').classList.remove('hidden');
+				<!-- document.getElementById('message-container').classList.add('hidden'); -->
+				<!-- document.getElementById('link-take-subscriptions').classList.add('hidden'); -->
 			}
 			// ----------------------------------------
             loginView.classList.add('hidden');
@@ -471,6 +623,7 @@
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
 			localStorage.removeItem('userRole');
+			localStorage.removeItem('driver_vehicle_id');
 			stopDriverTracker();
             loginForm.reset();
             profileView.classList.add('hidden');
@@ -481,7 +634,7 @@
             const token = getAccessToken();
             const container_registered = document.getElementById('vehicle-container-registered');
 			const container_assigned = document.getElementById('vehicle-container-assigned');
-
+			
             if (!token) {
                 container_registered.innerHTML = '<p class="error">Authentication token not found. Please log in first.</p>';
                 container_assigned.innerHTML = '<p class="error">Authentication token not found. Please log in first.</p>';
@@ -490,7 +643,13 @@
             
             try {
                 const response = await authorizedFetch(`${API_BASE}/vehicles/`, { method: 'GET' });
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                // Check for specific status codes first
+				if (response.status === 403) {
+					throw new Error("Access denied. You do not have active subscription to view these orders.");
+					}
+                if (!response.ok) throw new Error(`Failed to fetch orders. Status: ${response.status}`);
+
+				<!-- if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`); -->
 
                 const userVehicleData = await response.json();
 				console.log(userVehicleData);
@@ -502,15 +661,17 @@
 				
                 if (user_registered_vehicle && user_registered_vehicle.length > 0) {
                     container_registered.innerHTML = ''; 
+					document.getElementById('registered-count').innerText = `${user_registered_vehicle.length} Vehicle`;
                     
                     user_registered_vehicle.forEach(vehicle => {
                         const card = document.createElement('div');
-                        card.className = 'vehicle-card';
+                        card.className = 'card shadow-sm border-0 rounded-4 p-4 position-relative overflow-hidden';
                         
                         let mapLinkHtml = '';
                         if (vehicle.currlat && vehicle.currlon) {
                             const mapUrl = `https://www.google.com/maps/search/?api=1&query=${vehicle.currlat},${vehicle.currlon}`;
-                            mapLinkHtml = `<p><a href="${mapUrl}" target="_blank" class="map-link">📍 View Location on Map</a></p>`;
+                            mapLinkHtml = `<p><a href="${mapUrl}" target="_blank" class="btn btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold shadow-sm">
+							<i class="fa-solid fa-location-pin me-1 text-danger"></i> View Location on Map </a></p>`;
                         } else {
                             mapLinkHtml = `<p class="no-location"><em>Location coordinates not currently available.</em></p>`;
                         }
@@ -519,36 +680,64 @@
 						let trackHistoryHtml = null
 						// Add history tracking link for owners
 						if (role === 'owner') {
-							trackHistoryHtml = `<p><a href="vehicle_history.html?id=${vehicle.id}" class="map-link" style="background-color: #10b981;">📜 View Vehicle History Trail</a></p>`;
+							trackHistoryHtml = `<p><a href="vehicle_history.html?id=${vehicle.id}" class="btn btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold shadow-sm">
+							<i class="fa-solid fa-clock-rotate-left me-1 text-warning"></i> View Vehicle History Trail</a></p>`;
 						} else {
-							trackHistoryHtml = `<p><a href="vehicle_history.html?id=${vehicle.id}" class="map-link" style="background-color: #10b981;">📜 View Vehicle History Trail</a></p>`;
+							trackHistoryHtml = `<p><a href="vehicle_history.html?id=${vehicle.id}" class="btn btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold shadow-sm" style="background-color: #10b981;">
+							<i class="fa-solid fa-clock-rotate-left me-1 text-warning"></i> View Vehicle History Trail </a></p>`;
 						}
                         
                         card.innerHTML = `
-                            <h3>Vehicle No: ${vehicle.vehicle_no}</h3>
-                            <p><strong>Type:</strong> ${vehicle.vehicle_type}</p>
-                            <p><strong>Chassis No:</strong> ${vehicle.chesis_no}</p>
-                            <p><strong>Engine No:</strong> ${vehicle.engine_no}</p>
-                            ${mapLinkHtml}
-							${trackHistoryHtml}
+							<div class="position-absolute top-0 start-0 bg-primary h-100" style="width: 6px;"></div>
+							<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-3">
+								<h3 class="h6 fw-bold text-primary fst-italic mb-0">Vehicle No: ${vehicle.vehicle_no}</h3>
+								<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle align-self-start align-self-sm-auto">Active Fleet</span>
+							</div>
+							
+                            <!-- <h3>Vehicle No: ${vehicle.vehicle_no}</h3> -->
+							
+							<div class="row g-3 bg-light p-3 rounded-3 border mb-3 small">
+								<div class="col-4">
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>Type:</strong> ${vehicle.vehicle_type}</span>
+									<span class="fw-semibold fst-italic">light</span>
+								</div>
+								<div class="col-4">
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>Chassis No:</strong> ${vehicle.chesis_no}</span>
+									<span class="fw-semibold">57777</span>
+								</div>
+								<div class="col-4">
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>Engine No:</strong> ${vehicle.engine_no}</span>
+									<span class="fw-semibold">6383856</span>
+								</div>
+							</div>
+							<div class="d-flex flex-wrap gap-2">
+								${mapLinkHtml}
+								${trackHistoryHtml}
+							</div>
                         `;
                         container_registered.appendChild(card);
                     });
                 } else {
-                    container_registered.innerHTML = '<p>You have not registered any vehicles yet.</p>';
+                    container_registered.innerHTML = `<div class="alert alert-info d-flex align-items-center" role="alert">
+														<i class="fa-solid fa-circle-info me-2"></i>
+														<div>
+															You have not registered any vehicles yet.
+														</div>
+													  </div>`;
                 }
 				
 				if (user_assigned_vehicle && user_assigned_vehicle.length > 0) {
                     container_assigned.innerHTML = ''; 
-                    
+                    document.getElementById('assinged-count').innerText = `${user_assigned_vehicle.length} Vehicle`;
                     user_assigned_vehicle.forEach(vehicle => {
                         const card = document.createElement('div');
-                        card.className = 'vehicle-card';
+                        card.className = 'card shadow-sm border-0 rounded-4 p-4 position-relative overflow-hidden';
                         
                         let mapLinkHtml = '';
                         if (vehicle.currlat && vehicle.currlon) {
                             const mapUrl = `https://www.google.com/maps/search/?api=1&query=${vehicle.currlat},${vehicle.currlon}`;
-                            mapLinkHtml = `<p><a href="${mapUrl}" target="_blank" class="map-link">📍 View Location on Map</a></p>`;
+                            mapLinkHtml = `<p><a href="${mapUrl}" target="_blank" class="btn btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold shadow-sm">
+							<i class="fa-solid fa-location-pin me-1 text-danger"></i> View Location on Map </a></p>`;
                         } else {
                             mapLinkHtml = `<p class="no-location"><em>Location coordinates not currently available.</em></p>`;
                         }
@@ -557,29 +746,57 @@
 						let trackHistoryHtml = null
 						// Add history tracking link for owners
 						if (role === 'owner') {
-							trackHistoryHtml = `<p><a href="vehicle_history.html?id=${vehicle.id}" class="map-link" style="background-color: #10b981;">📜 View Vehicle History Trail</a></p>`;
+							trackHistoryHtml = `<p><a href="vehicle_history.html?id=${vehicle.id}" class="btn btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold shadow-sm">
+							<i class="fa-solid fa-clock-rotate-left me-1 text-warning"></i> View Vehicle History Trail</a></p>`;
 						} else {
-							trackHistoryHtml = `<p><a href="vehicle_history.html?id=${vehicle.id}" class="map-link" style="background-color: #10b981;">📜 View Vehicle History Trail</a></p>`;
+							trackHistoryHtml = `<p><a href="vehicle_history.html?id=${vehicle.id}" class="btn btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold shadow-sm" style="background-color: #10b981;">
+							<i class="fa-solid fa-clock-rotate-left me-1 text-warning"></i> View Vehicle History Trail </a></p>`;
 						}
                         
                         card.innerHTML = `
-                            <h3>Vehicle No: ${vehicle.vehicle_no}</h3>
-                            <p><strong>Type:</strong> ${vehicle.vehicle_type}</p>
-                            <p><strong>Chassis No:</strong> ${vehicle.chesis_no}</p>
-                            <p><strong>Engine No:</strong> ${vehicle.engine_no}</p>
-                            ${mapLinkHtml}
-							${trackHistoryHtml}
+							<div class="position-absolute top-0 start-0 bg-primary h-100" style="width: 6px;"></div>
+							<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-3">
+								<h3 class="h6 fw-bold text-primary fst-italic mb-0">Vehicle No: ${vehicle.vehicle_no}</h3>
+								<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle align-self-start align-self-sm-auto">Active Fleet</span>
+							</div>
+							
+                            <!-- <h3>Vehicle No: ${vehicle.vehicle_no}</h3> -->
+							
+							<div class="row g-3 bg-light p-3 rounded-3 border mb-3 small">
+								<div class="col-4">
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>Type:</strong> ${vehicle.vehicle_type}</span>
+									<span class="fw-semibold fst-italic">light</span>
+								</div>
+								<div class="col-4">
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>Chassis No:</strong> ${vehicle.chesis_no}</span>
+									<span class="fw-semibold">57777</span>
+								</div>
+								<div class="col-4">
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>Engine No:</strong> ${vehicle.engine_no}</span>
+									<span class="fw-semibold">6383856</span>
+								</div>
+							</div>
+							<div class="d-flex flex-wrap gap-2">
+								${mapLinkHtml}
+								${trackHistoryHtml}
+							</div>
                         `;
                         container_assigned.appendChild(card);
                     });
                 } else {
-                    container_assigned.innerHTML = '<p>You have not assigned any vehicles yet.</p>';
+                    container_assigned.innerHTML = `<div class="alert alert-info d-flex align-items-center" role="alert">
+														<i class="fa-solid fa-circle-info me-2"></i>
+														<div>
+															You have not registered any vehicles yet.
+														</div>
+													  </div>`;
                 }
 				
 
             } catch (error) {
                 console.error('Error fetching vehicles:', error);
-                container_registered.innerHTML = '<p class="error">Failed to load vehicles. Please check your connection or login status.</p>';
+                container_registered.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+				container_assigned.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
             }
         }        
 		
@@ -610,12 +827,12 @@
                 const userData = await response.json();
                 console.log(userData);
                 // Check if vehicle is assigned
-                if (userData.assigned_vehicle) {
+                if (userData.assigned_vehicle && userData.profile?.is_subscribed) {
                     const vehicleId = userData.assigned_vehicle;
 					localStorage.setItem('driver_vehicle_id', vehicleId);
 					
                 } else {
-                    console.warn("No vehicle currently assigned to this driver account.");
+                    console.warn("Either No vehicle currently assigned to this user driver or user does not have active subscription.");
                 }
 
             } catch (err) {

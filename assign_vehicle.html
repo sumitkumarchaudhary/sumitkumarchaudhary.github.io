@@ -124,12 +124,12 @@
                 const users = await usersRes.json();
 
 				const userData = await currUser.json();
-				let myVehicles = vehicles.filter(v => v.user === userData.id);
+				
+				let myVehicles = vehicles.filter(v => v.user === userData.id && v.is_verified);
 				
 				console.log('vehicles', myVehicles);
 				console.log('users', users);
 				console.log("Current User Loaded:", userData);
-				
 				
 				// Collect IDs of all drivers who are already assigned to ANY vehicle
                 // Filter users who have the role of 'driver'

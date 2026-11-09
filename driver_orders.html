@@ -4,15 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Driver - Available Orders</title>
-    <style>
-        body { 
-			font-family: system-ui, -apple-system, sans-serif; 
-			background-color: #f4f6f9; 
-			margin: 0; 
-			padding: 20px; 
-			color: #1e293b;
-		}
-        .card { 
+
+	<!-- Local Bootstrap Compiled CSS -->
+    <link href="static/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Local FontAwesome Icons -->
+	<link href="static/css/all.min.css" rel="stylesheet">
+	
+	
+	<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .toast-container {
+            z-index: 1080;
+        }
+		.hidden { display: none !important; }
+		.card { 
 			background: white; 
 			padding: 20px; 
 			border-radius: 8px; 
@@ -22,34 +31,51 @@
 			width: 100%;
 			max-width: 550px;
 		}
-		.back-btn { display: inline-block; margin-bottom: 1.5rem; color: #4f46e5; text-decoration: none; font-weight: 600; }
-        .back-btn:hover { text-decoration: underline; }
-        h2 { color: #007BFF; margin-top: 0; }
-        .order-item { border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 15px; background: #fafafa; border-radius: 4px; }
-        .assigned { border-left-color: #28a745; }
-        button { padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
-        button:hover { background: #218838; }
-        .status-badge { font-weight: bold; text-transform: uppercase; font-size: 12px; padding: 3px 8px; border-radius: 3px; color: white; background: #ffc107; }
-        .status-badge.assigned { background: #28a745; }
-        #msg { margin-bottom: 20px; font-weight: bold; text-align: center; }
+		.order-item { border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 15px; background: #fafafa; border-radius: 4px; }
+
     </style>
 </head>
-<body>
-	<a href="index.html" class="back-btn">← Back to Dashboard</a>
+<body class="d-flex flex-column min-vh-100 justify-content-between">
+	<div class="container max-w-3xl my-4" style="max-width: 100%;">
     
-	<div class="card">
-        <h2>🚚 Driver Portal - Delivery Queue</h2>
-        <p>Accept pending supply orders and start your deliveries.</p>
-        <div id="msg"></div>
+		<!-- Back Button -->
+		<a href="index.html" class="btn btn-link text-decoration-none px-0 mb-3 text-muted fw-semibold">
+			<i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+		</a>
 		
-		<!-- Tab Navigation Buttons -->
-		<div style="margin-bottom: 20px;">
-			<button onclick="switchTab('active')" id="btn-active" style="padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Active Queue</button>
-			<button onclick="switchTab('history')" id="btn-history" style="padding: 8px 16px; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-left: 10px;">Delivery History</button>
+		<!-- Main Card Container -->
+		<div class="card shadow-sm border-0 rounded-4" style="max-width: 100%;">
+			<div class="card-body p-4 p-sm-5">
+				
+				<!-- Header Section -->
+				<h3 class="fw-bold text-dark mb-1">🚚 Driver Portal - Delivery Queue</h3>
+				<p class="text-muted small mb-4">Accept pending supply orders and start your deliveries.</p>
+				
+				<!-- Message Alert Container -->
+				<div id="msg"></div>
+				
+				<!-- Tab Navigation using Bootstrap Nav Pills -->
+				<ul class="nav nav-pills gap-2 mb-4" role="tablist">
+					<li class="nav-item" role="presentation">
+						<button class="nav-link active fw-semibold px-3 py-2 rounded-3" id="btn-active" onclick="switchTab('active')" type="button">
+							Active Queue
+						</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link fw-semibold px-3 py-2 rounded-3 text-secondary bg-light" id="btn-history" onclick="switchTab('history')" type="button">
+							Delivery History
+						</button>
+					</li>
+				</ul>
+				
+				<!-- Orders Dynamic Content Container -->
+				<div id="orders-container">
+					<!-- Orders will dynamically render here -->
+				</div>
+				
+			</div>
 		</div>
-        
-        <div id="orders-container"></div>
-    </div>
+	</div>
 	
 	<!-- <script src="/static/js/global-tracker.js"></script> -->
 	<script src="/static/js/tracker.js"></script>
@@ -305,19 +331,23 @@
 		let currentTab = 'active';
 		function switchTab(tab) {
 			currentTab = tab;
-			document.getElementById('btn-active').style.background = tab === 'active' ? '#4f46e5' : '#e2e8f0';
-			document.getElementById('btn-active').style.color = tab === 'active' ? 'white' : '#334155';
 			
-			document.getElementById('btn-history').style.background = tab === 'history' ? '#4f46e5' : '#e2e8f0';
-			document.getElementById('btn-history').style.color = tab === 'history' ? 'white' : '#334155';
+			const activeBtn = document.getElementById('btn-active');
+			const historyBtn = document.getElementById('btn-history');
 
+			// Toggle Bootstrap classes based on selected tab
 			if (tab === 'active') {
+				activeBtn.className = 'nav-link active fw-semibold px-3 py-2 rounded-3';
+				historyBtn.className = 'nav-link fw-semibold px-3 py-2 rounded-3 text-secondary bg-light';
 				fetchOrders();
 			} else {
+				historyBtn.className = 'nav-link active fw-semibold px-3 py-2 rounded-3';
+				activeBtn.className = 'nav-link fw-semibold px-3 py-2 rounded-3 text-secondary bg-light';
 				fetchHistory();
 			}
 		}
-
+		
+		
 		async function fetchHistory() {
 			const container = document.getElementById('orders-container');
 			container.innerHTML = '<p>Loading delivery history...</p>';

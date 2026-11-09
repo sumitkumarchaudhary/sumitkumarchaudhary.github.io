@@ -4,319 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Registration with JS Validation</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
+	
+	<!-- Local Bootstrap Compiled CSS -->
+    <link href="static/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Local FontAwesome Icons -->
+	<link href="static/css/all.min.css" rel="stylesheet">
+	
+	<style>
         body {
-            background-color: #f4f7f6;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 12px;
-			margin: 0 auto;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
         }
-		.back-btn { display: inline-block; margin-bottom: 1.5rem; color: #4f46e5; text-decoration: none; font-weight: 600; }
-        .back-btn:hover { text-decoration: underline; }
-
-        .registration-container {
-            width: 100%;
-			max-width: 650px;
-			margin: 20px auto;
-			background: #ffffff;
-			padding: 24px;
-			border-radius: 12px;
-			box-sizing: border-box;
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        .toast-container {
+            z-index: 1080;
         }
-
-        .registration-container h2 {
-            margin-bottom: 20px;
-            color: #333333;
-            text-align: center;
-            font-size: 24px;
+		.hidden { display: none !important; }
+		.btn-check:checked + .btn {
+            background-color: #e6f0ff !important; /* Soft custom blue background */
+            border-color: #0d6efd !important;      /* Primary border */
+            color: #0b5ed7 !important;             /* Primary text */
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1); /* Subtle focus glow */
         }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #666666;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .form-group input[type="text"],
-        .form-group input[type="email"],
-        .form-group input[type="password"],
-        .form-group select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #cccccc;
-            border-radius: 4px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #4472c4;
-        }
-
-        .error-message {
-            color: #d9534f;
-            font-size: 12px;
-            margin-top: 5px;
-            display: none;
-        }
-
-        <!-- .radio-group { -->
-            <!-- display: flex; -->
-            <!-- gap: 15px; -->
-            <!-- margin-top: 5px; -->
-        <!-- } -->
-
-        <!-- .radio-item { -->
-            <!-- display: flex; -->
-            <!-- align-items: center; -->
-            <!-- gap: 5px; -->
-            <!-- font-size: 14px; -->
-            <!-- color: #333; -->
-        <!-- } -->
-		
-		.vehicle-type-group {
-			display: flex;
-			gap: 12px;
-			flex-wrap: wrap;
-			margin-bottom: 16px;
-		}
-
-		.vehicle-option {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			padding: 10px 14px;
-			background: #f8fafc;
-			border: 1px solid #cbd5e1;
-			border-radius: 8px;
-			cursor: pointer;
-			font-size: 14px;
-			font-weight: 500;
-			color: #1e293b;
-			transition: all 0.2s ease;
-			flex: 1;
-			min-width: 110px;
-		}
-
-		.vehicle-option:hover {
-			border-color: #4f46e5;
-			background: #eef2ff;
-		}
-
-		.vehicle-option input[type="radio"] {
-			accent-color: #4f46e5;
-			cursor: pointer;
-		}
-
-        .checkbox-group {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            margin: 20px 0;
-            font-size: 13px;
-            color: #666666;
-        }
-
-        .checkbox-group input {
-            margin-top: 3px;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 12px;
-            background-color: #4472c4;
-            border: none;
-            border-radius: 4px;
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .btn-submit:hover {
-            background-color: #3359a3;
-        }
-
-        .form-footer {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 13px;
-            color: #666666;
-        }
-
-        .form-footer a {
-            color: #4472c4;
-            text-decoration: none;
-        }
-		/* Core Layout Box */
-		.upload-container {
-		  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-		  display: flex;
-		  flex-direction: column;
-		  gap: 8px;
-		  max-width: 650px;
-		  width: 100%;
-		  box-sizing: border-box;
-		  margin-bottom: 8px;
-		}
-
-		.upload-label {
-		  font-size: 14px;
-		  font-weight: 600;
-		  color: #374151;
-		}
-
-		/* The Invisible Input Trick */
-		#certInput {
-		  position: absolute;
-		  width: 1px;
-		  height: 1px;
-		  padding: 0;
-		  margin: -1px;
-		  overflow: hidden;
-		  clip: rect(0, 0, 0, 0);
-		  border: 0;
-		}
-
-		/* Custom Interactive Label Box */
-		.custom-file-upload {
-		  display: flex;
-		  flex-direction: column;
-		  align-items: center;
-		  justify-content: center;
-		  border: 2px dashed #d1d5db;
-		  border-radius: 12px;
-		  padding: 24px 16px;
-		  background-color: #f9fafb;
-		  cursor: pointer;
-		  transition: all 0.2s ease-in-out;
-		  text-align: center;
-		  min-height: 140px; /* Touch-friendly size limit */
-		}
-
-		/* Hover State */
-		.custom-file-upload:hover {
-		  border-color: #3b82f6;
-		  background-color: #eff6ff;
-		}
-
-		/* Accessibility Focus Indicator (Fires when user tabs via keyboard) */
-		#certInput:focus-visible + .custom-file-upload {
-		  outline: 2px solid #3b82f6;
-		  outline-offset: 2px;
-		  border-color: #3b82f6;
-		}
-
-		/* Decorative UI Elements */
-		.upload-icon {
-		  font-size: 32px;
-		  margin-bottom: 8px;
-		}
-
-		.upload-text {
-		  font-size: 14px;
-		  color: #4b5563;
-		  margin-bottom: 4px;
-		}
-
-		.upload-text strong {
-		  color: #2563eb;
-		}
-
-		.upload-hint {
-		  font-size: 12px;
-		  color: #9ca3af;
-		}
-
-		.file-name-text {
-		  margin-top: 12px;
-		  font-size: 13px;
-		  font-weight: 500;
-		  color: #10b981; /* Changes color dynamically when file is ready */
-		  word-break: break-all;
-		}
-
-		
     </style>
 </head>
-<body>
-<a href="index.html" class="back-btn">← Back to Dashboard</a>
-<div class="registration-container">
-    <h2>Add Vehicle</h2>
+<body class="d-flex flex-column min-vh-100 justify-content-between">
+<div class="container my-4" style="max-width: 100%;">
     
-    <form id="vehicleRegistrationForm">
-        <div class="form-group">
-            <label>Vehicle Type</label>
-            <div class="vehicle-type-group">
-                <label class="vehicle-option">
-                    <input type="radio" name="vehicle_type" value="light" required>
-                    Commercial (Light)
-                </label>
-                <label class="vehicle-option">
-                    <input type="radio" name="vehicle_type" value="heavy">
-                    Commercial (Heavy)
-                </label>
-                <label class="vehicle-option">
-                    <input type="radio" name="vehicle_type" value="other">
-                    Other
-                </label>
-            </div>
-        </div>
-        
-        <div class="form-group">
-            <label for="vehicle_no">Vehicle Number </label>
-            <input type="text" id="vehicle_no" name="vehicle_no" placeholder="Enter Vehicle Number" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="chesis_no">Chesis Number</label>
-            <input type="text" id="chesis_no" name="chesis_no" placeholder="Enter Chesis Number" required>
-        </div>
+    <!-- Back Button -->
+    <a href="index.html" class="btn btn-link text-decoration-none px-0 mb-3 text-muted fw-semibold">
+        <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+    </a>
 
-        <div class="form-group">
-            <label for="engine_no">Engine Number</label>
-            <input type="text" id="engine_no" name="engine_no" placeholder="Enter Engine Number" required>
-        </div>
-        
-        <div class="upload-container">
-            <span class="upload-label">Vehicle Registration Certificate (PDF/DOCX)</span>
+    <!-- Registration Card -->
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4 p-sm-5"100%
             
-            <!-- Clickable custom label box linked via 'for' attribute -->
-            <label for="certInput" class="custom-file-upload">
-                <div class="upload-icon">📄</div>
-                <div class="upload-text">
-                    <strong>Click to upload</strong> or drag and drop
+            <h3 class="fw-bold text-dark mb-4">Add Vehicle</h3>
+            
+            <form id="vehicleRegistrationForm" novalidate>
+                
+                <!-- Commercial Vehicle Type (Radio Grid) -->
+                <div class="mb-4">
+                    <label class="form-label text-muted small fw-semibold">Commercial Vehicle Type</label>
+                    <div class="row g-2">
+                        <div class="col-12 col-sm-6">
+                            <input type="radio" class="btn-check" name="vehicle_type" id="type_small" value="small" required>
+                            <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_small">
+                                Small (≤ 3.5 tonnes)
+                            </label>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <input type="radio" class="btn-check" name="vehicle_type" id="type_light" value="light">
+                            <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_light">
+                                Light (3.5 to 7.5 tonnes)
+                            </label>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <input type="radio" class="btn-check" name="vehicle_type" id="type_medium" value="medium">
+                            <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_medium">
+                                Medium (7.5 to 18.5 tonnes)
+                            </label>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <input type="radio" class="btn-check" name="vehicle_type" id="type_heavy" value="heavy">
+                            <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_heavy">
+                                Heavy (≥ 18.5 tonnes)
+                            </label>
+                        </div>
+                    </div>
                 </div>
-                <span class="upload-hint">PDF or DOCX only (Max 5MB)</span>
-                <!-- Dynamic placeholder to show chosen filename -->
-                <span id="fileNameDisplay" class="file-name-text">No file chosen</span>
-            </label>
-            
-            <!-- ⚡ FIXED: Added name="vehicle_rc" to map directly to your Django fields array -->
-            <input type="file" id="certInput" name="vehicle_rc" accept=".pdf, .docx" required>
+                
+                <!-- Vehicle Number -->
+                <div class="mb-3">
+                    <label for="vehicle_no" class="form-label text-muted small fw-semibold">Vehicle Number</label>
+                    <input type="text" class="form-control bg-light shadow-none" id="vehicle_no" name="vehicle_no" placeholder="Enter Vehicle Number" required>
+                </div>
+                
+                <!-- Chassis Number -->
+                <div class="mb-3">
+                    <label for="chesis_no" class="form-label text-muted small fw-semibold">Chassis Number</label>
+                    <input type="text" class="form-control bg-light shadow-none" id="chesis_no" name="chesis_no" placeholder="Enter Chassis Number" required>
+                </div>
+
+                <!-- Engine Number -->
+                <div class="mb-4">
+                    <label for="engine_no" class="form-label text-muted small fw-semibold">Engine Number</label>
+                    <input type="text" class="form-control bg-light shadow-none" id="engine_no" name="engine_no" placeholder="Enter Engine Number" required>
+                </div>
+                
+                <!-- File Upload Container -->
+                <div class="mb-4">
+                    <label class="form-label text-muted small fw-semibold d-block">Vehicle Registration Certificate (PDF/DOCX)</label>
+                    
+                    <label for="certInput" class="border border-2 border-dashed rounded-3 p-4 text-center bg-light d-block cursor-pointer w-100" style="cursor: pointer;">
+                        <div class="fs-2 mb-2">📄</div>
+                        <div class="text-dark small mb-1">
+                            <strong>Click to upload</strong> or drag and drop
+                        </div>
+                        <span class="d-block text-muted" style="font-size: 0.75rem;">PDF or DOCX only (Max 5MB)</span>
+                        <span id="fileNameDisplay" class="d-block text-primary small mt-2 fw-semibold">No file chosen</span>
+                    </label>
+                    
+                    <!-- Hidden or visually integrated file input -->
+                    <input type="file" id="certInput" name="vehicle_rc" accept=".pdf, .docx" class="d-none" required>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary py-2 fw-semibold rounded-3 shadow-sm">Register</button>
+                </div>
+            </form>
+
         </div>
-        
-        <button type="submit" class="btn-submit">Register</button>
-    </form>
+    </div>
 </div>
 
 <script src="/static/js/tracker.js"></script>

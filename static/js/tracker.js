@@ -54,6 +54,5 @@ function stopDriverTracker() {
 	if (watchId !== null) {
 		navigator.geolocation.clearWatch(watchId);
 		watchId = null;
-		localStorage.removeItem('driver_vehicle_id');
 	}
 }
