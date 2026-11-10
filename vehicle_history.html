@@ -39,8 +39,8 @@
     <div class="container py-4" style="max-width: 950px;">
         
         <!-- Back Button -->
-        <a href="index.html" class="btn btn-link text-decoration-none px-0 mb-3 text-muted fw-semibold">
-            <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+        <a onclick="history.back()" class="btn btn-link text-decoration-none px-0 mb-3 text-muted fw-semibold">
+            <i class="fa-solid fa-arrow-left me-1"></i> Go Back
         </a>
 
         <!-- Map & Timeline Card -->
@@ -171,8 +171,8 @@
                             fillColor: "#ff7800",
                             color: "#fff",
                             weight: 1,
-                            opacity: 1,
-                            fillOpacity: 0.8
+                            opacity: 0.1,
+                            fillOpacity: 0.1
                         })
                         .bindTooltip(`<b>Date:</b> ${new Date(timestamp).toLocaleDateString()}<br><b>Time:</b> ${new Date(timestamp).toLocaleTimeString()}`)
                         .addTo(map);

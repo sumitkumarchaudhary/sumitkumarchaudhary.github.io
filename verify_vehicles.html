@@ -37,7 +37,12 @@
 <body class="bg-light">
 
     <div class="container py-5" style="max-width: 900px;">
-        
+        <!-- Action Footer -->
+		<div class="d-flex justify-content-start gap-2 pt-3 border-top">
+			<a href="index.html" class="btn btn-outline-secondary btn-sm fw-semibold px-3">
+				<i class="fa-solid fa-house me-1"></i> Go To Dashboard
+			</a>
+		</div>
         <!-- Main Card Container -->
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-body p-4 p-sm-5">
@@ -116,14 +121,14 @@
                                         <span><strong>Engine No:</strong> ${v.engine_no || 'N/A'}</span>
                                     </div>
                                     <div class="d-flex flex-column flex-sm-row gap-2 pt-2 border-top">
-                                        <a href="${v.certificate_url || '#'}" target="_blank" class="btn btn-outline-primary btn-sm fw-semibold ${!v.certificate_url ? 'disabled' : ''}">
+                                        <a href="${v.vehicle_rc || '#'}" target="_blank" class="btn btn-outline-primary btn-sm fw-semibold ${!v.vehicle_rc ? 'disabled' : ''}">
                                             <i class="fa-solid fa-file-pdf me-1"></i> View RC Certificate
                                         </a>
                                         <div class="d-flex gap-2 ms-sm-auto">
-                                            <button class="btn btn-success btn-sm fw-semibold px-3 shadow-none" onclick="verifyVehicle(${v.id}, 'approve')" ${!v.certificate_url ? 'disabled' : ''}>
+                                            <button class="btn btn-success btn-sm fw-semibold px-3 shadow-none" onclick="verifyVehicle(${v.id}, 'approve')" ${!v.vehicle_rc ? 'disabled' : ''}>
                                                 <i class="fa-solid fa-check me-1"></i> Approve
                                             </button>
-                                            <button class="btn btn-danger btn-sm fw-semibold px-3 shadow-none" onclick="verifyVehicle(${v.id}, 'reject')" ${!v.certificate_url ? 'disabled' : ''}>
+                                            <button class="btn btn-danger btn-sm fw-semibold px-3 shadow-none" onclick="verifyVehicle(${v.id}, 'reject')" ${!v.vehicle_rc ? 'disabled' : ''}>
                                                 <i class="fa-solid fa-xmark me-1"></i> Reject
                                             </button>
                                         </div>

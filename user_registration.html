@@ -46,18 +46,18 @@
                 <form id="registrationForm" novalidate>
                     
                     <!-- User Type Selection -->
-                    <div class="mb-3">
-                        <label for="role" class="form-label text-muted small fw-semibold">User Type</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-user-tag"></i></span>
-                            <select id="role" name="role" class="form-select bg-light border-start-0 ps-0 shadow-none" required>
-                                <option value="" disabled selected>Select User Type</option>
-                                <option value="customer">End Customer</option>
-                                <option value="driver">Driver</option>
-                                <option value="owner">Vehicle Owner</option>
-                            </select>
-                        </div>
-                    </div>
+					<div class="mb-3">
+						<label for="role" class="form-label text-muted small fw-semibold">User Type</label>
+						<div class="input-group">
+							<span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-user-tag"></i></span>
+							<select id="role" name="role" class="form-select bg-light border-start-0 ps-0 shadow-none" required>
+								<option value="" disabled selected>Select User Type</option>
+								<option value="customer">End Customer</option>
+								<option value="driver">Driver</option>
+								<option value="owner">Vehicle Owner</option>
+							</select>
+						</div>
+					</div>
 
                     <!-- First Name & Last Name Row -->
                     <div class="row g-3 mb-3">
@@ -122,11 +122,10 @@
                             <div id="passwordError" class="error-message">Passwords do not match.</div>
                         </div>
                     </div>
-					<!-- Government ID Proof Upload -->
+					<!-- Government ID Proof Upload (Shown for all) -->
 					<div class="mb-4">
 						<label class="form-label text-muted small fw-semibold d-block">Government ID Proof (PDF/DOCX/Image)</label>
-						
-						<label for="idProofInput" class="border border-2 border-dashed rounded-3 p-4 text-center bg-light d-block cursor-pointer w-100" style="cursor: pointer;">
+						<label for="idProofInput" class="border border-2 border-dashed rounded-3 p-4 text-center bg-light d-block w-100" style="cursor: pointer;">
 							<div class="fs-2 mb-2">🪪</div>
 							<div class="text-dark small mb-1">
 								<strong>Click to upload</strong> or drag and drop ID Proof
@@ -134,15 +133,13 @@
 							<span class="d-block text-muted" style="font-size: 0.75rem;">PDF, DOCX, or Image (Max 5MB)</span>
 							<span id="idProofFileName" class="d-block text-primary small mt-2 fw-semibold">No file chosen</span>
 						</label>
-						
 						<input type="file" id="idProofInput" name="id_proof" accept=".pdf,.docx,image/*" class="d-none" required>
 					</div>
 
-					<!-- Driving License Upload -->
-					<div class="mb-4">
+					<!-- Driving License Upload (Hidden by default, shown ONLY for Drivers) -->
+					<div class="mb-4" id="dlContainer" style="display: none;">
 						<label class="form-label text-muted small fw-semibold d-block">Driving License (PDF/DOCX/Image)</label>
-						
-						<label for="dlInput" class="border border-2 border-dashed rounded-3 p-4 text-center bg-light d-block cursor-pointer w-100" style="cursor: pointer;">
+						<label for="dlInput" class="border border-2 border-dashed rounded-3 p-4 text-center bg-light d-block w-100" style="cursor: pointer;">
 							<div class="fs-2 mb-2">🚗</div>
 							<div class="text-dark small mb-1">
 								<strong>Click to upload</strong> or drag and drop Driving License
@@ -150,8 +147,7 @@
 							<span class="d-block text-muted" style="font-size: 0.75rem;">PDF, DOCX, or Image (Max 5MB)</span>
 							<span id="dlFileName" class="d-block text-primary small mt-2 fw-semibold">No file chosen</span>
 						</label>
-						
-						<input type="file" id="dlInput" name="driving_license" accept=".pdf,.docx,image/*" class="d-none" required>
+						<input type="file" id="dlInput" name="driving_license" accept=".pdf,.docx,image/*" class="d-none">
 					</div>
 
                     <!-- Terms Checkbox -->
@@ -292,12 +288,29 @@
         });
 		
 		
-		
+		// Toggle Driving License field visibility based on selected User Type
+		document.getElementById('role').addEventListener('change', function() {
+			const dlContainer = document.getElementById('dlContainer');
+			const dlInput = document.getElementById('dlInput');
+
+			if (this.value === 'driver') {
+				dlContainer.style.display = 'block';
+				dlInput.setAttribute('required', 'true'); // Make DL required if user is a driver
+			} else {
+				dlContainer.style.display = 'none';
+				dlInput.removeAttribute('required');
+				dlInput.value = ''; // Reset file input if switched away
+				document.getElementById('dlFileName').textContent = 'No file chosen';
+			}
+		});
+
+		// File name display feedback for ID Proof
 		document.getElementById('idProofInput').addEventListener('change', function(e) {
 			const fileName = e.target.files.length > 0 ? e.target.files[0].name : 'No file chosen';
 			document.getElementById('idProofFileName').textContent = fileName;
 		});
 
+		// File name display feedback for Driving License
 		document.getElementById('dlInput').addEventListener('change', function(e) {
 			const fileName = e.target.files.length > 0 ? e.target.files[0].name : 'No file chosen';
 			document.getElementById('dlFileName').textContent = fileName;

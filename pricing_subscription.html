@@ -160,8 +160,46 @@
 
     function selectPlan(amount, data, validity) {
         alert(`You selected plan: ₹${amount} (${data} data for ${validity}). Proceeding to payment gateway...`);
+		
         // window.location.href = `checkout.html?amount=${amount}`;
+		
     }
+	
+	
+	// Example using a gateway success callback (e.g., Razorpay or generic success)
+	function onPaymentSuccess(paymentResponse) {
+		const token = localStorage.getItem('accessToken');
+		
+		// Extract plan duration from localStorage or URL query parameters
+		const planDays = parseInt(localStorage.getItem('selectedPlanDays')) || 30;
+
+		fetch(`${API_BASE}/user_profiles/verify-payment/`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${token}`,
+				'ngrok-skip-browser-warning': 'true'
+			},
+			body: JSON.stringify({
+				payment_id: paymentResponse.payment_id,
+				order_id: paymentResponse.order_id,
+				signature: paymentResponse.signature, // If using Razorpay/HMAC verification
+				days: planDays
+			})
+		})
+		.then(response => {
+			if (!response.ok) throw new Error("Payment verification failed on server.");
+			return response.json();
+		})
+		.then(data => {
+			// Clear temporary storage and redirect to dashboard with success message
+			localStorage.removeItem('selectedPlanDays');
+			window.location.href = 'index.html?payment=success';
+		})
+		.catch(err => {
+			alert("Error verifying payment: " + err.message);
+		});
+	}
 </script>
 </body>
 </html>

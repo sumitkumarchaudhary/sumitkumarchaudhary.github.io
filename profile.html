@@ -127,7 +127,7 @@
                     <!-- User Header Banner -->
                     <div class="d-flex flex-column flex-sm-row align-items-center gap-3 mb-4 pb-4 border-bottom text-center text-sm-start">
                         <div class="profile-avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold">
-                            ${user.first_name ? user.first_name.charAt(0).toUpperCase() : '<i class="fa-solid fa-user"></i>'}
+                            ${user.first_name ? user.first_name.charAt(0).toUpperCase()+user.last_name.charAt(0).toUpperCase() : '<i class="fa-solid fa-user"></i>'}
                         </div>
                         <div>
                             <div class="d-flex align-items-center justify-content-center justify-content-sm-start gap-2 mb-1">
