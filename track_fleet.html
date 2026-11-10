@@ -3,82 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fleet Tracking Dashboard</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-        body { background-color: #f8fafc; color: #0f172a; padding: 2rem; max-width: 900px; margin: 0 auto; }
-        .card { 
-			width: 100%;
-			max-width: 650px;
-			margin: 20px auto;
-			background: #ffffff;
-			padding: 24px;
-			border-radius: 12px;
-			box-sizing: border-box;
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-		}
-        h2 { color: #4f46e5; margin-bottom: 0.5rem; }
-        .subtitle { color: #64748b; font-size: 0.875rem; margin-bottom: 1.5rem; }
-        .back-btn { display: inline-block; margin-bottom: 1.5rem; color: #4f46e5; text-decoration: none; font-weight: 600; }
-        .back-btn:hover { text-decoration: underline; }
-        
-        .fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
-        .vehicle-card { 
-			background: #f8fafc;
-			border: 1px solid #e2e8f0;
-			border-radius: 10px;
-			padding: 16px;
-			box-sizing: border-box;
-			display: flex;
-			flex-direction: column;
-			gap: 10px; 
-			width: 100%;
-		}
-		.vehicle-card h3 {
-			margin: 0;
-			font-size: 16px;
-			color: #1e293b;
-		}
-        .vehicle-card p { 
-			font-size: 14px;
-			color: #475569;
-			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-			gap: 6px; 
-		}
-        
-        .action-links { 
-			margin-top: 1rem; 
-			display: flex; 
-			gap: 8px; 
-			flex-wrap: wrap; 
-		}
-        .btn-link { padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; color: white; display: inline-block; }
-        .btn-map { background-color: #007BFF; }
-        .btn-map:hover { background-color: #0056b3; }
-        .btn-history { background-color: #10b981; }
-        .btn-history:hover { background-color: #059669; }
-        
-        .loading { 
-			display: flex;
-			flex-direction: column;
-			gap: 16px;
-			margin-top: 20px;
-			}
-        .error { color: #ef4444; font-weight: bold; text-align: center; }
-    </style>
+    <title>Fleet Tracking Overview</title>
+    <!-- Local Bootstrap Compiled CSS -->
+    <link href="static/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Local FontAwesome Icons -->
+	<link href="static/css/all.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-light">
 
-    <a href="index.html" class="back-btn">← Back to Dashboard</a>
-
-    <div class="card">
-        <h2>🗺️ Fleet Tracking Overview</h2>
-        <p class="subtitle">Monitor real-time locations and access past telemetry trails for all registered vehicles.</p>
+    <div class="container py-4" style="max-width: 900px;">
         
-        <div id="fleet-container" class="loading">Loading your fleet data...</div>
+        <!-- Back Button -->
+        <a href="index.html" class="btn btn-link text-decoration-none px-0 mb-3 text-muted fw-semibold">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+
+        <!-- Main Card Container -->
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4 p-sm-5">
+                
+                <!-- Header Section -->
+                <h3 class="fw-bold text-dark mb-1"><i class="fa-solid fa-map-location-dot text-primary me-2"></i>Fleet Tracking Overview</h3>
+                <p class="text-muted small mb-4">Monitor real-time locations and access past telemetry trails for all registered vehicles.</p>
+                
+                <!-- Fleet Dynamic Container -->
+                <div id="fleet-container">
+                    <div class="text-center py-5 text-muted">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                        <span>Loading your fleet data...</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
+    <!-- Bootstrap JS Bundle -->
+	<script src="/static/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api";
 
@@ -91,7 +52,10 @@
             const token = getAccessToken();
 
             if (!token) {
-                container.innerHTML = '<p class="error">Authentication token not found. Please log in.</p>';
+                container.innerHTML = `
+                    <div class="alert alert-danger small" role="alert">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i> Authentication token not found. Please log in.
+                    </div>`;
                 return;
             }
 
@@ -102,7 +66,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
-						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 		
+                        'ngrok-skip-browser-warning': 'true' 		
                     }
                 });
 
@@ -111,42 +75,78 @@
                 }
 
                 const vehicles = await response.json();
-				console.log(vehicles)
+                console.log(vehicles);
 
                 if (vehicles && vehicles.length > 0) {
-                    container.innerHTML = '<div class="fleet-grid"></div>';
-                    const grid = container.querySelector('.fleet-grid');
+                    container.innerHTML = '<div class="row g-3" id="fleet-grid"></div>';
+                    const grid = container.querySelector('#fleet-grid');
 
                     vehicles.forEach(vehicle => {
-                        const card = document.createElement('div');
-                        card.className = 'vehicle-card';
+                        const col = document.createElement('div');
+                        col.className = 'col-12 col-md-6';
 
                         let actionButtons = '';
                         if (vehicle.currlat && vehicle.currlon) {
                             const mapUrl = `https://www.google.com/maps/search/?api=1&query=${vehicle.currlat},${vehicle.currlon}`;
-                            actionButtons += `<a href="${mapUrl}" target="_blank" class="btn-link btn-map">📍 Live Map</a>`;
+                            actionButtons += `
+                                <a href="${mapUrl}" target="_blank" class="btn btn-primary btn-sm fw-semibold text-decoration-none flex-grow-1">
+                                    <i class="fa-solid fa-location-dot me-1"></i> Live Map
+                                </a>`;
                         } else {
-                            actionButtons += `<span style="font-size: 12px; color: #94a3b8; align-self: center;">No GPS fix</span>`;
+                            actionButtons += `
+                                <span class="text-muted small align-self-center flex-grow-1 text-center py-1 bg-light rounded border border-dashed" style="font-size: 0.75rem;">
+                                    <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> No GPS fix
+                                </span>`;
                         }
 
-                        actionButtons += `<a href="vehicle_history.html?id=${vehicle.id}" class="btn-link btn-history">📜 History Trail</a>`;
+                        actionButtons += `
+                            <a href="vehicle_history.html?id=${vehicle.id}" class="btn btn-outline-secondary btn-sm fw-semibold text-decoration-none flex-grow-1">
+                                <i class="fa-solid fa-clock-rotate-left me-1"></i> History Trail
+                            </a>`;
 
-                        card.innerHTML = `
-                            <h3>${vehicle.vehicle_no}</h3>
-                            <p><strong>Type:</strong> ${vehicle.vehicle_type}</p>
-                            <p><strong>Chassis:</strong> ${vehicle.chesis_no}</p>
-                            <p><strong>Lat/Lon:</strong> ${vehicle.currlat ? vehicle.currlat.toFixed(4) + ', ' + vehicle.currlon.toFixed(4) : 'N/A'}</p>
-                            <div class="action-links">${actionButtons}</div>
+                        col.innerHTML = `
+                            <div class="card h-100 border shadow-sm rounded-3">
+                                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h5 class="fw-bold text-dark mb-0">${vehicle.vehicle_no}</h5>
+                                            <span class="badge bg-secondary text-uppercase" style="font-size: 0.65rem;">${vehicle.vehicle_type || 'Vehicle'}</span>
+                                        </div>
+                                        
+                                        <div class="row g-2 bg-light p-2 rounded-3 border mb-3 small">
+                                            <div class="col-6">
+                                                <span class="text-muted d-block" style="font-size: 0.65rem;">DRIVER</span>
+                                                <span class="fw-semibold">${vehicle.driver_first_name || 'N/A'} ${vehicle.driver_last_name || ''}</span>
+                                            </div>
+                                            <div class="col-6">
+                                                <span class="text-muted d-block" style="font-size: 0.65rem;">COORDINATES</span>
+                                                <span class="fw-semibold text-truncate d-block">${vehicle.currlat ? vehicle.currlat.toFixed(4) + ', ' + vehicle.currlon.toFixed(4) : 'N/A'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2 pt-2 border-top">
+                                        ${actionButtons}
+                                    </div>
+                                </div>
+                            </div>
                         `;
-                        grid.appendChild(card);
+                        grid.appendChild(col);
                     });
                 } else {
-                    container.innerHTML = '<p>No vehicles found in your fleet.</p>';
+                    container.innerHTML = `
+                        <div class="text-center py-4 text-muted border border-dashed rounded-3 bg-light">
+                            <i class="fa-solid fa-truck-fast fs-3 mb-2"></i>
+                            <p class="mb-0 small">No vehicles found in your fleet.</p>
+                        </div>`;
                 }
 
             } catch (error) {
                 console.error('Error fetching fleet:', error);
-                container.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+                container.innerHTML = `
+                    <div class="alert alert-danger small" role="alert">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i> Error: ${error.message}
+                    </div>`;
             }
         }
 

@@ -3,303 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Registration with JS Validation</title>
+    <title>Create an Account - Fleet Portal</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background-color: #f8fafc; 
+            color: #1e293b;
         }
-
-        body {
-            background-color: #f4f7f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .registration-container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 500px;
-        }
-
-        .registration-container h2 {
-            margin-bottom: 20px;
-            color: #333333;
-            text-align: center;
-            font-size: 24px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #666666;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .form-group input[type="text"],
-        .form-group input[type="email"],
-		.form-group input[type="tel"],
-        .form-group input[type="password"],
-        .form-group select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #cccccc;
-            border-radius: 4px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #4472c4;
-        }
-
         .error-message {
-            color: #d9534f;
-            font-size: 12px;
-            margin-top: 5px;
+            color: #dc3545;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
             display: none;
-        }
-
-        .radio-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 5px;
-        }
-
-        .radio-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 14px;
-            color: #333;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            margin: 20px 0;
-            font-size: 13px;
-            color: #666666;
-        }
-
-        .checkbox-group input {
-            margin-top: 3px;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 12px;
-            background-color: #4472c4;
-            border: none;
-            border-radius: 4px;
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .btn-submit:hover {
-            background-color: #3359a3;
-        }
-
-        .form-footer {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 13px;
-            color: #666666;
-        }
-
-        .form-footer a {
-            color: #4472c4;
-            text-decoration: none;
         }
     </style>
 </head>
-<body>
+<body class="bg-light">
 
-<div class="registration-container">
-    <h2>Create an Account</h2>
-    
-    <form id="registrationForm" action="/register-endpoint" method="POST">
-        <div class="form-group">
-            <label for="role">User Type</label>
-            <select id="role" name="role" required>
-                <option value="" disabled selected>Select User Type</option>
-                <option value="customer">End Customer</option>
-                <option value="driver">Driver</option>
-                <option value="owner">Vehicle Owner</option>
-            </select>
-			<!-- <label for="phone">Phone Number</label> -->
-			<!-- <input type="text" id="phone" name="phone" placeholder="phone number" required> -->
+    <div class="container py-5" style="max-width: 650px;">
+        
+        <!-- Main Card Container -->
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4 p-sm-5">
+                
+                <!-- Header Section -->
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; min-width: 50px; font-size: 1.25rem;">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0">Create an Account</h3>
+                        <p class="text-muted small mb-0">Join the transport and logistics fleet management portal.</p>
+                    </div>
+                </div>
+
+                <!-- Registration Form -->
+                <form id="registrationForm" novalidate>
+                    
+                    <!-- User Type Selection -->
+                    <div class="mb-3">
+                        <label for="role" class="form-label text-muted small fw-semibold">User Type</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-user-tag"></i></span>
+                            <select id="role" name="role" class="form-select bg-light border-start-0 ps-0 shadow-none" required>
+                                <option value="" disabled selected>Select User Type</option>
+                                <option value="customer">End Customer</option>
+                                <option value="driver">Driver</option>
+                                <option value="owner">Vehicle Owner</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- First Name & Last Name Row -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label for="first_name" class="form-label text-muted small fw-semibold">First Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-user"></i></span>
+                                <input type="text" id="first_name" name="first_name" class="form-control bg-light border-start-0 ps-0 shadow-none" placeholder="John" required>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label for="last_name" class="form-label text-muted small fw-semibold">Last Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-user"></i></span>
+                                <input type="text" id="last_name" name="last_name" class="form-control bg-light border-start-0 ps-0 shadow-none" placeholder="Doe" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email & Phone Row -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label for="email" class="form-label text-muted small fw-semibold">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-envelope"></i></span>
+                                <input type="email" id="email" name="email" class="form-control bg-light border-start-0 ps-0 shadow-none" placeholder="you@example.com" required>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label for="phone" class="form-label text-muted small fw-semibold">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-phone"></i></span>
+                                <input type="tel" id="phone" name="phone" class="form-control bg-light border-start-0 ps-0 shadow-none" placeholder="+1 (123) 456-7890" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Username -->
+                    <div class="mb-3">
+                        <label for="username" class="form-label text-muted small fw-semibold">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-at"></i></span>
+                            <input type="text" id="username" name="username" class="form-control bg-light border-start-0 ps-0 shadow-none" placeholder="Choose a username" required>
+                        </div>
+                    </div>
+
+                    <!-- Password & Confirm Password Row -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-sm-6">
+                            <label for="password" class="form-label text-muted small fw-semibold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" id="password" name="password" minlength="8" class="form-control bg-light border-start-0 ps-0 shadow-none" placeholder="At least 8 characters" required>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label for="confirmPassword" class="form-label text-muted small fw-semibold">Confirm Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control bg-light border-start-0 ps-0 shadow-none" placeholder="Repeat password" required>
+                            </div>
+                            <div id="passwordError" class="error-message">Passwords do not match.</div>
+                        </div>
+                    </div>
+
+                    <!-- Terms Checkbox -->
+                    <div class="mb-4 form-check">
+                        <input type="checkbox" class="form-check-input shadow-none" id="terms" name="terms" required>
+                        <label class="form-check-label small text-muted" for="terms">
+                            I agree to the <a href="#" class="text-primary text-decoration-none fw-semibold">Terms of Service</a> and <a href="#" class="text-primary text-decoration-none fw-semibold">Privacy Policy</a>.
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary py-2 fw-semibold rounded-3 shadow-sm">
+                            <i class="fa-solid fa-user-check me-1"></i> Register Account
+                        </button>
+                    </div>
+
+                    <!-- Footer Link -->
+                    <div class="text-center small text-muted">
+                        Already have an account? <a href="index.html" class="text-primary text-decoration-none fw-semibold">Sign In</a>
+                    </div>
+
+                </form>
+
+            </div>
         </div>
-        <div class="form-group">
-            <label for="first_name">First Name</label>
-            <input type="text" id="first_name" name="first_name" placeholder="John" required>
-        </div>
-		
-		<div class="form-group">
-            <label for="last_name">Last Name</label>
-            <input type="text" id="last_name" name="last_name" placeholder="Doe" required>
-        </div>
+    </div>
 
-        <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="you@example.com" required>
-        </div>
-		<div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input type="tel" id="phone" name="phone" placeholder="+1 (123) 456-7890" required>
-        </div>
-		<div class="form-group">
-            <label for="username">User Name</label>
-            <input type="text" id="username" name="username" placeholder="username" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" minlength="8" placeholder="At least 8 characters" required>
-        </div>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-        <div class="form-group">
-            <label for="confirmPassword">Confirm Password</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Repeat password" required>
-            <div id="passwordError" class="error-message">Passwords do not match.</div>
-        </div>
+    <script>
+        const API_URL = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
+        
+        const form = document.getElementById('registrationForm');
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const passwordError = document.getElementById('passwordError');
 
-		
+        form.addEventListener('submit', async function(event) {
+            // 1. Prevent default browser form submission
+            event.preventDefault();
 
-        <!-- <div class="form-group"> -->
-            <!-- <label>Gender</label> -->
-            <!-- <div class="radio-group"> -->
-                <!-- <label class="radio-item"> -->
-                    <!-- <input type="radio" name="gender" value="male" required> Male -->
-                <!-- </label> -->
-                <!-- <label class="radio-item"> -->
-                    <!-- <input type="radio" name="gender" value="female"> Female -->
-                <!-- </label> -->
-                <!-- <label class="radio-item"> -->
-                    <!-- <input type="radio" name="gender" value="other"> Other -->
-                <!-- </label> -->
-            <!-- </div> -->
-        <!-- </div> -->
+            // 2. Clear previous error states
+            passwordError.style.display = 'none';
+            confirmPassword.classList.remove('is-invalid');
 
-        <div class="checkbox-group">
-            <input type="checkbox" id="terms" name="terms" required>
-            <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</label>
-        </div>
+            // 3. Client-side password verification
+            if (password.value !== confirmPassword.value) {
+                passwordError.style.display = 'block';
+                confirmPassword.classList.add('is-invalid');
+                confirmPassword.focus();
+                return;
+            }
 
-        <button type="submit" class="btn-submit">Register</button>
+            // 4. Gather form data automatically & construct payload
+            const formData = new FormData(form);
+            const formProps = Object.fromEntries(formData);
+            
+            const payload = {
+                username: formProps.username,
+                email: formProps.email,
+                password: formProps.password,
+                first_name: formProps.first_name,
+                last_name: formProps.last_name,
+                profile: {
+                    role: formProps.role,
+                    phone_number: formProps.phone 
+                }
+            };
 
-        <div class="form-footer">
-            Already have an account? <a href="index.html">Sign In</a>
-        </div>
-    </form>
-</div>
+            // 5. Send data via Fetch API
+            try {
+                const response = await fetch(`${API_URL}/users/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-<script>
-	const API_URL = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
-	// Grab form and input elements
-	const form = document.getElementById('registrationForm');
-	const password = document.getElementById('password');
-	const confirmPassword = document.getElementById('confirmPassword');
-	const passwordError = document.getElementById('passwordError');
+                // 6. Handle server response
+                if (response.ok) {
+                    const result = await response.json();
+                    form.reset();
+                    alert('Registration successful! Redirecting...');
+                    window.location.href = 'index.html';                
+                } else {
+                    const errorData = await response.json();
+                    alert(`Registration failed: ${errorData.message || JSON.stringify(errorData) || 'Unknown error occurred.'}`);
+                }
+            } catch (error) {
+                console.error('Network Error:', error);
+                alert('A network error occurred. Please check your connection and try again.');
+            }
+        });
 
-	form.addEventListener('submit', async function(event) {
-		// 1. Prevent the default browser form submission (page reload)
-		event.preventDefault();
-
-		// 2. Clear previous states
-		passwordError.style.display = 'none';
-		confirmPassword.style.borderColor = '#cccccc';
-
-		// 3. Client-side password verification
-		if (password.value !== confirmPassword.value) {
-			passwordError.style.display = 'block';
-			confirmPassword.style.borderColor = '#d9534f';
-			confirmPassword.focus();
-			return;
-		}
-
-		// 4. Gather form data automatically
-		const formData = new FormData(form);
-		
-		// Convert FormData to a standard JavaScript object
-		const formProps = Object.fromEntries(formData);
-		<!-- console.log(formProps); -->
-		
-		// Reshape the payload to nest role and phone inside a 'profile' object
-		const payload = {
-			username: formProps.username,
-			email: formProps.email,
-			password: formProps.password,
-			first_name: formProps.first_name,
-			last_name: formProps.last_name,
-			<!-- role: formProps.role, -->
-			profile: {
-				role: formProps.role,
-				phone_number: formProps.phone // matches your HTML input id="phone"
-			}
-		};
-
-		<!-- console.log("Sending Payload:", payload); -->
-
-		// 5. Send data via Fetch API
-		try {
-			const response = await fetch(`${API_URL}/users/`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'ngrok-skip-browser-warning': 'true' // <-- Add this exact line!
-					// Optional: include authentication tokens or cross-site request forgery (CSRF) tokens here if required
-				},
-				body: JSON.stringify(payload) // Send data as JSON string
-			});
-
-			// 6. Handle the server response
-			if (response.ok) {
-				const result = await response.json();
-				form.reset(); // Clear the form fields
-				alert('Registration successful! Redirecting...');
-				// Optional: Redirect the user to a dashboard or login page
-				window.location.href = 'index.html';				
-			} else {
-				// Handle server-side errors (e.g., email already taken)
-				const errorData = await response.json();
-				alert(`Registration failed: ${errorData.message || 'Unknown error occurred.'}`);
-			}
-		} catch (error) {
-			// Handle network errors or server downtime
-			console.error('Network Error:', error);
-			alert('A network error occurred. Please check your connection and try again.');
-		}
-	});
-
-	// Real-time matching feedback as user types
-	confirmPassword.addEventListener('input', function() {
-		if (password.value === confirmPassword.value) {
-			passwordError.style.display = 'none';
-			confirmPassword.style.borderColor = '#28a745'; 
-		} else {
-			confirmPassword.style.borderColor = '#d9534f';
-		}
-	});
-</script>
-
+        // Real-time matching feedback as user types
+        confirmPassword.addEventListener('input', function() {
+            if (password.value === confirmPassword.value) {
+                passwordError.style.display = 'none';
+                confirmPassword.classList.remove('is-invalid');
+                confirmPassword.classList.add('is-valid');
+            } else {
+                confirmPassword.classList.remove('is-valid');
+                confirmPassword.classList.add('is-invalid');
+            }
+        });
+    </script>
 </body>
 </html>

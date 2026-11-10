@@ -3,200 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Supply Order with Address Search</title>
-    
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <title>Place a Material Order - Fleet Dashboard</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        body { font-family: system-ui, sans-serif; background-color: #f8fafc; margin: 0px auto; max-width: 500px; padding: 20px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        h2 { color: #4f46e5; margin-top: 0; }
-        .back-btn { display: inline-block; margin-bottom: 1.5rem; color: #4f46e5; text-decoration: none; font-weight: 600; }
-        .back-btn:hover { text-decoration: underline; }
-        
-        .form-group { margin-bottom: 16px; position: relative; }
-        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: #1e293b; }
-        input[type="text"] { width: 100%; height: 42px; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; }
-        input:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); }
-        
-        /* Map Toggle Styles */
-        .map-toggle-link {
-            color: #007BFF;
-            text-decoration: underline;
+        /* Custom Selected State for Vehicle Type Radio Buttons */
+        .btn-check:checked + .btn {
+            background-color: #e6f0ff !important;
+            border-color: #0d6efd !important;
+            color: #0b5ed7 !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+        }
+        /* Autocomplete suggestions dropdown */
+        .suggestions-box {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            max-height: 180px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.08);
+        }
+        .suggestion-item {
+            padding: 10px 14px;
+            font-size: 0.85rem;
             cursor: pointer;
-            font-size: 13px;
-            display: inline-block;
-            margin-top: 5px;
+            border-bottom: 1px solid #f8f9fa;
         }
-        #map-container {
-            display: none;
-            margin-top: 10px;
-            border: 1px solid #cbd5e1;
-            padding: 10px;
-            border-radius: 8px;
-            background: #f8f9fa;
+        .suggestion-item:hover {
+            background-color: #f1f5f9;
         }
-        #map {
-            height: 300px;
-            width: 100%;
-            margin-top: 8px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        #address-box {
-            font-size: 13px;
-            background-color: #fff;
-            padding: 8px;
-            border-left: 4px solid #10b981;
-            border-radius: 4px;
-        }
-        .loading { color: #666; font-style: italic; }
-
-        /* Autocomplete dropdown styling */
-        .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #cbd5e1; border-radius: 0 0 6px 6px; max-height: 150px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .suggestion-item { padding: 10px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
-        .suggestion-item:hover { background-color: #f8fafc; }
-
-        button[type="submit"] { width: 100%; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        button[type="submit"]:hover { background: #4338ca; }
-        
-        #response-msg { margin-top: 15px; font-weight: 600; text-align: center; font-size: 14px; }
-        .success { color: #10b981; }
-        .error { color: #ef4444; }
-        
-        .vehicle-type-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-        .vehicle-option { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; color: #1e293b; flex: 1; min-width: 110px; }
-        .vehicle-option:hover { border-color: #4f46e5; background: #eef2ff; }
-        .vehicle-option input[type="radio"] { accent-color: #4f46e5; cursor: pointer; }
-
-        .location-grid { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; width: 100%; }
-        .location-grid button { height: 42px; padding: 0 10px; background-color: #4f46e5; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap; transition: background-color 0.2s; }
-        .location-grid button:hover { background-color: #4338ca; }
     </style>
 </head>
-<body>
-    <a href="index.html" class="back-btn">← Back to Dashboard</a>
-    <div class="card">
-        <h2>📦 Place a Material Order</h2>
-        <form id="order-form" onsubmit="submitOrder(event)">
-            
-            <div class="form-group">
-                <label>Required Commercial Vehicle Type</label>
-                <div class="vehicle-type-group">
-                    <label class="vehicle-option">
-                        <input type="radio" name="vehicle_type" value="small" required>
-                        Small (≤ 3.5 tonnes) 
-                    </label>
-                    <label class="vehicle-option">
-                        <input type="radio" name="vehicle_type" value="light">
-                        Light (3.5 to 7.5 tonnes)
-                    </label>
-					<label class="vehicle-option">
-                        <input type="radio" name="vehicle_type" value="medium">
-                        Medium (7.5 to 18.5 tonnes)
-                    </label>
-                    <label class="vehicle-option">
-                        <input type="radio" name="vehicle_type" value="heavy">
-                        Heavy (≥ 18.5 tonnes)
-                    </label>
+<body class="bg-light">
+
+    <div class="container py-5" style="max-width: 900px;">
+        
+        <!-- Back Button -->
+        <a href="index.html" class="btn btn-link text-decoration-none px-0 mb-3 text-muted fw-semibold">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+
+        <!-- Main Card Container -->
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4 p-sm-5">
+                
+                <!-- Header Section -->
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; min-width: 50px; font-size: 1.25rem;">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0">Place a Material Order</h3>
+                        <p class="text-muted small mb-0">Specify requirements and dispatch locations for your shipment.</p>
+                    </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="material_description">Material Description</label>
-                <input type="text" id="material_description" placeholder="e.g., Sand, Bricks, Cement" required>
-            </div>
+                <!-- Order Form -->
+                <form id="order-form" onsubmit="submitOrder(event)" novalidate>
+                    
+                    <!-- Vehicle Type Grid -->
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-semibold">Required Commercial Vehicle Type</label>
+                        <div class="row g-2">
+                            <div class="col-12 col-sm-6">
+                                <input type="radio" class="btn-check" name="vehicle_type" id="type_small" value="small" required>
+                                <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_small">
+                                    Small (≤ 3.5 tonnes)
+                                </label>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <input type="radio" class="btn-check" name="vehicle_type" id="type_light" value="light">
+                                <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_light">
+                                    Light (3.5 to 7.5 tonnes)
+                                </label>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <input type="radio" class="btn-check" name="vehicle_type" id="type_medium" value="medium">
+                                <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_medium">
+                                    Medium (7.5 to 18.5 tonnes)
+                                </label>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <input type="radio" class="btn-check" name="vehicle_type" id="type_heavy" value="heavy">
+                                <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_heavy">
+                                    Heavy (≥ 18.5 tonnes)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- Pickup / Source Address Search -->
-            <div class="form-group">
-                <label for="pickup_address">Pickup Location (Source)</label>
-                <div class="location-grid">
-                    <input type="text" id="pickup_address" placeholder="Type source address..." autocomplete="off" oninput="searchAddress('pickup_address', 'pickup-suggestions')" required>
-                    <button type="button" onclick="useCurrentLocationForPickup()" title="Use Current Location">📍</button>
-                </div>
-                <div id="pickup-suggestions" class="suggestions-box"></div>
+                    <!-- Material Description -->
+                    <div class="mb-3">
+                        <label for="material_description" class="form-label text-muted small fw-semibold">Material Description</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-cube"></i></span>
+                            <input type="text" class="form-control bg-light border-start-0 ps-0 shadow-none" id="material_description" placeholder="e.g., Sand, Bricks, Cement" required>
+                        </div>
+                    </div>
 
-                <!-- Hidden coordinate holders -->
-                <input type="hidden" id="pickup_lat">
-                <input type="hidden" id="pickup_lon">
-				<!-- For Pickup -->
-				<a class="map-toggle-link" onclick="openMapWindow('pickup')">Can't find address? Click here to select on map</a>
-				<br>
-            </div>
-            
-            <div class="form-group">
-                <label for="local_pickup_address">Local Pickup Address (Optional)</label>
-                <input type="text" id="local_pickup_address" placeholder="Type local pickup address">
-            </div>
+                    <!-- Pickup Location -->
+                    <div class="mb-3 position-relative">
+                        <label for="pickup_address" class="form-label text-muted small fw-semibold">Pickup Location (Source)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-location-dot"></i></span>
+                            <input type="text" class="form-control bg-light border-start-0 ps-0 shadow-none" id="pickup_address" placeholder="Type source address..." autocomplete="off" oninput="searchAddress('pickup_address', 'pickup-suggestions')" required>
+                            <button class="btn btn-light border border-start-0 text-primary" type="button" onclick="useCurrentLocationForPickup()" title="Use Current GPS Location">
+                                <i class="fa-solid fa-crosshairs"></i>
+                            </button>
+                        </div>
+                        <div id="pickup-suggestions" class="suggestions-box"></div>
+                        
+                        <!-- Hidden coordinates -->
+                        <input type="hidden" id="pickup_lat">
+                        <input type="hidden" id="pickup_lon">
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <a class="small text-primary text-decoration-none fw-medium cursor-pointer" onclick="openMapWindow('pickup')">
+                                <i class="fa-solid fa-map me-1"></i> Pinpoint on map
+                            </a>
+                        </div>
+                    </div>
 
-            <!-- Delivery / Destination Address Search -->
-            <div class="form-group">
-                <label for="delivery_address">Delivery Location (Destination)</label>
-                <input type="text" id="delivery_address" placeholder="Type destination location..." autocomplete="off" oninput="searchAddress('delivery_address', 'delivery-suggestions')" required>
-                <div id="delivery-suggestions" class="suggestions-box"></div>
-				<!-- For Delivery -->
-				<a class="map-toggle-link" onclick="openMapWindow('delivery')">Can't find address? Click here to select on map</a>
-                <!-- Hidden coordinate holders -->
-                <input type="hidden" id="drop_lat">
-                <input type="hidden" id="drop_lon">
-            </div>
+                    <!-- Local Pickup Address Optional -->
+                    <div class="mb-3">
+                        <label for="local_pickup_address" class="form-label text-muted small fw-semibold">Local Pickup Address <span class="text-muted fw-normal">(Optional)</span></label>
+                        <input type="text" class="form-control bg-light shadow-none" id="local_pickup_address" placeholder="e.g., Gate No. 3, Warehouse B">
+                    </div>
 
-            <div class="form-group">
-                <label for="local_delivery_address">Local Delivery Address (Optional)</label>
-                <input type="text" id="local_delivery_address" placeholder="Type local delivery address">
-            </div>
+                    <!-- Delivery Location -->
+                    <div class="mb-3 position-relative">
+                        <label for="delivery_address" class="form-label text-muted small fw-semibold">Delivery Location (Destination)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-flag-checkered"></i></span>
+                            <input type="text" class="form-control bg-light border-start-0 ps-0 shadow-none" id="delivery_address" placeholder="Type destination location..." autocomplete="off" oninput="searchAddress('delivery_address', 'delivery-suggestions')" required>
+                        </div>
+                        <div id="delivery-suggestions" class="suggestions-box"></div>
+                        
+                        <!-- Hidden coordinates -->
+                        <input type="hidden" id="drop_lat">
+                        <input type="hidden" id="drop_lon">
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <a class="small text-primary text-decoration-none fw-medium cursor-pointer" onclick="openMapWindow('delivery')">
+                                <i class="fa-solid fa-map me-1"></i> Pinpoint on map
+                            </a>
+                        </div>
+                    </div>
 
-            <!-- Shared Collapsible Map Selector Box -->
-            <div id="map-container">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <b id="map-title">Pinpoint Location on Map:</b>
-                    <span style="cursor:pointer; color: red; font-weight: bold;" onclick="toggleMapSelector()">[X Close]</span>
-                </div>
-                <div id="address-box"><b>Selected:</b> <span id="address-text" class="loading">Click anywhere on the map...</span></div>
-                <div id="map"></div>
-            </div>
+                    <!-- Local Delivery Address Optional -->
+                    <div class="mb-4">
+                        <label for="local_delivery_address" class="form-label text-muted small fw-semibold">Local Delivery Address <span class="text-muted fw-normal">(Optional)</span></label>
+                        <input type="text" class="form-control bg-light shadow-none" id="local_delivery_address" placeholder="e.g., Site Office, Tower 4">
+                    </div>
 
-            <button type="submit">Submit Order</button>
-        </form>
-        <p id="response-msg"></p>
+                    <!-- Submit Button -->
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary py-2 fw-semibold rounded-3 shadow-sm">
+                            <i class="fa-solid fa-paper-plane me-1"></i> Submit Order
+                        </button>
+                    </div>
+
+                </form>
+
+                <!-- Response Message Container -->
+                <div id="response-msg" class="text-center small"></div>
+
+            </div>
+        </div>
     </div>
-    
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
         const API_URL = 'https://upheaval-revise-fit.ngrok-free.dev/etransport/api/orders/';
-        let map, marker;
-        let mapInitialized = false;
-        let activeTargetField = 'pickup'; // Tracks whether map targets 'pickup' or 'delivery'
 
-		// Open the map selector in a separate popup window
-		function openMapWindow(targetType) {
-			const width = 600;
-			const height = 600;
-			const left = (window.screen.width - width) / 2;
-			const top = (window.screen.height - height) / 2;
-			
-			// Opens map_selector.html and passes whether it's for 'pickup' or 'delivery'
-			window.open(
-				`map_selector.html?type=${targetType}`, 
-				'MapSelector', 
-				`width=${width},height=${height},top=${top},left=${left}`
-			);
-		}
-		// Global function called by the popup window when user clicks "Confirm Location"
-		function setSelectedLocation(targetType, lat, lon, address) {
-			if (targetType === 'pickup') {
-				document.getElementById('pickup_lat').value = lat;
-				document.getElementById('pickup_lon').value = lon;
-				document.getElementById('pickup_address').value = address;
-			} else if (targetType === 'delivery') {
-				document.getElementById('drop_lat').value = lat;
-				document.getElementById('drop_lon').value = lon;
-				document.getElementById('delivery_address').value = address;
-			}
-		}
+        // Open the map selector in a separate popup window
+        function openMapWindow(targetType) {
+            const width = 600;
+            const height = 600;
+            const left = (window.screen.width - width) / 2;
+            const top = (window.screen.height - height) / 2;
+            
+            window.open(
+                `map_selector.html?type=${targetType}`, 
+                'MapSelector', 
+                `width=${width},height=${height},top=${top},left=${left}`
+            );
+        }
+
+        // Global function called by the popup window when user clicks "Confirm Location"
+        function setSelectedLocation(targetType, lat, lon, address) {
+            if (targetType === 'pickup') {
+                document.getElementById('pickup_lat').value = lat;
+                document.getElementById('pickup_lon').value = lon;
+                document.getElementById('pickup_address').value = address;
+            } else if (targetType === 'delivery') {
+                document.getElementById('drop_lat').value = lat;
+                document.getElementById('drop_lon').value = lon;
+                document.getElementById('delivery_address').value = address;
+            }
+        }
 
         // Address Autocomplete Search logic
         let debounceTimer;
@@ -250,8 +265,8 @@
             event.preventDefault();
 
             const msgElement = document.getElementById('response-msg');
-            msgElement.innerText = "Submitting order...";
-            msgElement.className = "";
+            msgElement.innerHTML = `<div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Submitting order...`;
+            msgElement.className = "text-muted";
             
             const payload = {
                 material_description: document.getElementById('material_description').value,
@@ -266,8 +281,7 @@
 
             const token = localStorage.getItem('accessToken');
             if (!token) {
-                msgElement.innerText = "Error: You must be logged in as a customer.";
-                msgElement.className = "error";
+                msgElement.innerHTML = `<div class="alert alert-danger small mt-3">Error: You must be logged in as a customer.</div>`;
                 return;
             }
 
@@ -285,20 +299,22 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.detail || JSON.stringify(data) || "Failed to create order.");
 
-                msgElement.innerText = `Success! Order #${data.id} created successfully.`;
-                msgElement.className = "success";
+                msgElement.innerHTML = `
+                    <div class="alert alert-success small mt-3" role="alert">
+                        <i class="fa-solid fa-circle-check me-1"></i> Success! Order #${data.id} created successfully.
+                    </div>`;
                 document.getElementById('order-form').reset();
             } catch (err) {
                 console.error(err);
                 msgElement.innerHTML = `
-                    <p style="margin: 0 0 6px 0; color: #ef4444;">Error: ${err.message}</p>
-                    <p style="margin: 0;">Click here to go to <a href="index.html" style="color: #4f46e5; text-decoration: underline; font-weight: 600;">Home Page</a></p>
-                `;
-                msgElement.className = "error";
+                    <div class="alert alert-danger small mt-3" role="alert">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i> Error: ${err.message}<br>
+                        <a href="index.html" class="alert-link fw-semibold">Return to Dashboard</a>
+                    </div>`;
             }
         }
 
-        async function useCurrentLocationForPickup() {
+	    async function useCurrentLocationForPickup() {
             const addressInput = document.getElementById('pickup_address');
             addressInput.value = "Fetching your location...";
 

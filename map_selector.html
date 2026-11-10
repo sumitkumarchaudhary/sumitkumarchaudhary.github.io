@@ -4,34 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Location on Map</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    
     <style>
-        body { margin: 0; font-family: system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; background: #f8fafc; }
-        #info-bar { padding: 12px 20px; background: white; font-size: 14px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); gap: 10px; }
-        #instruction { flex-grow: 1; }
-        .btn-group { display: flex; gap: 10px; align-items: center; }
-        button { background: #4f46e5; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: background 0.2s; white-space: nowrap; }
-        button:hover { background: #4338ca; }
-        button:disabled { background: #cbd5e1; cursor: not-allowed; }
-        #gps-btn { background: #0ea5e9; }
-        #gps-btn:hover { background: #0284c7; }
-        #map { flex-grow: 1; width: 100%; cursor: pointer; }
-        .loading { color: #64748b; font-style: italic; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8fafc;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+        #map {
+            flex-grow: 1;
+            width: 100%;
+            z-index: 1;
+        }
+        /* Floating Modern Control Bar */
+        .control-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e2e8f0;
+            z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
     </style>
 </head>
 <body>
 
-    <div id="info-bar">
-        <span id="instruction" class="loading">Click anywhere on the map or use your current location...</span>
-        <div class="btn-group">
-            <button id="gps-btn" onclick="panToCurrentLocation()">📍 Zoom to Current Location</button>
-            <button id="confirm-btn" disabled onclick="confirmLocation()">Confirm Location</button>
+    <!-- Control Header Bar -->
+    <div class="control-bar py-3 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center text-secondary small" id="instruction-wrapper">
+            <i class="fa-solid fa-map-pin text-primary fs-5 me-2 animate-bounce"></i>
+            <span id="instruction" class="fw-medium text-dark fst-italic">Click anywhere on the map or use your current location...</span>
+        </div>
+        <div class="d-flex align-items-center gap-2 w-100 w-md-auto justify-content-end">
+            <button id="gps-btn" onclick="panToCurrentLocation()" class="btn btn-outline-primary btn-sm fw-semibold text-nowrap py-2 px-3 rounded-3 shadow-sm">
+                <i class="fa-solid fa-crosshairs me-1"></i> Current Location
+            </button>
+            <button id="confirm-btn" disabled onclick="confirmLocation()" class="btn btn-primary btn-sm fw-semibold text-nowrap py-2 px-3 rounded-3 shadow-sm">
+                <i class="fa-solid fa-check me-1"></i> Confirm Location
+            </button>
         </div>
     </div>
     
+    <!-- Map Viewport -->
     <div id="map"></div>
 
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     
@@ -60,8 +87,8 @@
             const instruction = document.getElementById('instruction');
             const confirmBtn = document.getElementById('confirm-btn');
 
-            instruction.className = "loading";
-            instruction.textContent = "Resolving address from coordinates...";
+            instruction.className = "text-muted fw-medium fst-italic";
+            instruction.innerHTML = `<span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span> Resolving address from coordinates...`;
 
             map.setView([selectedLat, selectedLon], zoomLevel);
 
@@ -81,7 +108,7 @@
                 const data = await res.json();
                 selectedAddress = data.display_name || `${selectedLat}, ${selectedLon}`;
                 
-                instruction.className = "";
+                instruction.className = "text-dark fw-semibold";
                 instruction.innerHTML = `<b>Selected:</b> ${selectedAddress}`;
                 confirmBtn.disabled = false;
 
@@ -89,7 +116,7 @@
             } catch (err) {
                 console.error("Geocoding error:", err);
                 selectedAddress = `${selectedLat}, ${selectedLon}`;
-                instruction.className = "";
+                instruction.className = "text-dark fw-semibold";
                 instruction.innerHTML = `<b>Selected Coordinates:</b> ${selectedAddress}`;
                 confirmBtn.disabled = false;
             }
@@ -108,18 +135,18 @@
                 return;
             }
 
-            instruction.className = "loading";
-            instruction.textContent = "Detecting your current location...";
+            instruction.className = "text-muted fw-medium fst-italic";
+            instruction.innerHTML = `<span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span> Detecting your current location...`;
 
             navigator.geolocation.getCurrentPosition(
                 position => {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
-                    selectCoordinates(lat, lon, 16); // Zoom closer to user location
+                    selectCoordinates(lat, lon, 16);
                 },
                 error => {
                     console.error(error);
-                    instruction.className = "";
+                    instruction.className = "text-danger fw-medium";
                     instruction.textContent = "Unable to retrieve your location. Please check browser permissions.";
                     alert("Unable to retrieve your location. Please check browser permissions.");
                 },

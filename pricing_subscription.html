@@ -30,8 +30,8 @@
     
     <!-- Header Section -->
     <div class="text-center mb-4">
-        <h2 class="fw-bold text-dark"><i class="fa-solid fa-mobile-screen-button text-primary me-2"></i>Select Recharge Plan</h2>
-        <p class="text-muted small">Choose the best suited pack for your mobile connection</p>
+        <h2 class="fw-bold text-dark"><i class="fa-solid fa-credit-card text-primary me-2"></i>Subscribe With A Plan</h2>
+        <p class="text-muted small">Choose the best suited pack for your subscription</p>
     </div>
 
     <!-- Filter Category Pills -->
@@ -41,9 +41,6 @@
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link px-4 py-2 rounded-pill small text-secondary bg-white border" onclick="filterPlans('popular')" type="button">🔥 Popular</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link px-4 py-2 rounded-pill small text-secondary bg-white border" onclick="filterPlans('data')" type="button">⚡ Data Add-on</button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link px-4 py-2 rounded-pill small text-secondary bg-white border" onclick="filterPlans('validity')" type="button">⏳ Long Validity</button>
@@ -61,25 +58,20 @@
                     <div>
                         <div class="d-flex align-items-baseline mb-2">
                             <h3 class="fw-bold text-primary mb-0 me-2">₹299</h3>
-                            <span class="text-muted small">Prepaid Recharge</span>
+                            <span class="text-muted small">Prepaid Plan</span>
                         </div>
-                        <div class="row g-2 mb-3 text-center">
-                            <div class="col-4 bg-light p-2 rounded-3">
-                                <span class="d-block text-muted" style="font-size: 0.7rem;">DATA</span>
-                                <strong class="small text-dark">1.5 GB/day</strong>
-                            </div>
-                            <div class="col-4 bg-light p-2 rounded-3">
+                        <div class="row g-2 mb-3 text-center" style="max-width: 100%">
+                            <div class="col-6 bg-light p-2 rounded-3">
                                 <span class="d-block text-muted" style="font-size: 0.7rem;">VALIDITY</span>
                                 <strong class="small text-dark">28 Days</strong>
                             </div>
-                            <div class="col-4 bg-light p-2 rounded-3">
-                                <span class="d-block text-muted" style="font-size: 0.7rem;">VOICE</span>
+                            <div class="col-6 bg-light p-2 rounded-3">
+                                <span class="d-block text-muted" style="font-size: 0.7rem;">SERVICE</span>
                                 <strong class="small text-dark">Unlimited</strong>
                             </div>
                         </div>
-                        <p class="text-muted mb-3" style="font-size: 0.8rem;"><i class="fa-solid fa-circle-check text-success me-1"></i> Includes 100 SMS/day + Free National Roaming & 5G Data.</p>
                     </div>
-                    <button onclick="selectPlan(299, '1.5 GB/day', '28 Days')" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2 rounded-3">Select Plan</button>
+                    <button onclick="selectPlan(299, '28 Days')" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2 rounded-3">Select Plan</button>
                 </div>
             </div>
         </div>
@@ -94,53 +86,23 @@
                             <span class="text-muted small">Prepaid Recharge</span>
                         </div>
                         <div class="row g-2 mb-3 text-center">
-                            <div class="col-4 bg-light p-2 rounded-3">
-                                <span class="d-block text-muted" style="font-size: 0.7rem;">DATA</span>
-                                <strong class="small text-dark">2 GB/day</strong>
-                            </div>
-                            <div class="col-4 bg-light p-2 rounded-3">
+                            <div class="col-6 bg-light p-2 rounded-3">
                                 <span class="d-block text-muted" style="font-size: 0.7rem;">VALIDITY</span>
                                 <strong class="small text-dark">84 Days</strong>
                             </div>
-                            <div class="col-4 bg-light p-2 rounded-3">
-                                <span class="d-block text-muted" style="font-size: 0.7rem;">VOICE</span>
+                            <div class="col-6 bg-light p-2 rounded-3">
+                                <span class="d-block text-muted" style="font-size: 0.7rem;">SERVICE</span>
                                 <strong class="small text-dark">Unlimited</strong>
                             </div>
                         </div>
                         <p class="text-muted mb-3" style="font-size: 0.8rem;"><i class="fa-solid fa-circle-check text-success me-1"></i> Includes 100 SMS/day + Unlimited 5G Data upgrade.</p>
                     </div>
-                    <button onclick="selectPlan(719, '2 GB/day', '84 Days')" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2 rounded-3">Select Plan</button>
+                    <button onclick="selectPlan(719, '84 Days')" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2 rounded-3">Select Plan</button>
                 </div>
             </div>
         </div>
 
         <!-- Plan 3 -->
-        <div class="col-md-6 plan-item" data-category="data">
-            <div class="card plan-card border-0 shadow-sm rounded-4 h-100 position-relative overflow-hidden">
-                <div class="card-body p-4 d-flex flex-column justify-content-between">
-                    <div>
-                        <div class="d-flex align-items-baseline mb-2">
-                            <h3 class="fw-bold text-primary mb-0 me-2">₹19</h3>
-                            <span class="text-muted small">Data Booster Pack</span>
-                        </div>
-                        <div class="row g-2 mb-3 text-center">
-                            <div class="col-6 bg-light p-2 rounded-3">
-                                <span class="d-block text-muted" style="font-size: 0.7rem;">DATA</span>
-                                <strong class="small text-dark">1 GB Lumpsum</strong>
-                            </div>
-                            <div class="col-6 bg-light p-2 rounded-3">
-                                <span class="d-block text-muted" style="font-size: 0.7rem;">VALIDITY</span>
-                                <strong class="small text-dark">Existing Pack</strong>
-                            </div>
-                        </div>
-                        <p class="text-muted mb-3" style="font-size: 0.8rem;"><i class="fa-solid fa-circle-check text-success me-1"></i> High-speed data add-on. Valid until current base pack expiry.</p>
-                    </div>
-                    <button onclick="selectPlan(19, '1 GB', 'Existing')" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2 rounded-3">Select Plan</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Plan 4 -->
         <div class="col-md-6 plan-item" data-category="validity">
             <div class="card plan-card border-0 shadow-sm rounded-4 h-100 position-relative overflow-hidden">
                 <span class="position-absolute top-0 end-0 bg-success text-white px-3 py-1 small fw-bold rounded-start" style="font-size: 0.65rem;">YEARLY SAVER</span>
@@ -151,22 +113,18 @@
                             <span class="text-muted small">Annual Pack</span>
                         </div>
                         <div class="row g-2 mb-3 text-center">
-                            <div class="col-4 bg-light p-2 rounded-3">
-                                <span class="d-block text-muted" style="font-size: 0.7rem;">DATA</span>
-                                <strong class="small text-dark">2.5 GB/day</strong>
-                            </div>
-                            <div class="col-4 bg-light p-2 rounded-3">
+                            <div class="col-6 bg-light p-2 rounded-3">
                                 <span class="d-block text-muted" style="font-size: 0.7rem;">VALIDITY</span>
                                 <strong class="small text-dark">365 Days</strong>
                             </div>
-                            <div class="col-4 bg-light p-2 rounded-3">
-                                <span class="d-block text-muted" style="font-size: 0.7rem;">VOICE</span>
+                            <div class="col-6 bg-light p-2 rounded-3">
+                                <span class="d-block text-muted" style="font-size: 0.7rem;">SERVICE</span>
                                 <strong class="small text-dark">Unlimited</strong>
                             </div>
                         </div>
                         <p class="text-muted mb-3" style="font-size: 0.8rem;"><i class="fa-solid fa-circle-check text-success me-1"></i> 100 SMS/day + Free Disney+ Hotstar subscription for 1 year.</p>
                     </div>
-                    <button onclick="selectPlan(2999, '2.5 GB/day', '365 Days')" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2 rounded-3">Select Plan</button>
+                    <button onclick="selectPlan(2999, '365 Days')" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2 rounded-3">Select Plan</button>
                 </div>
             </div>
         </div>

@@ -180,7 +180,7 @@
     </div>
 
     <!-- 2. SECURE PROFILE DASHBOARD INTERFACE -->
-    <div class="container max-w-3xl py-4 hidden" id="profileView" style="max-width: 100%;">
+    <div class="container max-w-3xl py-4 hidden" id="profileView" style="max-width: 900px;">
     
         <!-- Header / Navigation Bar -->
 		<header class="d-flex align-items-center justify-between pb-4 mb-4 border-bottom">
@@ -281,14 +281,14 @@
                 </a>
 				
                 <a href="track_fleet.html"  id="link-track-fleet" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-warning-emphasis bg-warning-subtle border border-warning-subtle" style="background-color: #fef3c7; color: #b45309; border-color: #fde68a;">
-                    <i class="fa-solid fa-truck-arrow-right me-1"></i> Track Fleet Vehicles
+                    <i class="fa-solid fa-map-location me-1"></i> Track Fleet Vehicles
                 </a>
                 <a href="create_order.html" id="link-create-order" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
-                    <i class="fa-solid fa-user-gear me-1"></i> Put New Supply Order
+                    <i class="fa-solid fa-boxes me-1"></i> Put New Supply Order
                 </a>
 				
 				<a href="customer_orders.html" id="link-customer-orders" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
-                    <i class="fa-solid fa-user-gear me-1"></i> See Orders
+                    <i class="fa-solid fa-sort me-1"></i> See Orders
                 </a>
 				
 				<a href="driver_orders.html" id="link-driver-orders" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
@@ -605,11 +605,11 @@
 				
 				
 				
-			} else if (role == "admin"){
+			} else if (role === "admin"){
 				document.getElementById('link-approve-subscriptions').classList.remove('hidden');
 				document.getElementById('link-verify_vehicles').classList.remove('hidden');
-				<!-- document.getElementById('message-container').classList.add('hidden'); -->
-				<!-- document.getElementById('link-take-subscriptions').classList.add('hidden'); -->
+				document.getElementById('message-container').classList.add('hidden');
+				document.getElementById('link-take-subscriptions').classList.add('hidden');
 			}
 			// ----------------------------------------
             loginView.classList.add('hidden');
@@ -677,6 +677,8 @@
                         }
 						
 						const role = user.profile.role; 
+						const is_verified = vehicle.is_verified;
+						console.log(is_verified)
 						let trackHistoryHtml = null
 						// Add history tracking link for owners
 						if (role === 'owner') {
@@ -691,23 +693,35 @@
 							<div class="position-absolute top-0 start-0 bg-primary h-100" style="width: 6px;"></div>
 							<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-3">
 								<h3 class="h6 fw-bold text-primary fst-italic mb-0">Vehicle No: ${vehicle.vehicle_no}</h3>
-								<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle align-self-start align-self-sm-auto">Active Fleet</span>
+								<span class="badge ${is_verified ? 'bg-success-subtle' : 'bg-warning-subtle'} text-warning-emphasis border border-warning-subtle align-self-start align-self-sm-auto">${is_verified ? 'Verified' : 'Not Verified'}</span>
 							</div>
 							
                             <!-- <h3>Vehicle No: ${vehicle.vehicle_no}</h3> -->
 							
 							<div class="row g-3 bg-light p-3 rounded-3 border mb-3 small">
 								<div class="col-4">
-									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>Type:</strong> ${vehicle.vehicle_type}</span>
-									<span class="fw-semibold fst-italic">light</span>
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>TYPE</strong></span>
+									<span class="fw-semibold fst-italic text-capitalize">${vehicle.vehicle_type}</span>
 								</div>
 								<div class="col-4">
-									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>Chassis No:</strong> ${vehicle.chesis_no}</span>
-									<span class="fw-semibold">57777</span>
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>CHASSIS NO</strong></span>
+									<span class="fw-semibold fst-italic">${vehicle.chesis_no}</span>
 								</div>
 								<div class="col-4">
-									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>Engine No:</strong> ${vehicle.engine_no}</span>
-									<span class="fw-semibold">6383856</span>
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>ENGINE NO</strong></span>
+									<span class="fw-semibold fst-italic">${vehicle.engine_no}</span>
+								</div>
+								<div class="col-4">
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DRIVER NAME</strong></span>
+									<span class="fw-semibold fst-italic">${vehicle.driver ? vehicle.driver_first_name : null} ${vehicle.driver ? vehicle.driver_last_name : ''}</span>
+								</div>
+								<div class="col-4">
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DRIVER PHONE</strong></span>
+									<span class="fw-semibold fst-italic">${vehicle.driver ? vehicle.driver_phone_number: null}</span>
+								</div>
+								<div class="col-4">
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DRIVER EMAIL</strong></span>
+									<span class="fw-semibold fst-italic">${vehicle.driver ? vehicle.driver_email: null}</span>
 								</div>
 							</div>
 							<div class="d-flex flex-wrap gap-2">
@@ -730,6 +744,7 @@
                     container_assigned.innerHTML = ''; 
                     document.getElementById('assinged-count').innerText = `${user_assigned_vehicle.length} Vehicle`;
                     user_assigned_vehicle.forEach(vehicle => {
+						const is_verified = vehicle.is_verified;
                         const card = document.createElement('div');
                         card.className = 'card shadow-sm border-0 rounded-4 p-4 position-relative overflow-hidden';
                         
@@ -757,23 +772,35 @@
 							<div class="position-absolute top-0 start-0 bg-primary h-100" style="width: 6px;"></div>
 							<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-3">
 								<h3 class="h6 fw-bold text-primary fst-italic mb-0">Vehicle No: ${vehicle.vehicle_no}</h3>
-								<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle align-self-start align-self-sm-auto">Active Fleet</span>
+								<span class="badge ${is_verified ? 'bg-success-subtle' : 'bg-warning-subtle'} text-warning-emphasis border border-warning-subtle align-self-start align-self-sm-auto">${is_verified ? 'Verified' : 'Not Verified'}</span>
 							</div>
 							
                             <!-- <h3>Vehicle No: ${vehicle.vehicle_no}</h3> -->
 							
 							<div class="row g-3 bg-light p-3 rounded-3 border mb-3 small">
 								<div class="col-4">
-									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>Type:</strong> ${vehicle.vehicle_type}</span>
-									<span class="fw-semibold fst-italic">light</span>
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>TYPE</strong></span>
+									<span class="fw-semibold fst-italic text-capitalize">${vehicle.vehicle_type}</span>
 								</div>
 								<div class="col-4">
-									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>Chassis No:</strong> ${vehicle.chesis_no}</span>
-									<span class="fw-semibold">57777</span>
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>CHASSIS NO</strong></span>
+									<span class="fw-semibold fst-italic">${vehicle.chesis_no}</span>
 								</div>
 								<div class="col-4">
-									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>Engine No:</strong> ${vehicle.engine_no}</span>
-									<span class="fw-semibold">6383856</span>
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>ENGINE NO</strong></span>
+									<span class="fw-semibold fst-italic">${vehicle.engine_no}</span>
+								</div>
+								<div class="col-4">
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DRIVER NAME</strong></span>
+									<span class="fw-semibold fst-italic">${vehicle.driver ? vehicle.driver_first_name : null} ${vehicle.driver ? vehicle.driver_last_name : ''}</span>
+								</div>
+								<div class="col-4">
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DRIVER PHONE</strong></span>
+									<span class="fw-semibold fst-italic">${vehicle.driver ? vehicle.driver_phone_number: null}</span>
+								</div>
+								<div class="col-4">
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DRIVER EMAIL</strong></span>
+									<span class="fw-semibold fst-italic">${vehicle.driver ? vehicle.driver_email: null}</span>
 								</div>
 							</div>
 							<div class="d-flex flex-wrap gap-2">
@@ -787,7 +814,7 @@
                     container_assigned.innerHTML = `<div class="alert alert-info d-flex align-items-center" role="alert">
 														<i class="fa-solid fa-circle-info me-2"></i>
 														<div>
-															You have not registered any vehicles yet.
+															You have not assigned any vehicles yet.
 														</div>
 													  </div>`;
                 }

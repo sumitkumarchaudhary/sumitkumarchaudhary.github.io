@@ -4,80 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fleet Owner - Assign Vehicles to Drivers</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-        body { background-color: #f8fafc; color: #0f172a; padding: 2rem; max-width: 800px; margin: 0 auto; }
-        .card { 
-			background: #f8fafc;
-			border: 1px solid #e2e8f0;
-			border-radius: 10px;
-			padding: 16px;
-			box-sizing: border-box;
-			display: flex;
-			flex-direction: column;
-			gap: 12px;
-			width: 100%;
-		}
-        h2 { color: #4f46e5; margin-bottom: 0.5rem; }
-        .subtitle { color: #64748b; font-size: 0.875rem; margin-bottom: 1.5rem; }
-        .back-btn { display: inline-block; margin-bottom: 1.5rem; color: #4f46e5; text-decoration: none; font-weight: 600; }
-        .back-btn:hover { text-decoration: underline; }
-        
-        .vehicle-row { background: #f8fafc; border: 1px solid #e2e8f0; padding: 1.25rem; border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-        .vehicle-info h3 { color: #0f172a; font-size: 1.1rem; margin-bottom: 0.25rem; }
-        .vehicle-info p { font-size: 0.875rem; color: #475569; }
-        
-        .assignment-controls {
-			display: flex;
-			gap: 8px;
-			align-items: center;
-			width: 100%;
-			box-sizing: border-box;
-		}
-        select {
-			flex: 1;
-			min-width: 0; /* Prevents overflow bugs in flex */
-			height: 40px;
-			padding: 0 10px;
-			border: 1px solid #cbd5e1;
-			border-radius: 8px;
-			background: white;
-			font-size: 14px;
-			box-sizing: border-box;
-	}
-        button { 
-			flex-shrink: 0;
-			height: 40px;
-			padding: 0 14px;
-			background-color: #4f46e5;
-			color: white;
-			border: none;
-			border-radius: 8px;
-			font-weight: 600;
-			font-size: 13px;
-			cursor: pointer;
-			box-sizing: border-box;
-			white-space: nowrap;
-		}
-        button:hover { background-color: #4338ca; }
-        
-        #msg { margin-bottom: 1rem; font-weight: 600; text-align: center; }
-        .success { color: #10b981; }
-        .error { color: #ef4444; }
-        .loading { font-style: italic; color: #64748b; text-align: center; }
-    </style>
+	<!-- Local Bootstrap Compiled CSS -->
+    <link href="static/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Local FontAwesome Icons -->
+	<link href="static/css/all.min.css" rel="stylesheet">
+
 </head>
-<body>
-
-    <a href="index.html" class="back-btn">← Back to Dashboard</a>
-
-    <div class="card">
-        <h2>🚗 Assign Fleet Vehicles to Drivers</h2>
-        <p class="subtitle">Select a driver from the dropdown list to assign them to your fleet vehicles.</p>
+<body class="bg-light">
+	<div class="container py-4" style="max-width: 900px;">
         
-        <div id="msg"></div>
-        <div id="fleet-container" class="loading">Loading fleet and drivers...</div>
+        <!-- Back Button -->
+        <a href="index.html" class="btn btn-link text-decoration-none px-0 mb-3 text-muted fw-semibold">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+
+        <!-- Main Card Container -->
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4 p-sm-5">
+                
+                <!-- Header Section -->
+                <h3 class="fw-bold text-dark mb-1"><i class="fa-solid fa-user-gear text-primary me-2"></i>Assign Fleet Vehicles to Drivers</h3>
+                <p class="text-muted small mb-4">Select a driver from the dropdown list to assign them to your fleet vehicles.</p>
+                
+                <!-- Message Container -->
+                <div id="msg"></div>
+                
+                <!-- Dynamic Content Container -->
+                <div id="fleet-container">
+                    <div class="text-center py-5 text-muted">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                        <span>Loading fleet and drivers...</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
+    <!-- Bootstrap JS Bundle -->
+	<script src="/static/js/bootstrap.bundle.min.js"></script>
 	<script src="/static/js/tracker.js"></script>
     <script>
         const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api";
@@ -91,7 +55,10 @@
             const token = getToken();
 
             if (!token) {
-                container.innerHTML = '<p class="error">Authentication token missing. Please log in as an owner.</p>';
+                container.innerHTML = `
+                    <div class="alert alert-danger small" role="alert">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i> Authentication token missing. Please log in as an owner.
+                    </div>`;
                 return;
             }
 
@@ -99,83 +66,88 @@
                 // 1. Fetch Owner's Vehicles and Available Drivers concurrently
                 const [vehiclesRes, usersRes, currUser] = await Promise.all([
                     fetch(`${API_BASE}/vehicles/`, { 
-						headers: { 
-							'Authorization': `Bearer ${token}`, 
-							'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 							
-							} 
-					}),
+                        headers: { 
+                            'Authorization': `Bearer ${token}`, 
+                            'ngrok-skip-browser-warning': 'true'							
+                        } 
+                    }),
                     fetch(`${API_BASE}/users/`, { 
-						headers: { 
-							'Authorization': `Bearer ${token}`,
-							'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
-						} 
-					}),
-					fetch(`${API_BASE}/users/me/`, { 
-						headers: { 
-							'Authorization': `Bearer ${token}`,
-							'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
-						} 
-					})
+                        headers: { 
+                            'Authorization': `Bearer ${token}`,
+                            'ngrok-skip-browser-warning': 'true'
+                        } 
+                    }),
+                    fetch(`${API_BASE}/users/me/`, { 
+                        headers: { 
+                            'Authorization': `Bearer ${token}`,
+                            'ngrok-skip-browser-warning': 'true'
+                        } 
+                    })
                 ]);
 
                 if (!vehiclesRes.ok || !usersRes.ok) throw new Error("Failed to load required data.");
 
                 const vehicles = await vehiclesRes.json();
                 const users = await usersRes.json();
+                const userData = await currUser.json();
+                
+                let myVehicles = vehicles.filter(v => v.user === userData.id && v.is_verified);
+                
+                console.log('vehicles', myVehicles);
+                console.log('users', users);
+                console.log("Current User Loaded:", userData);
+                
+                // Collect IDs of all drivers who are already assigned to ANY vehicle
+                const drivers = users.filter(u => (u.profile?.role || u.role) === 'driver');
+                const assignedDriverIds = new Set([
+                    ...myVehicles.map(v => v.driver).filter(Boolean),
+                    ...drivers.filter(d => d.assigned_vehicle != null).map(d => d.id)
+                ]);
 
-				const userData = await currUser.json();
-				
-				let myVehicles = vehicles.filter(v => v.user === userData.id && v.is_verified);
-				
-				console.log('vehicles', myVehicles);
-				console.log('users', users);
-				console.log("Current User Loaded:", userData);
-				
-				// Collect IDs of all drivers who are already assigned to ANY vehicle
-                // Filter users who have the role of 'driver'
-                const drivers = users.filter(u => (u.profile?.role || u.role) === 'driver')// && u?.assigned_vehicle === null);
-				const assignedDriverIds = new Set([
-												...myVehicles.map(v => v.driver).filter(Boolean),
-												...drivers.filter(d => d.assigned_vehicle != null).map(d => d.id)
-											]);
-				
-				
-				<!-- console.log('drivers', drivers) -->
-				<!-- console.log('assignedDriverIds', assignedDriverIds) -->
                 if (!myVehicles || myVehicles.length === 0) {
-                    container.innerHTML = '<p>You have no registered vehicles in your fleet.</p>';
+                    container.innerHTML = `
+                        <div class="text-center py-4 text-muted border border-dashed rounded-3 bg-light">
+                            <i class="fa-solid fa-truck fs-3 mb-2"></i>
+                            <p class="mb-0 small">You have no registered vehicles in your fleet.</p>
+                        </div>`;
                     return;
                 }
 
                 // 2. Render vehicles list with assignment controls
                 container.innerHTML = '';
                 myVehicles.forEach(vehicle => {
-					console.log(vehicle);
+                    console.log(vehicle);
                     const row = document.createElement('div');
-                    row.className = 'vehicle-row';
-
-                    // Build driver options dropdown
+                    row.className = 'card mb-3 border shadow-sm rounded-3';
+					const hasActiveOrder = vehicle.customer !== null;
+					console.log(hasActiveOrder);
+                    
+					// Build driver options dropdown
                     let driverOptions = '<option value="">-- Unassigned --</option>';
                     drivers.forEach(driver => {
-                        // Check if this driver is currently assigned to this vehicle
-						const isAssignedElsewhere = assignedDriverIds.has(driver.id) && vehicle.driver !== driver.id;
-						if (!isAssignedElsewhere) {
-							const isSelected = vehicle.driver === driver.id ? 'selected' : '';
-							driverOptions += `<option value="${driver.id}" ${isSelected}>${driver.username} (${driver.first_name || 'Driver'})</option>`;
-						}
+                        const isAssignedElsewhere = assignedDriverIds.has(driver.id) && vehicle.driver !== driver.id;
+                        if (!isAssignedElsewhere) {
+                            const isSelected = vehicle.driver === driver.id ? 'selected' : '';
+                            driverOptions += `<option value="${driver.id}" ${isSelected}>${driver.username} (${driver.first_name || 'Driver'})</option>`;
+                        }
                     });
-					
+                    
                     row.innerHTML = `
-                        <div class="vehicle-info">
-                            <h3>${vehicle.vehicle_no} (${vehicle.vehicle_type})</h3>
-                            <p><strong>Chassis:</strong> ${vehicle.chesis_no}</p>
-                            <p><strong>Current Driver:</strong> <span id="current-driver-${vehicle.id}">${vehicle.driver || vehicle.driver ? 'Assigned' : 'None'}</span></p>
-                        </div>
-                        <div class="assignment-controls">
-                            <select id="driver-select-${vehicle.id}">
-                                ${driverOptions}
-                            </select>
-                            <button onclick="assignDriver(${vehicle.id})">Save Assignment</button>
+                        <div class="card-body p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                            <div class="vehicle-info">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h5 class="fw-bold text-dark mb-0">${vehicle.vehicle_no}</h5>
+                                    <span class="badge bg-secondary text-uppercase" style="font-size: 0.65rem;">${vehicle.vehicle_type}</span>
+                                </div>
+                                <p class="mb-1 small text-muted"><strong>Chassis:</strong> ${vehicle.chesis_no}</p>
+                                <p class="mb-0 small text-muted"><strong>Current Status:</strong> <span class="badge bg-success-subtle text-success border border-success-subtle" id="current-driver-${vehicle.id}">${vehicle.driver ? 'Assigned' : 'Unassigned'}</span></p>
+                            </div>
+                            <div class="assignment-controls d-flex align-items-center gap-2">
+                                <select id="driver-select-${vehicle.id}" class="form-select form-select-sm shadow-none" style="min-width: 200px;" ${hasActiveOrder ? 'disabled' : ''}>
+                                    ${driverOptions}
+                                </select>
+                                <button onclick="assignDriver(${vehicle.id})" class="btn btn-primary btn-sm fw-semibold text-nowrap px-3">Save</button>
+                            </div>
                         </div>
                     `;
                     container.appendChild(row);
@@ -183,7 +155,10 @@
 
             } catch (err) {
                 console.error(err);
-                container.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+                container.innerHTML = `
+                    <div class="alert alert-danger small" role="alert">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i> Error: ${err.message}
+                    </div>`;
             }
         }
 

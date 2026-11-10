@@ -4,84 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Portal - My Orders</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         body { 
             font-family: system-ui, -apple-system, sans-serif; 
-            background-color: #f4f6f9; 
-            margin: 0; 
-            padding: 20px; 
+            background-color: #f8fafc; 
             color: #1e293b;
         }
-        .card { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
-            margin: 0 auto; 
-            box-sizing: border-box;
-            width: 100%;
-            max-width: 600px;
-        }
-        .back-btn { 
-            display: inline-block; 
-            margin-bottom: 1.5rem; 
-            color: #4f46e5; 
-            text-decoration: none; 
-            font-weight: 600; 
-        }
-        .back-btn:hover { text-decoration: underline; }
-        h2 { color: #4f46e5; margin-top: 0; }
-        .order-item { 
-            border-left: 4px solid #ffc107; 
-            padding: 16px; 
-            margin-bottom: 15px; 
-            background: #fafafa; 
-            border-radius: 8px; 
-            box-sizing: border-box;
-        }
-        .order-item.completed { border-left-color: #10b981; }
-        .order-item.in-transit { border-left-color: #0ea5e9; }
-        .status-badge { 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            font-size: 12px; 
-            padding: 4px 8px; 
-            border-radius: 4px; 
-            color: white; 
-            background: #ffc107; 
-        }
-        .status-badge.in_transit { background: #0ea5e9; }
-        .status-badge.delivered { background: #10b981; }
-        .status-badge.assigned { background: #8b5cf6; }
-        #msg { margin-bottom: 15px; font-weight: 600; text-align: center; }
+        /* Custom Tab Styling */
         .tab-btn {
-            padding: 8px 16px; 
-            border: none; 
-            border-radius: 6px; 
-            cursor: pointer; 
+            border: none;
+            border-radius: 0.5rem;
             font-weight: 600;
-            transition: background 0.2s;
+            font-size: 0.875rem;
+            transition: all 0.2s ease-in-out;
         }
-		.btn-link { padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; color: white; display: inline-block; }
-        .btn-map { background-color: #007BFF; }
-        .btn-map:hover { background-color: #0056b3; }
     </style>
 </head>
-<body>
-    <a href="index.html" class="back-btn">← Back to Dashboard</a>
-    <div class="card">
-        <h2>📦 Customer Portal - My Orders</h2>
-        <p>View your active ongoing shipments and past completed orders.</p>
-        <div id="msg"></div>
+<body class="bg-light">
+
+    <div class="container py-5" style="max-width: 900px;">
         
-        <!-- Tab Navigation Buttons -->
-        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <button onclick="switchTab('active')" id="btn-active" class="tab-btn" style="background: #4f46e5; color: white;">Active Orders</button>
-            <button onclick="switchTab('history')" id="btn-history" class="tab-btn" style="background: #e2e8f0; color: #334155;">Completed History</button>
+        <!-- Back Button -->
+        <a href="index.html" class="btn btn-link text-decoration-none px-0 mb-3 text-muted fw-semibold">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+
+        <!-- Main Card Container -->
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4 p-sm-5">
+                
+                <!-- Header Section -->
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; min-width: 50px; font-size: 1.25rem;">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0">Customer Portal - My Orders</h3>
+                        <p class="text-muted small mb-0">View your active ongoing shipments and past completed orders.</p>
+                    </div>
+                </div>
+
+                <!-- Message Alert Bar -->
+                <div id="msg"></div>
+                
+                <!-- Tab Navigation Buttons -->
+                <div class="d-flex gap-2 p-1 bg-light rounded-3 border mb-4">
+                    <button onclick="switchTab('active')" id="btn-active" class="tab-btn btn btn-primary flex-grow-1 py-2 shadow-sm">Active Orders</button>
+                    <button onclick="switchTab('history')" id="btn-history" class="tab-btn btn btn-light text-muted flex-grow-1 py-2 shadow-none">Completed History</button>
+                </div>
+                
+                <!-- Dynamic Orders Feed Container -->
+                <div id="orders-container">
+                    <div class="text-center py-5 text-muted">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                        <span class="small">Loading orders...</span>
+                    </div>
+                </div>
+
+            </div>
         </div>
-        
-        <div id="orders-container"></div>
     </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         const API_BASE = 'https://upheaval-revise-fit.ngrok-free.dev/etransport/api';
@@ -90,15 +80,16 @@
 
         function switchTab(tab) {
             currentTab = tab;
-            document.getElementById('btn-active').style.background = tab === 'active' ? '#4f46e5' : '#e2e8f0';
-            document.getElementById('btn-active').style.color = tab === 'active' ? 'white' : '#334155';
-            
-            document.getElementById('btn-history').style.background = tab === 'history' ? '#4f46e5' : '#e2e8f0';
-            document.getElementById('btn-history').style.color = tab === 'history' ? 'white' : '#334155';
+            const btnActive = document.getElementById('btn-active');
+            const btnHistory = document.getElementById('btn-history');
 
             if (tab === 'active') {
+                btnActive.className = "tab-btn btn btn-primary flex-grow-1 py-2 shadow-sm";
+                btnHistory.className = "tab-btn btn btn-light text-muted flex-grow-1 py-2 shadow-none";
                 fetchActiveOrders();
             } else {
+                btnHistory.className = "tab-btn btn btn-primary flex-grow-1 py-2 shadow-sm";
+                btnActive.className = "tab-btn btn btn-light text-muted flex-grow-1 py-2 shadow-none";
                 fetchOrderHistory();
             }
         }
@@ -106,164 +97,215 @@
         async function fetchActiveOrders() {
             const container = document.getElementById('orders-container');
             const msg = document.getElementById('msg');
-            container.innerHTML = '<p>Loading active orders...</p>';
+            container.innerHTML = `
+                <div class="text-center py-4 text-muted border border-dashed rounded-3 bg-light">
+                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                    <span class="small">Loading active orders...</span>
+                </div>`;
             msg.innerHTML = '';
 
             if (!token) {
-                container.innerHTML = '<p style="color: red;">Authentication token missing. Please log in.</p>';
+                container.innerHTML = `
+                    <div class="alert alert-danger small" role="alert">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i> Authentication token missing. Please log in.
+                    </div>`;
                 return;
             }
 
             try {
                 const response = await fetch(`${API_BASE}/orders/`, {
                     headers: { 
-						'Authorization': `Bearer ${token}`, 
-						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
-					}
+                        'Authorization': `Bearer ${token}`, 
+                        'ngrok-skip-browser-warning': 'true' 
+                    }
                 });
                 if (!response.ok) throw new Error("Failed to fetch active orders.");
 
                 const orders = await response.json();
-                console.log(orders)
-                // Filter for active orders (pending, assigned, in_transit)
+                console.log(orders);
+                
                 const activeOrders = orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled');
 
                 if (activeOrders.length === 0) {
-                    container.innerHTML = '<p>You have no active ongoing orders.</p>';
+                    container.innerHTML = `
+                        <div class="text-center py-4 text-muted border border-dashed rounded-3 bg-light">
+                            <i class="fa-solid fa-box-open fs-3 mb-2"></i>
+                            <p class="mb-0 small">You have no active ongoing orders.</p>
+                        </div>`;
                     return;
                 }
 
                 container.innerHTML = activeOrders.map(o => {
-					const statusClass = o.status;
-					const canCancel = o.status === 'pending' || o.status === 'assigned';
-					const hasDriver = (o.status === 'assigned' || o.status === 'in_transit') && o.customer_first_name;
-					let dest_lon = null;
-					let dest_lat = null;
-					
-					if (statusClass === 'assigned'){
-						dest_lon = o.pickup_location.coordinates[0];
-						dest_lat = o.pickup_location.coordinates[1];
-					} else if (statusClass === 'in_transit'){
-						dest_lon = o.dropoff_location.coordinates[0];
-						dest_lat = o.dropoff_location.coordinates[1];
-					}
-					return `
-						<div class="order-item ${o.status === 'in_transit' ? 'in-transit' : ''}">
-							<p><strong>Order ID:</strong> #${o.id}</p>
-							<p><strong>Material:</strong> ${o.material_description}</p>
-							<p><strong>Ordered By:</strong> ${o.customer_first_name} ${o.customer_last_name}</p>
-							<p><strong>Pickup:</strong> ${o.pickup_address}</p>
-							<p><strong>Delivery:</strong> ${o.delivery_address}</p>
-							<p><strong>Status:</strong> <span class="status-badge ${statusClass}">${o.status.replace('_', ' ')}</span></p>
-							
-							${hasDriver ? `
-								<div style="background: #eef2ff; border: 1px solid #c7d2fe; padding: 10px; border-radius: 6px; margin: 10px 0; font-size: 13px; color: #3730a3;">
-									👤 <strong>Assigned Driver:</strong> ${o.driver_first_name} ${o.driver_last_name}<br>
-									🚚 <strong>Assigned Vehicle:</strong> ${o.vehicle_no}<br>
-									📞 <strong>Phone:</strong> ${o.driver_phone_number ? `<a href="tel:${o.driver_phone_number}" style="color: #4f46e5; font-weight: 600; text-decoration: none;">${o.driver_phone_number}</a>` : 'Not provided'} <br>
-									📧 <strong>Email:</strong> ${o.driver_email ? `<a href="mailto:${o.driver_email}" style="color: #4f46e5; font-weight: 600; text-decoration: none;">${o.driver_email}</a>` : 'Not provided'}
-								</div>
-							` : ''}
-							${o.vehicle ? `<a href="track_vehicle_location.html?id=${o.vehicle}&destination_lat=${dest_lat}&destination_lon=${dest_lon}" class="btn-link btn-map">📍 Track Driver</a>`: ''}
-							${canCancel ? `
-								<button onclick="cancelOrder(${o.id})" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; margin-top: 4px;">
-									❌ Cancel Order
-								</button>
-							` : ''}
-						</div>
-					`;
-				}).join('');
+                    const statusClass = o.status;
+                    const canCancel = o.status === 'pending' || o.status === 'assigned';
+                    const hasDriver = (o.status === 'assigned' || o.status === 'in_transit') && o.customer_first_name;
+                    let dest_lon = null;
+                    let dest_lat = null;
+                    
+                    if (statusClass === 'assigned'){
+                        dest_lon = o.pickup_location?.coordinates[0];
+                        dest_lat = o.pickup_location?.coordinates[1];
+                    } else if (statusClass === 'in_transit'){
+                        dest_lon = o.dropoff_location?.coordinates[0];
+                        dest_lat = o.dropoff_location?.coordinates[1];
+                    }
+
+                    // Map status to badge color classes
+                    let badgeBg = 'bg-warning text-dark';
+                    if (statusClass === 'in_transit') badgeBg = 'bg-info text-white';
+                    if (statusClass === 'assigned') badgeBg = 'bg-secondary text-white';
+
+                    return `
+                        <div class="card mb-3 border border-light shadow-sm rounded-3">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold text-dark">Order ID: #${o.id}</span>
+                                    <span class="badge ${badgeBg} text-uppercase" style="font-size: 0.65rem;">${o.status.replace('_', ' ')}</span>
+                                </div>
+                                <p class="mb-1 small"><strong>Material:</strong> ${o.material_description}</p>
+                                <p class="mb-1 small"><strong>Ordered By:</strong> ${o.customer_first_name} ${o.customer_last_name}</p>
+                                <p class="mb-1 small"><strong>Pickup:</strong> ${o.pickup_address}</p>
+                                <p class="mb-2 small"><strong>Delivery:</strong> ${o.delivery_address}</p>
+                                
+                                ${hasDriver ? `
+                                    <div class="bg-light p-3 rounded-3 border mb-3 small text-secondary">
+                                        <div class="fw-semibold text-dark mb-1"><i class="fa-solid fa-user-shield me-1 text-primary"></i> Assigned Driver Details</div>
+                                        <div class="mb-1">👤 <strong>Driver:</strong> ${o.driver_first_name} ${o.driver_last_name}</div>
+                                        <div class="mb-1">🚚 <strong>Vehicle:</strong> ${o.vehicle_no}</div>
+                                        <div class="mb-1">📞 <strong>Phone:</strong> ${o.driver_phone_number ? `<a href="tel:${o.driver_phone_number}" class="text-primary fw-semibold text-decoration-none">${o.driver_phone_number}</a>` : 'Not provided'}</div>
+                                        <div>📧 <strong>Email:</strong> ${o.driver_email ? `<a href="mailto:${o.driver_email}" class="text-primary fw-semibold text-decoration-none">${o.driver_email}</a>` : 'Not provided'}</div>
+                                    </div>
+                                ` : ''}
+
+                                <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                                    ${o.vehicle ? `<a href="track_vehicle_location.html?id=${o.vehicle}&destination_lat=${dest_lat}&destination_lon=${dest_lon}" class="btn btn-primary btn-sm fw-semibold text-decoration-none"><i class="fa-solid fa-location-crosshairs me-1"></i> Track Driver</a>`: ''}
+                                    ${canCancel ? `
+                                        <button onclick="cancelOrder(${o.id})" class="btn btn-danger btn-sm fw-semibold text-white">
+                                            <i class="fa-solid fa-xmark me-1"></i> Cancel Order
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
 
             } catch (err) {
                 console.error(err);
-                container.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+                container.innerHTML = `
+                    <div class="alert alert-danger small" role="alert">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i> Error: ${err.message}
+                    </div>`;
             }
         }
 
         async function fetchOrderHistory() {
             const container = document.getElementById('orders-container');
             const msg = document.getElementById('msg');
-            container.innerHTML = '<p>Loading order history...</p>';
+            container.innerHTML = `
+                <div class="text-center py-4 text-muted border border-dashed rounded-3 bg-light">
+                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                    <span class="small">Loading order history...</span>
+                </div>`;
             msg.innerHTML = '';
 
             try {
                 const response = await fetch(`${API_BASE}/orders/history/`, {
                     headers: { 
-						'Authorization': `Bearer ${token}`,
-						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
-					}
+                        'Authorization': `Bearer ${token}`,
+                        'ngrok-skip-browser-warning': 'true' 
+                    }
                 });
 
                 if (!response.ok) throw new Error("Failed to fetch order history.");
 
                 const orders = await response.json();
-				console.log(orders)
+                console.log(orders);
+
                 if (orders.length === 0) {
-                    container.innerHTML = '<p>No completed order history found.</p>';
+                    container.innerHTML = `
+                        <div class="text-center py-4 text-muted border border-dashed rounded-3 bg-light">
+                            <i class="fa-solid fa-clock-rotate-left fs-3 mb-2"></i>
+                            <p class="mb-0 small">No completed order history found.</p>
+                        </div>`;
                     return;
                 }
 
                 container.innerHTML = orders.map(o => {
-					const isCancelled = o.status === 'cancelled';
-					const statusColor = isCancelled ? '#ef4444' : '#10b981';
-					const statusText = isCancelled ? 'CANCELLED' : 'DELIVERED';
-					const cardBorderColor = isCancelled ? '#ef4444' : '#10b981';
+                    const isCancelled = o.status === 'cancelled';
+                    const badgeBg = isCancelled ? 'bg-danger' : 'bg-success';
+                    const statusText = isCancelled ? 'CANCELLED' : 'DELIVERED';
 
-					return `
-						<div class="order-item" style="border-left: 4px solid ${cardBorderColor};">
-							<p><strong>Order ID:</strong> #${o.id}</p>
-							<p><strong>Material:</strong> ${o.material_description}</p>
-							<p><strong>Pickup:</strong> ${o.pickup_address}</p>
-							<p><strong>Delivery:</strong> ${o.delivery_address}</p>
-							<p><strong>Status:</strong> <span class="status-badge" style="background: ${statusColor};">${statusText}</span></p>
-							
-							${!isCancelled && o.vehicle ? `
-								<a href="order_history.html?id=${o.id}" style="display: inline-block; padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; margin-top: 5px;">
-									🗺️ See Route Trail
-								</a>
-							` : ''}
-						</div>
-					`;
-				}).join('');
+                    return `
+                        <div class="card mb-3 border border-light shadow-sm rounded-3">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold text-dark">Order ID: #${o.id}</span>
+                                    <span class="badge ${badgeBg} text-uppercase" style="font-size: 0.65rem;">${statusText}</span>
+                                </div>
+                                <p class="mb-1 small"><strong>Material:</strong> ${o.material_description}</p>
+                                <p class="mb-1 small"><strong>Pickup:</strong> ${o.pickup_address}</p>
+                                <p class="mb-2 small"><strong>Delivery:</strong> ${o.delivery_address}</p>
+                                
+                                ${!isCancelled && o.vehicle ? `
+                                    <div class="border-top pt-2 mt-2">
+                                        <a href="order_history.html?id=${o.id}" target="_blank" class="btn btn-info btn-sm text-white fw-semibold text-decoration-none">
+                                            <i class="fa-solid fa-map-location-dot me-1"></i> See Route Trail
+                                        </a>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
 
             } catch (err) {
                 console.error(err);
-                container.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+                container.innerHTML = `
+                    <div class="alert alert-danger small" role="alert">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i> Error: ${err.message}
+                    </div>`;
             }
         }
-		
-		async function cancelOrder(orderId) {
-			if (!confirm(`Are you sure you want to cancel Order #${orderId}?`)) return;
+        
+        async function cancelOrder(orderId) {
+            if (!confirm(`Are you sure you want to cancel Order #${orderId}?`)) return;
 
-			const msg = document.getElementById('msg');
-			msg.innerText = `Cancelling Order #${orderId}...`;
-			msg.style.color = "#0ea5e9";
+            const msg = document.getElementById('msg');
+            msg.innerHTML = `
+                <div class="alert alert-info py-2 small" role="alert">
+                    <span class="spinner-border spinner-border-sm me-1" role="status"></span> Cancelling Order #${orderId}...
+                </div>`;
 
-			try {
-				const response = await fetch(`${API_BASE}/orders/${orderId}/cancel/`, {
-					method: 'PATCH', // or 'POST' depending on your Django viewset setup
-					headers: {
-						'Content-Type': 'application/json',
-						'Authorization': `Bearer ${token}`,
-						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 
-					}
-				});
+            try {
+                const response = await fetch(`${API_BASE}/orders/${orderId}/cancel/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'ngrok-skip-browser-warning': 'true' 
+                    }
+                });
 
-				const data = await response.json();
-				if (!response.ok) throw new Error(data.error || "Failed to cancel order.");
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "Failed to cancel order.");
 
-				msg.innerText = `Success! Order #${orderId} has been cancelled.`;
-				msg.style.color = "green";
+                msg.innerHTML = `
+                    <div class="alert alert-success py-2 small" role="alert">
+                        <i class="fa-solid fa-circle-check me-1"></i> Success! Order #${orderId} has been cancelled.
+                    </div>`;
 
-				// Refresh active orders list
-				fetchActiveOrders();
+                // Refresh active orders list
+                fetchActiveOrders();
 
-			} catch (err) {
-				console.error(err);
-				msg.innerText = `Error: ${err.message}`;
-				msg.style.color = "red";
-			}
-		}
+            } catch (err) {
+                console.error(err);
+                msg.innerHTML = `
+                    <div class="alert alert-danger py-2 small" role="alert">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i> Error: ${err.message}
+                    </div>`;
+            }
+        }
 
         // Initialize by loading active orders on page load
         document.addEventListener('DOMContentLoaded', fetchActiveOrders);

@@ -32,7 +32,9 @@
 			max-width: 550px;
 		}
 		.order-item { border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 15px; background: #fafafa; border-radius: 4px; }
-
+		.assigned {
+			border-left-color: #28a745;
+		}
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100 justify-content-between">
@@ -131,7 +133,11 @@
 				console.log(orders);
 				
                 if (orders.length === 0) {
-                    container.innerHTML = '<p>No orders available at the moment.</p>';
+                    container.innerHTML = `
+						<div class="text-center py-4 text-muted border border-dashed rounded-3 bg-light">
+							<i class="fa-solid fa-box-open fs-3 mb-2"></i>
+							<p class="mb-0 small">No orders available at the moment.</p>
+						</div>`;
                     return;
                 }
 
@@ -147,7 +153,11 @@
 				
                 const hasActiveOrder = orders.some(o => o.status === 'assigned' || o.status === 'in_transit');
 				if (hasActiveOrder) {
-                    msg.innerHTML = '<span class="error">⚠️ You have an active ongoing delivery. Complete or reject it before accepting new orders.</span>';
+                    msg.innerHTML = `
+						<div class="alert alert-warning d-flex align-items-center small py-2 mb-3" role="alert">
+						<i class="fa-solid fa-triangle-exclamation me-2"></i>
+						<div>You have an active ongoing delivery. Complete or reject it before accepting new orders.</div>
+					</div>`;
                 } else {
                     msg.innerHTML = '';
                 }
@@ -158,50 +168,58 @@
                     let actionHtml = '';
                     if (o.status === 'pending') {
                         if (hasActiveOrder) {
-                            actionHtml = `<button disabled style="background: #cbd5e1; cursor: not-allowed;">Accept Order (Complete current first)</button>`;
+							actionHtml = `<button class="btn btn-secondary btn-sm w-100 disabled" style="cursor: not-allowed;">Accept Order (Complete current first)</button>`;
                         } else {
-                            actionHtml = `<button onclick="acceptOrder(${o.id})" style="background: #007BFF;">Accept Order</button>`;
+							actionHtml = `<button onclick="acceptOrder(${o.id})" class="btn btn-primary btn-sm w-100 fw-semibold">Accept Order</button>`;
                         }
                     } else if (isAcceptedByMe) {
 						actionHtml = `
-							<p><em>Current Status: <strong>${o.status.toUpperCase()}</strong></em></p>
+							<div class="mb-2 text-muted small">Current Status: <strong class="text-uppercase">${o.status}</strong></div>
 							
-							<button onclick="startNavigation('${o.status}', '${o.pickup_address}', '${o.delivery_address}')" style="background: #8b5cf6; margin-bottom: 8px; display: block; width: 100%;">
-								🧭 ${o.status === 'assigned' ? 'Navigate to Pickup' : 'Navigate to Delivery'}
+							<button onclick="startNavigation('${o.status}', '${o.pickup_address}', '${o.delivery_address}')" class="btn btn-sm text-white w-100 mb-2 fw-semibold" style="background-color: #8b5cf6;">
+								<i class="fa-solid fa-compass me-1"></i> ${o.status === 'assigned' ? 'Navigate to Pickup' : 'Navigate to Delivery'}
 							</button>
 
 							${o.status === 'assigned' ? `
-								<button onclick="updateOrderStatus(${o.id}, 'in_transit')" style="background: #ffc107; color: black; margin-bottom: 8px; width: 100%;">Start In Transit</button>
-								<button onclick="rejectOrder(${o.id})" style="background: #ef4444; color: white; width: 100%;">❌ Reject Order</button>
+								<button onclick="updateOrderStatus(${o.id}, 'in_transit')" class="btn btn-warning btn-sm text-dark w-100 mb-2 fw-semibold">Start In Transit</button>
+								<button onclick="rejectOrder(${o.id})" class="btn btn-danger btn-sm text-white w-100 fw-semibold">❌ Reject Order</button>
 							` : ''}
 
-							${o.status === 'in_transit' ? `<button onclick="updateOrderStatus(${o.id}, 'delivered')" style="background: #28a745; width: 100%;">Mark as Delivered</button>` : ''}
+							${o.status === 'in_transit' ? `<button onclick="updateOrderStatus(${o.id}, 'delivered')" class="btn btn-success btn-sm text-white w-100 fw-semibold">Mark as Delivered</button>` : ''}
 						`;
-                    } else if (o.status === 'delivered') {
+					} else if (o.status === 'delivered') {
 						actionHtml = `
-							<p><em>Current Status: <strong style="color: #10b981;">DELIVERED</strong></em></p>
-							<a href="order_history.html?id=${o.id}" target="_blank" class="btn-link" style="display: inline-block; padding: 8px 14px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 5px;">
-								🗺️ See Route Trail
+							<div class="mb-2 text-muted small">Current Status: <strong class="text-success text-uppercase">Delivered</strong></div>
+							<a href="order_history.html?id=${o.id}" target="_blank" class="btn btn-info btn-sm text-white w-100 fw-semibold text-decoration-none mt-1">
+								<i class="fa-solid fa-map-location-dot me-1"></i> See Route Trail
 							</a>
 						`;
 					}
 
-                    return `
-                        <div class="order-item ${isAcceptedByMe ? 'assigned' : ''}">
-                            <p><strong>Order ID:</strong> #${o.id}</p>
-                            <p><strong>Material:</strong> ${o.material_description}</p>
-							<p><strong>Ordered By:</strong> ${o.customer_first_name} ${o.customer_last_name}</p>
-                            <p><strong>Pickup:</strong> ${o.pickup_address}</p>
-                            <p><strong>Delivery:</strong> ${o.delivery_address}</p>
-                            <div style="margin-top: 10px;">${actionHtml}</div>
-                        </div>
-                    `;
-                }).join('');
+					return `
+						<div class="card mb-3 border ${isAcceptedByMe ? 'border-primary bg-primary bg-opacity-10' : 'border-light'} w-100 shadow-sm rounded-3" style="max-width: 100%;">
+							<div class="card-body p-3">
+								<div class="d-flex justify-content-between align-items-center mb-2">
+									<span class="fw-bold text-dark">Order ID: #${o.id}</span>
+									<span class="badge bg-secondary text-uppercase">${o.status}</span>
+								</div>
+								<p class="mb-1 small"><strong>Material:</strong> ${o.material_description}</p>
+								<p class="mb-1 small"><strong>Ordered By:</strong> ${o.customer_first_name} ${o.customer_last_name}</p>
+								<p class="mb-1 small"><strong>Pickup:</strong> ${o.pickup_address}</p>
+								<p class="mb-3 small"><strong>Delivery:</strong> ${o.delivery_address}</p>
+								<div class="border-top pt-2 mt-2">${actionHtml}</div>
+							</div>
+						</div>
+					`;
+				}).join('');
 
-            } catch (err) {
-                console.error(err);
-                container.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
-            }
+			} catch (err) {
+				console.error(err);
+				container.innerHTML = `
+					<div class="alert alert-danger small" role="alert">
+						<i class="fa-solid fa-circle-exclamation me-1"></i> Error: ${err.message}
+					</div>`;
+			}
         }
 
         async function acceptOrder(orderId) {
@@ -272,7 +290,7 @@
 					if (!navigator.geolocation) {
 						reject(new Error("Geolocation is not supported by your browser"));
 					} else {
-						navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+						navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 20000 });
 					}
 				});
 
@@ -369,25 +387,40 @@
 				const orders = await response.json();
 				console.log('orders_history', orders);
 				if (orders.length === 0) {
-					container.innerHTML = '<p>No completed delivery history found.</p>';
+					container.innerHTML = `
+						<div class="text-center py-4 text-muted border border-dashed rounded-3 bg-light w-100">
+							<i class="fa-solid fa-clock-rotate-left fs-3 mb-2"></i>
+							<p class="mb-0 small">No completed delivery history found.</p>
+						</div>
+					`;
 					return;
 				}
 
 				container.innerHTML = orders.map(o => `
-					<div class="order-item" style="border-left: 4px solid #10b981;">
-						<p><strong>Order ID:</strong> #${o.id}</p>
-						<p><strong>Material:</strong> ${o.material_description}</p>
-						<p><strong>Pickup:</strong> ${o.pickup_address}</p>
-						<p><strong>Delivery:</strong> ${o.delivery_address}</p>
-						<p><em>Status: <strong style="color: #10b981;">DELIVERED</strong></em></p>
-						<a href="order_history.html?id=${o.id}" style="display: inline-block; padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; margin-top: 5px;">
-							🗺️ See Route Trail
-						</a>
-					</div>
+						<div class="card mb-3 border border-primary bg-primary bg-opacity-10 w-100 shadow-sm rounded-3" style="max-width: 100%;">
+							<div class="card-body p-3">
+								<div class="d-flex justify-content-between align-items-center mb-2">
+									<span class="fw-bold text-dark">Order ID: #${o.id}</span>
+									<span class="badge bg-secondary text-uppercase">${o.status}</span>
+								</div>
+								<p class="mb-1 small"><strong>Material:</strong> ${o.material_description}</p>
+								<p class="mb-1 small"><strong>Ordered By:</strong> ${o.customer_first_name} ${o.customer_last_name}</p>
+								<p class="mb-1 small"><strong>Pickup:</strong> ${o.pickup_address}</p>
+								<p class="mb-3 small"><strong>Delivery:</strong> ${o.delivery_address}</p>
+								<p class="mb-1 small"><em>Status: <strong style="color: #10b981;">DELIVERED</strong></em></p>
+								<a href="order_history.html?id=${o.id}" target="_blank" class="btn btn-info btn-sm text-white fw-semibold text-decoration-none mt-1">
+									<i class="fa-solid fa-map-location-dot me-1"></i> See Route Trail
+								</a>
+							</div>
+						</div>
 				`).join('');
+				
 			} catch (err) {
 				console.error(err);
-				container.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+				container.innerHTML = `
+					<div class="alert alert-danger small" role="alert">
+							<i class="fa-solid fa-circle-exclamation me-1"></i> Error: ${err.message}
+					</div>`;
 			}
 		}
 		
