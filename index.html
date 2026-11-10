@@ -202,45 +202,43 @@
 		
 		
         <!-- User Profile Information Card -->
-        <section class="card shadow-sm border-0 rounded-4 p-4 mb-4">
-            <div class="row g-4">
-                <!-- User Name & Role -->
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <span class="text-uppercase text-muted fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">User Name</span>
-                        <div id="userName" class="fs-5 fw-bold text-dark mt-1">---</div>
-                    </div>
-                    <div>
-                        <span class="text-uppercase text-muted fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">User Role</span>
-                        <div class="mt-1 d-flex align-items-center gap-2">
-                            <span id="userRole" class="badge bg-primary-subtle text-primary border border-primary-subtle fw-bold px-3 py-2">
-                                <i class="fa-solid fa-id-badge me-1"></i>---
-                            </span>
-                            <!-- <span class="text-muted small fst-italic">---</span> -->
-                        </div>
-                    </div>
-                </div>
+		<section class="card shadow-sm border-0 rounded-4 p-4 mb-4">
+			<div class="row g-4 align-items-center">
+				<!-- Row 1, Col 1: User Name -->
+				<div class="col-12 col-md-6">
+					<span class="text-uppercase text-muted fw-semibold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 0.05em;">User Name</span>
+					<div id="userName" class="fs-5 fw-bold text-dark">---</div>
+				</div>
 
-                <!-- Email & Phone with Verification -->
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <span class="text-uppercase text-muted fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">Registered Email</span>
-                        <div class="d-flex align-items-center justify-content-between mt-1">
-                            <span id="profileEmail" class="fw-medium text-dark">---</span>
-							<span id="email-status-container" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold">Verify Email</span>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="text-uppercase text-muted fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">Registered Mobile/Phone</span>
-                        <div class="d-flex align-items-center justify-content-between mt-1">
-                            <span id="profilePhone" class="fw-medium text-dark">---</span>
-                            <span id="phone-status-container" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold">Verify Phone</span>
+				<!-- Row 1, Col 2: User Role -->
+				<div class="col-12 col-md-6">
+					<span class="text-uppercase text-muted fw-semibold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 0.05em;">User Role</span>
+					<div>
+						<span id="userRole" class="badge bg-primary-subtle text-primary border border-primary-subtle fw-bold px-3 py-2">
+							<i class="fa-solid fa-id-badge me-1"></i>---
+						</span>
+					</div>
+				</div>
 
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+				<!-- Row 2, Col 1: Registered Email -->
+				<div class="col-12 col-md-6">
+					<span class="text-uppercase text-muted fw-semibold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 0.05em;">Registered Email</span>
+					<div class="d-flex align-items-center gap-2">
+						<span id="profileEmail" class="fw-medium text-dark text-truncate">---</span>
+						<span id="email-status-container" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold text-nowrap">Verify Email</span>
+					</div>
+				</div>
+
+				<!-- Row 2, Col 2: Registered Mobile/Phone -->
+				<div class="col-12 col-md-6">
+					<span class="text-uppercase text-muted fw-semibold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 0.05em;">Registered Mobile/Phone</span>
+					<div class="d-flex align-items-center gap-2">
+						<span id="profilePhone" class="fw-medium text-dark text-truncate">---</span>
+						<span id="phone-status-container" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold text-nowrap">Verify Phone</span>
+					</div>
+				</div>
+			</div>
+		</section>
 
         <!-- My Registered Vehicles Section -->
         <section class="mb-4" id="registeredVehicleView">
@@ -283,11 +281,11 @@
                 <a href="track_fleet.html"  id="link-track-fleet" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-warning-emphasis bg-warning-subtle border border-warning-subtle" style="background-color: #fef3c7; color: #b45309; border-color: #fde68a;">
                     <i class="fa-solid fa-map-location me-1"></i> Track Fleet Vehicles
                 </a>
-                <a href="create_order.html" id="link-create-order" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
+                <a href="create_order.html" id="link-create-order" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-emerald bg-emerald-subtle border" style="background-color: #d1fae5; color: #064e3b; border-color: #c7d2fe;">
                     <i class="fa-solid fa-boxes me-1"></i> Put New Supply Order
                 </a>
 				
-				<a href="customer_orders.html" id="link-customer-orders" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
+				<a href="customer_orders.html" id="link-customer-orders" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-teal bg-teal-subtle border" style="background-color: #ccfbf1; color: #134e4a; border-color: #c7d2fe;">
                     <i class="fa-solid fa-sort me-1"></i> See Orders
                 </a>
 				
@@ -296,22 +294,22 @@
                 </a>
 				
 								
-				<a href="assign_vehicle.html" id="link-assign-vehicle" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
+				<a href="assign_vehicle.html" id="link-assign-vehicle" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-amber bg-amber-subtle border" style="background-color: #fef3c7; color: #78350f; border-color: #c7d2fe;">
                     <i class="fa-solid fa-user-gear me-1"></i> Assign Driver
                 </a>
 				
 								
-				<a href="approve_subscriptions.html" id="link-approve-subscriptions" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
+				<a href="approve_subscriptions.html" id="link-approve-subscriptions" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-rose bg-rose-subtle border" style="background-color: #ffe4e6; color: #881337; border-color: #c7d2fe;">
                     <i class="fa-solid fa-user-gear me-1"></i> ‍Approve User Subscriptions
                 </a>
 				
 								
-				<a href="verify_vehicles.html" id="link-verify_vehicles" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
+				<a href="verify_vehicles.html" id="link-verify_vehicles" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-slate bg-slate-subtle border" style="background-color: #f1f5f9; color: #0f172a; border-color: #c7d2fe;">
                     <i class="fa-solid fa-user-gear me-1"></i> Verify Vehicles
                 </a>
 				
 								
-				<a href="pricing_subscription.html" id="link-take-subscriptions" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
+				<a href="pricing_subscription.html" id="link-take-subscriptions" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-blue bg-blue-subtle border" style="background-color: #dbeafe; color: #1e3a8a; border-color: #c7d2fe;">
                     <i class="fa-solid fa-user-gear me-1"></i> Subscribe Now
                 </a>
 					

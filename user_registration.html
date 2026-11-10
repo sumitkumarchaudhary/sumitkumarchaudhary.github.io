@@ -122,6 +122,37 @@
                             <div id="passwordError" class="error-message">Passwords do not match.</div>
                         </div>
                     </div>
+					<!-- Government ID Proof Upload -->
+					<div class="mb-4">
+						<label class="form-label text-muted small fw-semibold d-block">Government ID Proof (PDF/DOCX/Image)</label>
+						
+						<label for="idProofInput" class="border border-2 border-dashed rounded-3 p-4 text-center bg-light d-block cursor-pointer w-100" style="cursor: pointer;">
+							<div class="fs-2 mb-2">🪪</div>
+							<div class="text-dark small mb-1">
+								<strong>Click to upload</strong> or drag and drop ID Proof
+							</div>
+							<span class="d-block text-muted" style="font-size: 0.75rem;">PDF, DOCX, or Image (Max 5MB)</span>
+							<span id="idProofFileName" class="d-block text-primary small mt-2 fw-semibold">No file chosen</span>
+						</label>
+						
+						<input type="file" id="idProofInput" name="id_proof" accept=".pdf,.docx,image/*" class="d-none" required>
+					</div>
+
+					<!-- Driving License Upload -->
+					<div class="mb-4">
+						<label class="form-label text-muted small fw-semibold d-block">Driving License (PDF/DOCX/Image)</label>
+						
+						<label for="dlInput" class="border border-2 border-dashed rounded-3 p-4 text-center bg-light d-block cursor-pointer w-100" style="cursor: pointer;">
+							<div class="fs-2 mb-2">🚗</div>
+							<div class="text-dark small mb-1">
+								<strong>Click to upload</strong> or drag and drop Driving License
+							</div>
+							<span class="d-block text-muted" style="font-size: 0.75rem;">PDF, DOCX, or Image (Max 5MB)</span>
+							<span id="dlFileName" class="d-block text-primary small mt-2 fw-semibold">No file chosen</span>
+						</label>
+						
+						<input type="file" id="dlInput" name="driving_license" accept=".pdf,.docx,image/*" class="d-none" required>
+					</div>
 
                     <!-- Terms Checkbox -->
                     <div class="mb-4 form-check">
@@ -159,7 +190,21 @@
         const password = document.getElementById('password');
         const confirmPassword = document.getElementById('confirmPassword');
         const passwordError = document.getElementById('passwordError');
+		
+		function appendNestedObject(formData, data, parentKey = '') {
+		  for (const [key, value] of Object.entries(data)) {
+			const fieldKey = parentKey ? `${parentKey}[${key}]` : key;
 
+			if (value instanceof File || value instanceof Blob) {
+			  formData.append(fieldKey, value);
+			} else if (typeof value === 'object' && value !== null) {
+			  appendNestedObject(formData, value, fieldKey);
+			} else if (value !== undefined) {
+			  formData.append(fieldKey, value);
+			}
+		  }
+		}
+		
         form.addEventListener('submit', async function(event) {
             // 1. Prevent default browser form submission
             event.preventDefault();
@@ -178,29 +223,43 @@
 
             // 4. Gather form data automatically & construct payload
             const formData = new FormData(form);
-            const formProps = Object.fromEntries(formData);
-            
-            const payload = {
-                username: formProps.username,
-                email: formProps.email,
-                password: formProps.password,
-                first_name: formProps.first_name,
-                last_name: formProps.last_name,
-                profile: {
-                    role: formProps.role,
-                    phone_number: formProps.phone 
-                }
-            };
+			
+			console.log([...formData.entries()]);
+			
+            const formProps = Object.fromEntries(formData);	
+			
+			const formDataFinal = new FormData();
 
+			// Top-level fields
+			formDataFinal.append("username", formProps.username);
+			formDataFinal.append("email", formProps.email);
+			formDataFinal.append("password", formProps.password);
+			formDataFinal.append("first_name", formProps.first_name);
+			formDataFinal.append("last_name", formProps.last_name);
+
+			// Nested profile text fields
+			formDataFinal.append("profile.role", formProps.role);
+			formDataFinal.append("profile.phone_number", formProps.phone);
+
+			// Nested profile file uploads (only append if a file is selected)
+			if (formProps.id_proof) {
+			  formDataFinal.append("profile.id_proof", formProps.id_proof);
+			}
+
+			if (formProps.driving_license) {
+			  formDataFinal.append("profile.driving_license", formProps.driving_license);
+			}
+			
+			console.log([...formDataFinal.entries()]);
             // 5. Send data via Fetch API
             try {
                 const response = await fetch(`${API_URL}/users/`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        <!-- 'Content-Type': 'application/json', -->
                         'ngrok-skip-browser-warning': 'true'
                     },
-                    body: JSON.stringify(payload)
+                    body: formDataFinal //JSON.stringify(payload)
                 });
 
                 // 6. Handle server response
@@ -218,6 +277,7 @@
                 alert('A network error occurred. Please check your connection and try again.');
             }
         });
+		
 
         // Real-time matching feedback as user types
         confirmPassword.addEventListener('input', function() {
@@ -230,6 +290,18 @@
                 confirmPassword.classList.add('is-invalid');
             }
         });
+		
+		
+		
+		document.getElementById('idProofInput').addEventListener('change', function(e) {
+			const fileName = e.target.files.length > 0 ? e.target.files[0].name : 'No file chosen';
+			document.getElementById('idProofFileName').textContent = fileName;
+		});
+
+		document.getElementById('dlInput').addEventListener('change', function(e) {
+			const fileName = e.target.files.length > 0 ? e.target.files[0].name : 'No file chosen';
+			document.getElementById('dlFileName').textContent = fileName;
+		});
     </script>
 </body>
 </html>

@@ -4,28 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Subscription Management</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        * { box-sizing: border-box; }
         body { 
-            font-family: system-ui, sans-serif; 
-            background: #f4f6f9; 
-            padding: 10px; 
-            color: #1e293b; 
-            margin: 0;
+            font-family: system-ui, -apple-system, sans-serif; 
+            background-color: #f8fafc; 
+            color: #1e293b;
         }
-        .card { 
-            background: white; 
-            padding: 15px; 
-            border-radius: 8px; 
-            max-width: 800px; 
-            margin: auto; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-            width: 100%;
-        }
-        h2 { font-size: 1.25rem; margin-top: 0; }
-        #msg { margin-bottom: 15px; font-weight: bold; text-align: center; font-size: 14px; }
-
-        /* Mobile-First Card View for Users */
+        /* Mobile-First Card View */
         .user-list {
             display: flex;
             flex-direction: column;
@@ -33,69 +23,63 @@
             margin-top: 15px;
         }
         .user-item {
-            background: #f8fafc;
+            background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            border-radius: 0.5rem;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
-        .user-info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 14px;
-        }
-        .user-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 4px;
-        }
-        .user-actions button {
-            flex: 1;
-        }
-
-        button { 
-            padding: 8px 12px; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-weight: 600; 
-            color: white; 
-            font-size: 13px;
-        }
-        .btn-activate { background: #10b981; }
-        .btn-revoke { background: #ef4444; }
-        button:disabled {
-            cursor: not-allowed;
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        /* Desktop Table View (Hidden on mobile, shown on wider screens) */
+        /* Desktop Table View Control */
         .desktop-table { display: none; }
         .mobile-cards { display: block; }
 
-        @media (min-width: 768px) {
-            body { padding: 20px; }
-            .card { padding: 20px; }
-            h2 { font-size: 1.5rem; }
-            
+        @media (min-width: 992px) {
             .mobile-cards { display: none; }
             .desktop-table { display: block; width: 100%; overflow-x: auto; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
-            .user-actions button { flex: unset; }
         }
     </style>
 </head>
-<body>
-    <div class="card">
-        <h2>🛠️ Admin Portal: User Subscriptions</h2>
-        <div id="msg"></div>
-        <div id="users-table-container">Loading users...</div>
+<body class="bg-light">
+
+    <div class="container py-5" style="max-width: 1100px;">
+		<!-- Action Footer -->
+		<div class="d-flex justify-content-start gap-2 pt-3 border-top">
+			<a href="index.html" class="btn btn-outline-secondary btn-sm fw-semibold px-3">
+				<i class="fa-solid fa-house me-1"></i> Go To Dashboard
+			</a>
+		</div>
+        <!-- Main Card Container -->
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4 p-sm-5">
+                
+                <!-- Header Section -->
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; min-width: 50px; font-size: 1.25rem;">
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0">Admin Portal: User Subscriptions</h3>
+                        <p class="text-muted small mb-0">Manage user account statuses, subscription timelines, and verifications.</p>
+                    </div>
+                </div>
+
+                <!-- Response / Notification Message Box -->
+                <div id="msg"></div>
+
+                <!-- Dynamic Data Feed Container -->
+                <div id="users-table-container">
+                    <div class="text-center py-5 text-muted">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                        <span class="small">Loading users...</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         const API_BASE = 'https://upheaval-revise-fit.ngrok-free.dev/etransport/api';
@@ -110,107 +94,122 @@
                 if (!response.ok) throw new Error("Failed to load user profiles. Ensure you are logged in as staff.");
 
                 const data = await response.json();
-				const users = data.filter(u => u.role !== 'admin');
+                const users = data.filter(u => u.role !== 'admin');
+                console.log(users);
                 if (users.length === 0) {
-                    container.innerHTML = '<p>No users found.</p>';
+                    container.innerHTML = `
+                        <div class="text-center py-4 text-muted border border-dashed rounded-3 bg-light">
+                            <i class="fa-solid fa-users-slash fs-3 mb-2"></i>
+                            <p class="mb-0 small">No users found.</p>
+                        </div>`;
                     return;
                 }
-				
-                console.log(users);
                 
                 container.innerHTML = `
                     <!-- Mobile Card View -->
-					<div class="mobile-cards">
-						<div class="user-list">
-							${users.map(u => {
-								const isSubscribed = u.profile && u.profile.is_subscribed;
-								const hasProfile = !!u.profile;
-								
-								let statusHtml = '<span style="color: #64748b;">Inactive</span>';
-								if (hasProfile && isSubscribed) {
-									let endDateStr = '';
-									if (u.profile.subscription_end_date) {
-										const dateObj = new Date(u.profile.subscription_end_date);
-										endDateStr = ` (Active till: ${dateObj.toLocaleDateString()})`;
-									}
-									statusHtml = `<span style="color: #10b981; font-weight: bold;">Active${endDateStr}</span>`;
-								} else if (!hasProfile) {
-									statusHtml = '<span style="color: #64748b;">No profile</span>';
-								}
+                    <div class="mobile-cards">
+                        <div class="user-list">
+                            ${users.map(u => {
+                                const isSubscribed = u.profile && u.profile.is_subscribed;
+                                const hasProfile = !!u.profile;
+                                
+                                let statusHtml = '<span class="text-muted small">Inactive</span>';
+                                if (hasProfile && isSubscribed) {
+                                    let endDateStr = '';
+                                    if (u.profile.subscription_end_date) {
+                                        const dateObj = new Date(u.profile.subscription_end_date);
+                                        endDateStr = ` <br><small class="text-muted">Active till: ${dateObj.toLocaleDateString()}</small>`;
+                                    }
+                                    statusHtml = `<span class="text-success fw-bold small">Active${endDateStr}</span>`;
+                                } else if (!hasProfile) {
+                                    statusHtml = '<span class="text-muted small">No profile</span>';
+                                }
 
-								return `
-									<div class="user-item">
-										<div class="user-info-row">
-											<strong>${u.first_name} ${u.last_name}</strong>
-											<span style="font-size: 12px; background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${u.role}</span>
-										</div>
-										<div class="user-info-row">
-											<span>Status:</span>
-											<span>${statusHtml}</span>
-										</div>
-										<div class="user-actions" style="display: flex; gap: 6px; align-items: center; margin-top: 8px;">
-											<input type="number" id="mobile-custom-days-${u.id}" value="30" min="1" max="365" style="width: 60px; padding: 8px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 4px;" placeholder="Days" ${!hasProfile ? 'disabled' : ''}>
-											<button class="btn-activate" onclick="modifySubscription(${u.id}, 'activate')" ${!hasProfile ? 'disabled' : ''}>Extend</button>
-											<button class="btn-revoke" onclick="modifySubscription(${u.id}, 'revoke')" ${!hasProfile ? 'disabled' : ''}>Revoke</button>
-										</div>
-									</div>
-								`;
-							}).join('')}
-						</div>
-					</div>
-                    
+                                const emailVerified = hasProfile ? (u.profile.email_verified ? '<span class="badge bg-success-subtle text-success border border-success-subtle">Verified</span>' : '<span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pending</span>') : '<span class="text-muted">-</span>';
+                                const phoneVerified = hasProfile ? (u.profile.phone_verified ? '<span class="badge bg-success-subtle text-success border border-success-subtle">Verified</span>' : '<span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pending</span>') : '<span class="text-muted">-</span>';
+
+                                return `
+                                    <div class="user-item">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h6 class="fw-bold text-dark mb-0">${u.first_name} ${u.last_name}</h6>
+                                                <a href="profile.html?id=${u.id}" class="small text-primary text-decoration-none fw-semibold" title="View Profile">
+                                                    <i class="fa-solid fa-arrow-up-right-from-square me-1" style="font-size: 0.65rem;"></i> Profile
+                                                </a>
+                                            </div>
+                                            <span class="badge bg-secondary-subtle text-secondary border text-uppercase" style="font-size: 0.65rem;">${u.role}</span>
+                                        </div>
+                                        <div class="row g-1 small text-secondary mb-3">
+                                            <div class="col-6">Email Status: ${emailVerified}</div>
+                                            <div class="col-6">Phone Status: ${phoneVerified}</div>
+                                            <div class="col-12 mt-1">Subscription: ${statusHtml}</div>
+                                        </div>
+                                        <div class="d-flex gap-2 align-items-center pt-2 border-top">
+                                            <input type="number" id="custom-days-${u.id}" value="30" min="1" max="365" class="form-control form-control-sm text-center shadow-none" style="width: 75px;" ${!hasProfile ? 'disabled' : ''}>
+                                            <button class="btn btn-success btn-sm fw-semibold flex-grow-1 shadow-none" onclick="modifySubscription(${u.id}, 'activate')" ${!hasProfile ? 'disabled' : ''}>
+                                                <i class="fa-solid fa-plus me-1"></i> Extend
+                                            </button>
+                                            <button class="btn btn-danger btn-sm fw-semibold flex-grow-1 shadow-none" onclick="modifySubscription(${u.id}, 'revoke')" ${!hasProfile ? 'disabled' : ''}>
+                                                <i class="fa-solid fa-ban me-1"></i> Revoke
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
 
                     <!-- Desktop Table View -->
                     <div class="desktop-table">
-                        <table>
-                            <thead>
+                        <table class="table align-middle mb-0">
+                            <thead class="table-light text-uppercase fs-7 text-muted">
                                 <tr>
-                                    <!-- <th>User Id</th> -->
-                                    <th>Name</th>
-                                    <th>Role</th>
-									<th>Email Verified?</th>
-									<th>Phone Verified?</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th class="py-3">Name & Role</th>
+                                    <th class="py-3 text-center">Email Verified</th>
+                                    <th class="py-3 text-center">Phone Verified</th>
+                                    <th class="py-3">Status</th>
+                                    <th class="py-3 text-end" style="min-width: 310px;">Actions</th>
                                 </tr>
                             </thead>
-							<tbody>
+                            <tbody>
                                 ${users.map(u => {
-                                    let statusHtml = '<span style="color: #64748b;">Inactive</span>';
+                                    let statusHtml = '<span class="text-muted small">Inactive</span>';
                                     if (u.profile && u.profile.is_subscribed) {
                                         let endDateStr = '';
                                         if (u.profile.subscription_end_date) {
                                             const dateObj = new Date(u.profile.subscription_end_date);
-                                            endDateStr = `<br><small style="color: #475569;">Active till: ${dateObj.toLocaleDateString()}</small>`;
+                                            endDateStr = `<br><small class="text-muted">Active till: ${dateObj.toLocaleDateString()}</small>`;
                                         }
-                                        statusHtml = `<span style="color: #10b981; font-weight: bold;">Active</span>${endDateStr}`;
+                                        statusHtml = `<span class="text-success fw-bold">Active</span>${endDateStr}`;
                                     }
+
+                                    const hasProfile = !!u.profile;
+                                    const emailBadge = hasProfile ? (u.profile.email_verified ? '<span class="badge bg-success-subtle text-success border border-success-subtle">Yes</span>' : '<span class="badge bg-warning-subtle text-warning border border-warning-subtle">No</span>') : '<span class="text-muted">null</span>';
+                                    const phoneBadge = hasProfile ? (u.profile.phone_verified ? '<span class="badge bg-success-subtle text-success border border-success-subtle">Yes</span>' : '<span class="badge bg-warning-subtle text-warning border border-warning-subtle">No</span>') : '<span class="text-muted">null</span>';
 
                                     return `
                                         <tr>
-                                            <!-- <td>${u.id}</td> -->
-                                            <td>${u.first_name} ${u.last_name}</td>
-                                            <td>${u.role}</td>
-											
-                                            ${u.profile ? `
-												<td>${u.profile.email_verified}</td>
-												<td>${u.profile.phone_verified}</td>
-                                                <td>${statusHtml}</td>
-                                                <td style="display: flex; gap: 6px; align-items: center;">
-                                                    <input type="number" id="custom-days-${u.id}" value="30" min="1" max="365" style="width: 60px; padding: 8px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 4px;" placeholder="Days">
-                                                    <button class="btn-activate" onclick="modifySubscription(${u.id}, 'activate')">Extend</button>
-                                                    <button class="btn-revoke" onclick="modifySubscription(${u.id}, 'revoke')">Revoke</button>
-                                                </td>
-                                            ` : `
-												<td>null</td>
-												<td>null</td>
-                                                <td><span style="color: #64748b;">No profile</span></td>
-                                                <td>
-                                                    <input type="number" id="custom-days-${u.id}" value="30" min="1" max="365" style="width: 60px; padding: 8px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 4px;" placeholder="Days" disabled>
-                                                    <button class="btn-activate" disabled>Extend</button>
-                                                    <button class="btn-revoke" disabled>Revoke</button>
-                                                </td>
-                                            `}
+                                            <td>
+                                                <div class="d-flex justify-content-between align-items-center pe-3">
+                                                    <div>
+                                                        <div class="fw-semibold text-dark">${u.first_name} ${u.last_name}</div>
+                                                        <a href="profile.html?id=${u.id}" class="small text-primary text-decoration-none fw-medium" title="View Profile">
+                                                            <i class="fa-solid fa-arrow-up-right-from-square me-1" style="font-size: 0.65rem;"></i> View Profile
+                                                        </a>
+                                                    </div>
+                                                    <span class="badge bg-secondary-subtle text-secondary border text-uppercase" style="font-size: 0.65rem;">${u.role}</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">${emailBadge}</td>
+                                            <td class="text-center">${phoneBadge}</td>
+                                            <td>${statusHtml}</td>
+                                            <td class="text-end">
+                                                <div class="d-flex gap-2 justify-content-end align-items-center">
+                                                    <input type="number" id="custom-days-${u.id}" value="30" min="1" max="365" class="form-control form-control-sm text-center shadow-none" style="width: 70px;" ${!hasProfile ? 'disabled' : ''}>
+                                                    <button class="btn btn-success btn-sm fw-semibold shadow-none text-nowrap" onclick="modifySubscription(${u.id}, 'activate')" ${!hasProfile ? 'disabled' : ''}>Extend</button>
+                                                    <button class="btn btn-danger btn-sm fw-semibold shadow-none text-nowrap" onclick="modifySubscription(${u.id}, 'revoke')" ${!hasProfile ? 'disabled' : ''}>Revoke</button>
+                                                </div>
+                                            </td>
                                         </tr>
                                     `;
                                 }).join('')}
@@ -219,22 +218,30 @@
                     </div>
                 `;
             } catch (err) {
-                container.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+                container.innerHTML = `
+                    <div class="alert alert-danger small" role="alert">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i> Error: ${err.message}
+                    </div>`;
             }
         }
 
         async function modifySubscription(userId, actionType) {
             const msg = document.getElementById('msg');
-            msg.innerText = `Processing ${actionType}...`;
-            msg.style.color = "#007BFF";
-			const daysInput = document.getElementById(`custom-days-${userId}`);
-			const days = parseInt(daysInput.value);
+            msg.innerHTML = `
+                <div class="alert alert-info py-2 small" role="alert">
+                    <span class="spinner-border spinner-border-sm me-1" role="status"></span> Processing ${actionType}...
+                </div>`;
 
-			if (!days || days <= 0) {
-				alert("Please enter a valid number of days.");
-				return;
-			}
-			const token = localStorage.getItem('accessToken');
+            const daysInput = document.getElementById(`custom-days-${userId}`);
+            const days = parseInt(daysInput.value);
+
+            if (!days || days <= 0) {
+                alert("Please enter a valid number of days.");
+                msg.innerHTML = '';
+                return;
+            }
+            
+            const token = localStorage.getItem('accessToken');
 
             try {
                 const response = await fetch(`${API_BASE}/user_profiles/${userId}/manage_subscription/`, {
@@ -250,12 +257,16 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || "Action failed.");
 
-                msg.innerText = data.message;
-                msg.style.color = "green";
+                msg.innerHTML = `
+                    <div class="alert alert-success py-2 small" role="alert">
+                        <i class="fa-solid fa-circle-check me-1"></i> ${data.message}
+                    </div>`;
                 fetchAllUsers();
             } catch (err) {
-                msg.innerText = `Error: ${err.message}`;
-                msg.style.color = "red";
+                msg.innerHTML = `
+                    <div class="alert alert-danger py-2 small" role="alert">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i> Error: ${err.message}
+                    </div>`;
             }
         }
 

@@ -190,7 +190,7 @@
 					} else if (o.status === 'delivered') {
 						actionHtml = `
 							<div class="mb-2 text-muted small">Current Status: <strong class="text-success text-uppercase">Delivered</strong></div>
-							<a href="order_history.html?id=${o.id}" target="_blank" class="btn btn-info btn-sm text-white w-100 fw-semibold text-decoration-none mt-1">
+							<a href="order_history.html?id=${o.id}" class="btn btn-info btn-sm text-white w-100 fw-semibold text-decoration-none mt-1">
 								<i class="fa-solid fa-map-location-dot me-1"></i> See Route Trail
 							</a>
 						`;
@@ -408,7 +408,7 @@
 								<p class="mb-1 small"><strong>Pickup:</strong> ${o.pickup_address}</p>
 								<p class="mb-3 small"><strong>Delivery:</strong> ${o.delivery_address}</p>
 								<p class="mb-1 small"><em>Status: <strong style="color: #10b981;">DELIVERED</strong></em></p>
-								<a href="order_history.html?id=${o.id}" target="_blank" class="btn btn-info btn-sm text-white fw-semibold text-decoration-none mt-1">
+								<a href="order_history.html?id=${o.id}" class="btn btn-info btn-sm text-white fw-semibold text-decoration-none mt-1">
 									<i class="fa-solid fa-map-location-dot me-1"></i> See Route Trail
 								</a>
 							</div>
