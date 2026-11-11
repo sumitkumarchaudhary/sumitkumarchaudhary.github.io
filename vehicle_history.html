@@ -106,7 +106,7 @@
         }
 		
 		// 1. Initialize the map
-        const map = L.map('map').setView([28.5355, 77.3910], 13); // Default center (e.g., Noida)
+        const map = L.map('map'); //.setView([28.5355, 77.3910], 13); // Default center (e.g., Noida)
 
         // Add OpenStreetMap tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -399,7 +399,7 @@
                         // Create marker on first load and center map on it
                         driverMarker = L.marker(latLng).addTo(map)
                             .bindPopup("<b>Live Driver Location</b>").openPopup();
-                        map.setView(latLng, 15);
+                        <!-- map.setView(latLng, 15); -->
                     }
                 }
             } catch (err) {
@@ -423,6 +423,9 @@
 
 			if (token && vehicleId && userRole === 'driver') {
 				startBackgroundDriverTracker();
+				fetchVehicleHistory();
+				fetchAndUpdateLiveLocation();
+				setInterval(fetchAndUpdateLiveLocation, 5000);
 			}
 			if (token && userRole === 'owner'){
 				fetchVehicleHistory();

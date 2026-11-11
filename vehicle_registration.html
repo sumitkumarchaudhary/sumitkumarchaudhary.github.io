@@ -26,6 +26,24 @@
             color: #0b5ed7 !important;             /* Primary text */
             box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1); /* Subtle focus glow */
         }
+		.border-dashed {
+            border-style: dashed !important;
+        }
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        .header-icon-box {
+            width: 56px;
+            height: 56px;
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 auto 12px auto;
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100 justify-content-between">
@@ -38,9 +56,17 @@
 
     <!-- Registration Card -->
     <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-4 p-sm-5"100%
+        <div class="card-body p-4 p-sm-5">
+            <!-- Highly Visible Header Section -->
+            <div class="text-center mb-5 pb-3 border-bottom">
+                <div class="header-icon-box shadow-sm">
+                    <i class="fa-solid fa-truck-fast"></i>
+                </div>
+                <h2 class="fw-bold text-dark mb-1" style="letter-spacing: -0.02em;">Add New Vehicle</h2>
+                <p class="text-muted small mb-0">Register a commercial transport unit to your fleet management profile.</p>
+            </div>
             
-            <h3 class="fw-bold text-dark mb-4">Add Vehicle</h3>
+			<!-- <h3 class="fw-bold text-dark mb-0">Create an Account</h3> -->
             
             <form id="vehicleRegistrationForm" novalidate>
                 
@@ -121,6 +147,7 @@
 </div>
 
 <script src="/static/js/tracker.js"></script>
+<script src="/static/js/bootstrap.bundle.min.js"></script>
 <script>
 	const API_URL = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
 	// Grab form and input elements

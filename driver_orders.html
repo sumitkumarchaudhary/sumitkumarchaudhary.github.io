@@ -117,22 +117,62 @@
 			}
 
             try {
-                const response = await fetch(url, {
-                    headers: { 
-						'Authorization': `Bearer ${token}`,
-						'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 					
-					}
-                });
+			
+				const [vehiclesRes, ordersResponse, currUser] = await Promise.all([
+					fetch(`${API_BASE}/vehicles/`, { 
+                        headers: { 
+                            'Authorization': `Bearer ${token}`, 
+                            'ngrok-skip-browser-warning': 'true'							
+                        } 
+                    }),
+                    
+					fetch(url, {
+						headers: { 
+							'Authorization': `Bearer ${token}`,
+							'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 					
+						}
+					}),
+                    
+					fetch(`${API_BASE}/users/me/`, { 
+                        headers: { 
+                            'Authorization': `Bearer ${token}`,
+                            'ngrok-skip-browser-warning': 'true'
+                        } 
+                    })
+                ]);
+				
 				// Check for specific status codes first
-				if (response.status === 403) {
+				if (!vehiclesRes.status === 403 || ordersResponse.status === 403 || currUser.status === 403) {
 					throw new Error("Access denied. You do not have active subscription to view these orders.");
 				}
-                if (!response.ok) throw new Error(`Failed to fetch orders. Status: ${response.status}`);
-
-                const orders = await response.json();
-				console.log(orders);
 				
-                if (orders.length === 0) {
+                if (!vehiclesRes.ok || !ordersResponse.ok || !currUser.ok) throw new Error(`Failed to fetch orders. Status: ${response.status}`);
+				
+				
+				
+				<!-- const response = await fetch(url, { -->
+                    <!-- headers: {  -->
+						<!-- 'Authorization': `Bearer ${token}`, -->
+						<!-- 'ngrok-skip-browser-warning': 'true' // <-- Add this exact line! 					 -->
+					<!-- } -->
+                <!-- }); -->
+				
+							
+				
+                <!-- if (!response.ok) throw new Error(`Failed to fetch orders. Status: ${response.status}`); -->
+				const vehicles = await vehiclesRes.json();
+                const orders = await ordersResponse.json();
+				const userData = await currUser.json();
+				
+				let currentVehicle = vehicles.find(v => v.driver && v.driver === userData.id && v.is_verified);
+				<!-- console.log('currentVehicle', currentVehicle); -->
+				console.log(orders);
+				console.log(userData);
+				<!-- const vehicleType = currentVehicle.vehicle_type; -->
+				<!-- console.log(vehicleType); -->
+				let applicableOrders = orders.filter(o => o.req_vehicle_type === currentVehicle.vehicle_type)
+				<!-- console.log(applicableOrders); -->
+                if (applicableOrders.length === 0) {
                     container.innerHTML = `
 						<div class="text-center py-4 text-muted border border-dashed rounded-3 bg-light">
 							<i class="fa-solid fa-box-open fs-3 mb-2"></i>
@@ -141,7 +181,7 @@
                     return;
                 }
 
-                orders.sort((a, b) => {
+                applicableOrders.sort((a, b) => {
                     const activeStatuses = ['assigned', 'in_transit'];
                     const aIsActive = activeStatuses.includes(a.status);
                     const bIsActive = activeStatuses.includes(b.status);
@@ -151,7 +191,7 @@
                     return 0;
                 });
 				
-                const hasActiveOrder = orders.some(o => o.status === 'assigned' || o.status === 'in_transit');
+                const hasActiveOrder = applicableOrders.some(o => o.status === 'assigned' || o.status === 'in_transit');
 				if (hasActiveOrder) {
                     msg.innerHTML = `
 						<div class="alert alert-warning d-flex align-items-center small py-2 mb-3" role="alert">
@@ -162,7 +202,7 @@
                     msg.innerHTML = '';
                 }
 				
-				container.innerHTML = orders.map(o => {
+				container.innerHTML = applicableOrders.map(o => {
                     const isAcceptedByMe = o.status === 'assigned' || o.status === 'in_transit';
                     
                     let actionHtml = '';
@@ -203,8 +243,9 @@
 									<span class="fw-bold text-dark">Order ID: #${o.id}</span>
 									<span class="badge bg-secondary text-uppercase">${o.status}</span>
 								</div>
+								<p class="mb-1 small"><strong>Required Vehicle Type:</strong> ${o.req_vehicle_type.charAt(0).toUpperCase()+ o.req_vehicle_type.slice(1)}</p>
 								<p class="mb-1 small"><strong>Material:</strong> ${o.material_description}</p>
-								<p class="mb-1 small"><strong>Ordered By:</strong> ${o.customer_first_name} ${o.customer_last_name}</p>
+								<p class="mb-1 small"><strong>Ordered By:</strong> ${o.customer_first_name.charAt(0).toUpperCase()+o.customer_first_name.slice(1)} ${o.customer_last_name.charAt(0).toUpperCase()+ o.customer_last_name.slice(1)}</p>
 								<p class="mb-1 small"><strong>Pickup:</strong> ${o.pickup_address}</p>
 								<p class="mb-3 small"><strong>Delivery:</strong> ${o.delivery_address}</p>
 								<div class="border-top pt-2 mt-2">${actionHtml}</div>

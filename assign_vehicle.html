@@ -85,7 +85,7 @@
                     })
                 ]);
 
-                if (!vehiclesRes.ok || !usersRes.ok) throw new Error("Failed to load required data.");
+                if (!vehiclesRes.ok || !usersRes.ok || !currUser.ok) throw new Error("Failed to load required data.");
 
                 const vehicles = await vehiclesRes.json();
                 const users = await usersRes.json();
