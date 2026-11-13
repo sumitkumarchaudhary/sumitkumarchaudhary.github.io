@@ -102,7 +102,7 @@
                 container.innerHTML = `
                     <div class="vehicle-list">
                         ${vehicles.map(v => {
-                            const formattedType = v.vehicle_type ? v.vehicle_type.charAt(0).toUpperCase() + v.vehicle_type.slice(1).toLowerCase() : 'N/A';
+                            const formattedType = v.vehicle_type_description ? v.vehicle_type_description : 'N/A';
                             const verificationBadge = v.is_verified 
                                 ? '<span class="badge bg-success-subtle text-success border border-success-subtle"><i class="fa-solid fa-check me-1"></i> Verified</span>' 
                                 : '<span class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="fa-solid fa-clock me-1"></i> Pending Review</span>';

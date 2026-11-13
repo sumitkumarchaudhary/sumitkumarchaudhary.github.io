@@ -70,44 +70,87 @@
                 <form id="order-form" onsubmit="submitOrder(event)" novalidate>
                     
                     <!-- Vehicle Type Grid -->
-                    <div class="mb-4">
-                        <label class="form-label text-muted small fw-semibold">Required Commercial Vehicle Type</label>
-                        <div class="row g-2">
-                            <div class="col-12 col-sm-6">
-                                <input type="radio" class="btn-check" name="vehicle_type" id="type_small" value="small" required>
-                                <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_small">
-                                    Small (≤ 3.5 tonnes)
-                                </label>
-                            </div>
-                            <div class="col-12 col-sm-6">
-                                <input type="radio" class="btn-check" name="vehicle_type" id="type_light" value="light">
-                                <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_light">
-                                    Light (3.5 to 7.5 tonnes)
-                                </label>
-                            </div>
-                            <div class="col-12 col-sm-6">
-                                <input type="radio" class="btn-check" name="vehicle_type" id="type_medium" value="medium">
-                                <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_medium">
-                                    Medium (7.5 to 18.5 tonnes)
-                                </label>
-                            </div>
-                            <div class="col-12 col-sm-6">
-                                <input type="radio" class="btn-check" name="vehicle_type" id="type_heavy" value="heavy">
-                                <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_heavy">
-                                    Heavy (≥ 18.5 tonnes)
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- <div class="mb-4"> -->
+                        <!-- <label class="form-label text-muted small fw-semibold">Required Commercial Vehicle Type</label> -->
+                        <!-- <div class="row g-2"> -->
+                            <!-- <div class="col-12 col-sm-6"> -->
+                                <!-- <input type="radio" class="btn-check" name="vehicle_type" id="type_small" value="small" required> -->
+                                <!-- <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_small"> -->
+                                    <!-- Small (≤ 3.5 tonnes) -->
+                                <!-- </label> -->
+                            <!-- </div> -->
+                            <!-- <div class="col-12 col-sm-6"> -->
+                                <!-- <input type="radio" class="btn-check" name="vehicle_type" id="type_light" value="light"> -->
+                                <!-- <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_light"> -->
+                                    <!-- Light (3.5 to 7.5 tonnes) -->
+                                <!-- </label> -->
+                            <!-- </div> -->
+                            <!-- <div class="col-12 col-sm-6"> -->
+                                <!-- <input type="radio" class="btn-check" name="vehicle_type" id="type_medium" value="medium"> -->
+                                <!-- <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_medium"> -->
+                                    <!-- Medium (7.5 to 18.5 tonnes) -->
+                                <!-- </label> -->
+                            <!-- </div> -->
+                            <!-- <div class="col-12 col-sm-6"> -->
+                                <!-- <input type="radio" class="btn-check" name="vehicle_type" id="type_heavy" value="heavy"> -->
+                                <!-- <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_heavy"> -->
+                                    <!-- Heavy (≥ 18.5 tonnes) -->
+                                <!-- </label> -->
+                            <!-- </div> -->
+                        <!-- </div> -->
+                    <!-- </div> -->				
+					
+					<div class="mb-4">
+						<label class="form-label text-muted small fw-semibold d-block">Cargo Materials & Quantities</label>
+						
+						<!-- Dynamic Rows Container -->
+						<div id="materialRowsContainer" class="vstack gap-2">
+							<!-- Row template will be inserted here dynamically -->
+						</div>
+
+						<!-- Add Button -->
+						<div class="d-flex justify-content-end">
+							<button type="button" class="btn btn-outline-primary btn-sm mt-2 fw-semibold mb-3" onclick="addMaterialRow()">
+								<i class="fa-solid fa-plus me-1"></i> Add Another Material
+							</button>
+						</div>
+						<!-- Live Weight Summary -->
+						<div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded-3 border">
+							<span class="text-muted small fw-semibold">Total Cargo Weight:</span>
+							<span class="fw-bold text-primary fs-6">
+								<span id="totalWeightBadge">0</span> kg
+							</span>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label for="vehicleSelect" class="form-label text-muted small fw-semibold">Select Vehicle Type</label>
+						<select id="vehicleSelect" class="form-select bg-light shadow-none" required>
+							<option value="" disabled selected>Loading available vehicle type...</option>
+						</select>
+					</div>
 
                     <!-- Material Description -->
-                    <div class="mb-3">
-                        <label for="material_description" class="form-label text-muted small fw-semibold">Material Description</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-cube"></i></span>
-                            <input type="text" class="form-control bg-light border-start-0 ps-0 shadow-none" id="material_description" placeholder="e.g., Sand, Bricks, Cement" required>
-                        </div>
-                    </div>
+					<!-- <div class="mb-3"> -->
+						<!-- <label for="materials" class="form-label text-muted small fw-semibold">Select Vehicle</label> -->
+						<!-- <select id="materials" class="form-select bg-light shadow-none" required> -->
+							<!-- <option value="" disabled selected>Loading materials...</option> -->
+						<!-- </select> -->
+					<!-- </div> -->
+					
+					<!-- <div class="mb-3"> -->
+                        <!-- <label for="material_description" class="form-label text-muted small fw-semibold">Material Description</label> -->
+                        <!-- <div class="input-group"> -->
+                            <!-- <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-cube"></i></span> -->
+                            <!-- <input type="text" class="form-control bg-light border-start-0 ps-0 shadow-none" id="material_description" placeholder="e.g., Sand, Bricks, Cement" required> -->
+                        <!-- </div> -->
+                    <!-- </div> -->
+                    <!-- <div class="mb-3"> -->
+                        <!-- <label for="material_weight" class="form-label text-muted small fw-semibold">Material Weight</label> -->
+                        <!-- <div class="input-group"> -->
+                            <!-- <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-cube"></i></span> -->
+                            <!-- <input type="text" class="form-control bg-light border-start-0 ps-0 shadow-none" id="material_weight" placeholder="e.g., 1.5 Ton, 2 Ton" required> -->
+                        <!-- </div> -->
+                    <!-- </div> -->
 
                     <!-- Pickup Location -->
                     <div class="mb-3 position-relative">
@@ -184,7 +227,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        const API_URL = 'https://upheaval-revise-fit.ngrok-free.dev/etransport/api/orders/';
+        const API_BASE = 'https://upheaval-revise-fit.ngrok-free.dev/etransport/api';
 
         // Open the map selector in a separate popup window
         function openMapWindow(targetType) {
@@ -269,16 +312,20 @@
             msgElement.className = "text-muted";
             
             const payload = {
-                material_description: document.getElementById('material_description').value,
+                material_weight: parseFloat(document.getElementById('totalWeightBadge').textContent.replace(/,/g, '')),
+				req_truck_type: parseInt(document.getElementById('vehicleSelect').value),
+				<!-- material_description: document.getElementById('material_description').value, -->
+				material_description: getMaterialsSummaryText(),
+				<!-- material_weight: document.getElementById('material_weight').value, -->
                 pickup_address: document.getElementById('local_pickup_address').value || document.getElementById('pickup_address').value || "Null",
                 delivery_address: document.getElementById('local_delivery_address').value || document.getElementById('delivery_address').value || "Null",
                 pickup_lat: document.getElementById('pickup_lat').value ? parseFloat(document.getElementById('pickup_lat').value) : null,
                 pickup_lon: document.getElementById('pickup_lon').value ? parseFloat(document.getElementById('pickup_lon').value) : null,
                 dropoff_lat: document.getElementById('drop_lat').value ? parseFloat(document.getElementById('drop_lat').value) : null,
                 dropoff_lon: document.getElementById('drop_lon').value ? parseFloat(document.getElementById('drop_lon').value) : null,
-                req_vehicle_type: document.querySelector('input[name="vehicle_type"]:checked')?.value || ""
+                <!-- req_vehicle_type: document.querySelector('input[name="vehicle_type"]:checked')?.value || "" -->
             };
-
+			console.log(payload);
             const token = localStorage.getItem('accessToken');
             if (!token) {
                 msgElement.innerHTML = `<div class="alert alert-danger small mt-3">Error: You must be logged in as a customer.</div>`;
@@ -286,7 +333,7 @@
             }
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(`${API_BASE}/orders/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -349,9 +396,283 @@
                 addressInput.value = "";
             }, { timeout: 10000 });
         }
-		
 		// Run on page load
         document.addEventListener('DOMContentLoaded', useCurrentLocationForPickup);
+		
+		//	
+		
+		let availableMaterials = []; // Cache materials fetched from backend
+		// 1. Fetch materials from your backend on page load
+		async function loadMaterialsForDynamicRows() {
+			const token = localStorage.getItem('accessToken');
+			try {
+				const response = await fetch(`${API_BASE}/materials/`, {
+					method: 'GET',
+					headers: {
+						'Authorization': `Bearer ${token}`,
+						'ngrok-skip-browser-warning': 'true'
+					}
+				});
+				if (response.ok) {
+					availableMaterials = await response.json();
+				}
+			} catch (err) {
+				console.error("Failed to load materials:", err);
+			}
+			
+			// Add the first default row once materials are loaded
+			addMaterialRow();
+		}
+		
+		// Call loadMaterialsForDynamicRows() inside your DOMContentLoaded event
+		document.addEventListener('DOMContentLoaded', () => {
+			loadMaterialsForDynamicRows();
+		});
+
+		// 2. Add a new material row
+		function addMaterialRow() {
+			const container = document.getElementById('materialRowsContainer');
+			
+			// Build options HTML from cached materials with data-unit attribute
+			let optionsHtml = '<option value="" disabled selected>Select Material</option>';
+			availableMaterials.forEach(mat => {
+				const unit = mat.material_weight_unit || 'kg';
+				optionsHtml += `<option value="${mat.id}" data-unit="${unit}">${mat.name} (${unit})</option>`;
+			});
+
+			const rowDiv = document.createElement('div');
+			rowDiv.className = 'row g-2 align-items-center material-row mb-2';
+			rowDiv.innerHTML = `
+				<div class="col-6">
+					<select name="material_id[]" class="form-select bg-light shadow-none material-select" required onchange="updateRowUnit(this)">
+						${optionsHtml}
+					</select>
+				</div>
+				<div class="col-5">
+					<div class="input-group">
+						<input type="number" step="0.01" name="quantity[]" class="form-control bg-light shadow-none material-qty" placeholder="Qty" required>
+						<span class="input-group-text bg-white text-muted small unit-label">kg</span>
+					</div>
+				</div>
+				<div class="col-1 text-center">
+					<button type="button" class="btn btn-outline-danger btn-sm border-0 shadow-none" onclick="removeMaterialRow(this)" title="Remove">
+						<i class="fa-solid fa-trash-can"></i>
+					</button>
+				</div>
+			`;
+			container.appendChild(rowDiv);
+		}
+
+		// Dynamically updates the unit label when the user changes the material selection
+		function updateRowUnit(selectElement) {
+			const row = selectElement.closest('.material-row');
+			const selectedOption = selectElement.options[selectElement.selectedIndex];
+			const unit = selectedOption.getAttribute('data-unit') || 'kg';
+			
+			// Update the unit label span
+			row.querySelector('.unit-label').textContent = unit;
+			
+			// Recalculate weight immediately
+			calculateTotalWeightAndFilterTrucks();
+		}
+
+		function removeMaterialRow(button) {
+			const row = button.closest('.material-row');
+			const container = document.getElementById('materialRowsContainer');
+			
+			if (container.children.length > 1) {
+				row.remove();
+				calculateTotalWeightAndFilterTrucks();
+			} else {
+				alert("You must include at least one material.");
+			}
+		}
+		
+		
+		function getMaterialsSummaryText() {
+			const rows = document.querySelectorAll('.material-row');
+			const summaryParts = [];
+
+			rows.forEach(row => {
+				const selectElement = row.querySelector('.material-select');
+				const qtyInput = row.querySelector('.material-qty');
+				const unitLabel = row.querySelector('.unit-label');
+
+				// Check if a material is selected and quantity is entered
+				if (selectElement && selectElement.selectedIndex > 0 && qtyInput.value) {
+					// Get material name without the unit suffix (e.g., "Cement (kg)" -> "Cement")
+					const fullOptionText = selectElement.options[selectElement.selectedIndex].text;
+					const materialName = fullOptionText.split(' (')[0]; 
+					
+					const qty = qtyInput.value;
+					const unit = unitLabel ? unitLabel.textContent : 'kg';
+
+					summaryParts.push(`${qty} ${unit} ${materialName}`);
+				}
+			});
+
+			// Join all parts with a comma and space (e.g., "50 kg Cement, 2 tonnes Sand")
+			return summaryParts.join(', ');
+		}
+		
+		
+		let allTrucks = [];
+		// 1. Fetch trucks from backend on page load
+		async function loadTrucksDropdown() {
+			const token = localStorage.getItem('accessToken');
+			const selectElement = document.getElementById('vehicleSelect');
+
+			try {
+				const response = await fetch(`${API_BASE}/trucks/`, {
+					method: 'GET',
+					headers: {
+						'Authorization': `Bearer ${token}`,
+						'ngrok-skip-browser-warning': 'true'
+					}
+				});
+
+				if (!response.ok) throw new Error("Failed to fetch vehicles.");
+
+				allTrucks = await response.json();
+				
+				// Initial population (unfiltered until weight is entered)
+				updateTruckDropdownOptions(0);
+
+			} catch (err) {
+				console.error('Error loading trucks:', err);
+				selectElement.innerHTML = '<option value="" disabled selected>Error loading trucks</option>';
+			}
+		}
+		
+		// Convert any weight unit into standardized Kilograms (kg)
+		function convertToKg(value, unit) {
+			if (!value || isNaN(value)) return 0;
+			const u = (unit || 'kg').toLowerCase().trim();
+			
+			switch (u) {
+				case 'g':
+				case 'gram':
+				case 'grams':
+					return value / 1000;
+				case 'quintal':
+				case 'quintals':
+					return value * 100;
+				case 'tonne':
+				case 'tonnes':
+				case 'ton':
+				case 't':
+					return value * 1000;
+				case 'kg':
+				case 'kilogram':
+				case 'kilograms':
+				default:
+					return value; // already in kg
+			}
+		}
+
+		// Calculate total weight in kg across all rows with mixed units
+		function calculateTotalWeightAndFilterTrucks() {
+			const rows = document.querySelectorAll('.material-row');
+			let totalWeightKg = 0;
+
+			rows.forEach(row => {
+				const qtyInput = row.querySelector('.material-qty');
+				const selectElement = row.querySelector('.material-select');
+				const qty = parseFloat(qtyInput.value) || 0;
+				
+				let unit = 'kg';
+				if (selectElement.selectedIndex > 0) {
+					const selectedOption = selectElement.options[selectElement.selectedIndex];
+					unit = selectedOption.getAttribute('data-unit') || 'kg';
+				}
+
+				// Convert row quantity to kg and add to total sum
+				totalWeightKg += convertToKg(qty, unit);
+			});
+
+			// Update UI Badge
+			const weightBadge = document.getElementById('totalWeightBadge');
+			if (weightBadge) {
+				weightBadge.textContent = `${totalWeightKg.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2})}`;
+			}
+
+			// Filter and repopulate backend truck dropdown based on standardized total weight
+			updateTruckDropdownOptions(totalWeightKg);
+		}
+		
+		
+		// Render filtered trucks into the select element
+		function updateTruckDropdownOptions(currentWeight) {
+			const selectElement = document.getElementById('vehicleSelect');
+			selectElement.innerHTML = '<option value="" disabled selected>Choose a suitable truck</option>';
+			
+			console.log(allTrucks);
+			let validTrucksCount = 0;
+
+			allTrucks.forEach(truck => {
+				
+				// Adjust property name based on your backend serializer (e.g., truck.capacity or truck.max_weight)
+				const truckCapacity = parseFloat(truck.max_load_capacity); 
+				console.log(truckCapacity);
+				const truckTypeLabel =  `${truck.truck_type} - (Capacity: ${truck.min_load_capacity} to ${truck.max_load_capacity} kg)`;
+				
+				const option = document.createElement('option');
+				option.value = truck.id;
+			
+
+				if (currentWeight > 0 && currentWeight > truckCapacity) {
+					// Overweight for this truck - disable or style it as unavailable
+					option.textContent = `${truckTypeLabel} [Overweight]`;
+					option.disabled = true;
+					option.style.color = '#9ca3af';
+				} else {
+					// Suitable truck
+					option.textContent = `${truckTypeLabel}`;
+					validTrucksCount++;
+				}
+
+				selectElement.appendChild(option);
+			});
+
+			if (validTrucksCount === 0 && currentWeight > 0) {
+				selectElement.innerHTML = '<option value="" disabled selected>No trucks available for this weight (Exceeds max capacity)</option>';
+			}
+		}
+		<!-- // 4. Collect data into an array of objects when submitting your form -->
+		<!-- function getSelectedMaterialsPayload() { -->
+			<!-- const rows = document.querySelectorAll('.material-row'); -->
+			<!-- const materialsData = []; -->
+
+			<!-- rows.forEach(row => { -->
+				<!-- const materialId = row.querySelector('.material-select').value; -->
+				<!-- const quantity = row.querySelector('.material-qty').value; -->
+
+				<!-- if (materialId && quantity) { -->
+					<!-- materialsData.push({ -->
+						<!-- material: parseInt(materialId), -->
+						<!-- quantity: parseFloat(quantity) -->
+					<!-- }); -->
+				<!-- } -->
+			<!-- }); -->
+
+			<!-- return materialsData; -->
+		<!-- } -->
+
+		
+		
+			
+		// 4. Listen to input changes on material quantities to trigger recalculation
+		document.addEventListener('input', function(event) {
+			if (event.target.classList.contains('material-qty') || event.target.classList.contains('material-select')) {
+				calculateTotalWeightAndFilterTrucks();
+			}
+		});
+		
+		// Load trucks when the DOM is ready
+		document.addEventListener('DOMContentLoaded', () => {
+			loadTrucksDropdown();
+		});
+		
     </script>
 </body>
 </html>

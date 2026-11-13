@@ -164,14 +164,14 @@
                 const orders = await ordersResponse.json();
 				const userData = await currUser.json();
 				
-				let currentVehicle = vehicles.find(v => v.driver && v.driver === userData.id && v.is_verified);
-				<!-- console.log('currentVehicle', currentVehicle); -->
+				let currentVehicle = vehicles.find(v => v.driver && v.driver === userData.id && v.is_verified) || {};
+				console.log('currentVehicle', currentVehicle);
 				console.log(orders);
 				console.log(userData);
 				<!-- const vehicleType = currentVehicle.vehicle_type; -->
 				<!-- console.log(vehicleType); -->
-				let applicableOrders = orders.filter(o => o.req_vehicle_type === currentVehicle.vehicle_type)
-				<!-- console.log(applicableOrders); -->
+				let applicableOrders = orders.filter(o => o.req_truck_type === currentVehicle.vehicle_type)
+				console.log(applicableOrders);
                 if (applicableOrders.length === 0) {
                     container.innerHTML = `
 						<div class="text-center py-4 text-muted border border-dashed rounded-3 bg-light">
@@ -243,7 +243,7 @@
 									<span class="fw-bold text-dark">Order ID: #${o.id}</span>
 									<span class="badge bg-secondary text-uppercase">${o.status}</span>
 								</div>
-								<p class="mb-1 small"><strong>Required Vehicle Type:</strong> ${o.req_vehicle_type.charAt(0).toUpperCase()+ o.req_vehicle_type.slice(1)}</p>
+								<p class="mb-1 small"><strong>Required Vehicle Type:</strong> ${o.req_vehicle_type?.charAt(0).toUpperCase()+ o.req_vehicle_type?.slice(1)}</p>
 								<p class="mb-1 small"><strong>Material:</strong> ${o.material_description}</p>
 								<p class="mb-1 small"><strong>Ordered By:</strong> ${o.customer_first_name.charAt(0).toUpperCase()+o.customer_first_name.slice(1)} ${o.customer_last_name.charAt(0).toUpperCase()+ o.customer_last_name.slice(1)}</p>
 								<p class="mb-1 small"><strong>Pickup:</strong> ${o.pickup_address}</p>

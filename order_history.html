@@ -189,10 +189,10 @@
                                     <span class="text-muted d-block" style="font-size: 0.7rem;">CUSTOMER</span>
                                     <strong class="text-dark">${data.customer_first_name || ''} ${data.customer_last_name || ''}</strong>
                                 </div>
-                                <!-- <div class="col-12 col-md-6 mt-2"> -->
-                                    <!-- <span class="text-muted d-block" style="font-size: 0.7rem;">ASSIGNED VEHICLE</span> -->
-                                    <!-- <strong class="text-dark">${data.vehicle_no || 'N/A'} (${data.vehicle_type ? data.vehicle_type.toUpperCase() : 'N/A'})</strong> -->
-                                <!-- </div> -->
+                                <div class="col-12 col-md-6 mt-2">
+                                    <span class="text-muted d-block" style="font-size: 0.7rem;">ASSIGNED VEHICLE</span>
+                                    <strong class="text-dark">${data.vehicle_no || 'N/A'} (${data.vehicle_type_description || 'N/A'})</strong>
+                                </div>
                                 <div class="col-12 col-md-6 mt-2">
                                     <span class="text-muted d-block" style="font-size: 0.7rem;">CREATED AT</span>
                                     <strong class="text-dark">${new Date(data.created_at).toLocaleString()}</strong>
@@ -202,15 +202,16 @@
                                     <strong class="text-dark">${new Date(data.completed_at).toLocaleString()}</strong>
                                 </div>
                             </div>
-                            <p class="mb-1 small"><strong>Pickup Address:</strong> ${data.pickup_address}</p>
-                            <p class="mb-0 small"><strong>Delivery Address:</strong> ${data.delivery_address}</p>
+                            <p class="mb-3 small"><strong>Pickup Address:</strong> ${data.pickup_address}</p>
+                            <p class="mb-3 small"><strong>Delivery Address:</strong> ${data.delivery_address}</p>
                             
 							${hasDriver ? `
                                 <div class="bg-white p-3 rounded-3 border small text-secondary mb-3">
                                     <div class="fw-semibold text-dark mb-1"><i class="fa-solid fa-id-badge me-1 text-primary"></i> Delivered By:</div>
                                     <div class="row g-2">
                                         <div class="col-12 col-sm-6">👤 <strong>Driver Name:</strong> ${data.driver_first_name || ''} ${data.driver_last_name || ''}</div>
-                                        <div class="col-12 col-sm-6">🚚 <strong>Vehicle No:</strong> ${data.vehicle_no || 'N/A'}</div>
+                                        <!-- <div class="col-12 col-sm-6">🚚 <strong>Vehicle No:</strong> ${data.vehicle_no || 'N/A'}</div> -->
+										<!-- <div class="col-12 col-sm-6">🚚 <strong>Vehicle Type:</strong> ${data.vehicle_type_description || 'N/A'}</div> -->
                                         <div class="col-12 col-sm-6">📞 <strong>Phone:</strong> ${data.driver_phone_number ? `<a href="tel:${data.driver_phone_number}" class="text-primary fw-semibold text-decoration-none">${data.driver_phone_number}</a>` : 'Not provided'}</div>
                                         <div class="col-12 col-sm-6">📧 <strong>Email:</strong> ${data.driver_email ? `<a href="mailto:${data.driver_email}" class="text-primary fw-semibold text-decoration-none">${data.driver_email}</a>` : 'Not provided'}</div>
                                     </div>

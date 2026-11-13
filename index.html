@@ -128,7 +128,7 @@
                         <form id="loginForm" novalidate onsubmit="handleAuthSubmission(event)">
                             
                             <!-- Email Field -->
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <label for="userInput" class="form-label text-muted small fw-semibold">Email or Username</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-envelope"></i></span>
@@ -138,10 +138,10 @@
                             </div>
 
                             <!-- Password Field -->
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <label for="passwordInput" class="form-label text-muted small fw-semibold">Password</label>
-                                    <a href="#" class="small text-decoration-none text-primary">Forgot?</a>
+                                    <a href="forgot-password-request.html" class="small text-decoration-none text-primary">Forgot?</a>
                                 </div>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-lock"></i></span>
@@ -153,11 +153,6 @@
                                 <div class="invalid-feedback">Please enter your password.</div>
                             </div>
 
-                            <!-- Remember Me Checkbox -->
-                            <div class="mb-4 form-check">
-                                <input type="checkbox" class="form-check-input" id="rememberMe">
-                                <label class="form-check-label text-muted small" for="rememberMe">Remember me for 30 days</label>
-                            </div>
 							<div class="error-message" id="authFeedback"></div>
                             <!-- Submit Button -->
                             <div class="d-grid">
@@ -166,10 +161,13 @@
                                 </button>
                             </div>
                         </form>
-
                     </div>
                 </div>
-
+				<div class="text-center mt-3">
+					<a href="login-otp.html" class="text-decoration-none small fw-semibold text-primary">
+						<i class="fa-solid fa-mobile-screen-button me-1"></i> Login with Mobile & OTP instead
+					</a>
+				</div>
                 <!-- Footer text -->
                 <div class="text-center mt-4">
                     <p class="text-muted small">Don't have an account? <a href="user_registration.html" class="text-primary fw-semibold text-decoration-none">Register</a></p>
@@ -265,7 +263,61 @@
 			<div class="vstack gap-3" id="vehicle-container-assigned"></div>
 			
 		 </section>
+		 <!-- <div id="otpStep" style="display: none;"> -->
+			<!-- <div class="mb-3"> -->
+				<!-- <label for="otpCode" class="form-label text-muted small fw-semibold">Enter 6-Digit OTP</label> -->
+				<!-- <input type="text" id="otpCode" class="form-control bg-light text-center fs-4 tracking-widest shadow-none" maxlength="6" placeholder="------"> -->
+			<!-- </div> -->
+			<!-- <button class="btn btn-success w-100 fw-semibold" onclick="verifyOtp()">Verify OTP</button> -->
+		<!-- </div> -->
+		<!-- <div id="msg" class="mt-3 text-center small fw-semibold"></div> -->
+		
+		<!-- <div id="otpStep" style="display: none;"> -->
+			<!-- <div class="mb-3 text-center"> -->
+				<!-- <label for="modalOtpCode" class="form-label text-muted small fw-semibold d-block">Enter 6-Digit OTP Sent To Your Phone</label> -->
+				<!-- <input type="text" id="modalOtpCode" class="form-control bg-light text-center fs-3 tracking-widest shadow-none" maxlength="6" placeholder="------"> -->
+			<!-- </div> -->
+			<!-- <button type="button" class="btn btn-success w-100 fw-semibold py-2" onclick="verifyOtp()">Verify OTP</button> -->
+			<!-- <div class="text-center mt-3"> -->
+				<!-- <button type="button" class="btn btn-link btn-sm text-muted text-decoration-none" onclick="resetOtpModal()">Resend OTP</button> -->
+			<!-- </div> -->
+		<!-- </div> -->
+		
+		<!-- OTP Verification Modal -->
+		<div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+				<div class="modal-content border-0 shadow-lg rounded-4 p-3">
+					<div class="modal-header border-0 pb-0">
+						<h5 class="modal-title fw-bold text-dark" id="otpModalLabel">Verify Phone Number</h5>
+						<button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					
+					<div class="modal-body">
+						<!-- Response / Feedback Message -->
+						<div id="otpMsg" class="mb-3 small text-center fw-semibold"></div>
 
+						<!-- Step 1: Request OTP -->
+						<div id="modalSendStep">
+							<p class="text-muted small text-center mb-4">Click below to send a 6-digit verification OTP to your registered mobile number.</p>
+							<button type="button" class="btn btn-primary w-100 fw-semibold py-2" onclick="sendModalOtpDirect()">Send OTP</button>
+						</div>
+
+						<!-- Step 2: Enter 6-Digit OTP (Hidden initially) -->
+						<div id="modalOtpStep" style="display: none;">
+							<div class="mb-3 text-center">
+								<label for="modalOtpCode" class="form-label text-muted small fw-semibold d-block">Enter 6-Digit OTP Sent To Your Phone</label>
+								<input type="text" id="modalOtpCode" class="form-control bg-light text-center fs-3 tracking-widest shadow-none" maxlength="6" placeholder="------">
+							</div>
+							<button type="button" class="btn btn-success w-100 fw-semibold py-2" onclick="verifyModalOtp()">Verify OTP</button>
+							<div class="text-center mt-3">
+								<button type="button" class="btn btn-link btn-sm text-muted text-decoration-none" onclick="resetOtpModal()">Resend OTP</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
 
 		<div id="message-container"> <p style="color: red; margin-top:15px; text-align:center;"> You do not have active subscription. Kindly subscribe to avail the services.</p> </div>
 
@@ -286,7 +338,7 @@
                 </a>
 				
 				<a href="customer_orders.html" id="link-customer-orders" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-teal bg-teal-subtle border" style="background-color: #ccfbf1; color: #134e4a; border-color: #c7d2fe;">
-                    <i class="fa-solid fa-sort me-1"></i> See Orders
+                    <i class="fa fa-eye me-1"  aria-hidden="true"></i> See Orders
                 </a>
 				
 				<a href="driver_orders.html" id="link-driver-orders" class="btn btn-sm role-nav hidden rounded-3 px-3 py-2 fw-semibold text-indigo bg-indigo-subtle border" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
@@ -323,13 +375,28 @@
                 <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
             </button>
         </section>
+		
 	    <!-- Footer -->
 		<footer class="bg-white border-top py-4 text-center text-muted small">
 			<p class="mb-0">&copy; 2026 FleetPro Telematics & Logistics Inc. All rights reserved.</p>
 		</footer>
     </div>
 
+	<!-- otp verification modal -->
+	<!-- <div class="card shadow-sm border-0 rounded-4 p-4 mx-auto" style="max-width: 450px;"> -->
+		<!-- <h4 class="fw-bold mb-3">Verify Phone Number</h4> -->
+		
+		<!-- <!-- Step 1: Input Phone Number --> -->
+		<!-- <div id="phoneStep"> -->
+			<!-- <div class="mb-3"> -->
+				<!-- <label for="phoneNumber" class="form-label text-muted small fw-semibold">Mobile Number</label> -->
+				<!-- <input type="text" id="phoneNumber" class="form-control bg-light shadow-none" placeholder="Enter 10-digit mobile number" required> -->
+			<!-- </div> -->
+			<!-- <button class="btn btn-primary w-100 fw-semibold" onclick="sendOtp()">Send OTP</button> -->
+		<!-- </div> -->
 
+		<!-- Step 2: Enter OTP (Hidden by default) -->
+	<!-- </div> -->
 	
 	<!-- <script src="/static/js/global-tracker.js"></script> -->
 	<script src="/static/js/tracker.js"></script>
@@ -338,6 +405,7 @@
     <script>
         const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
 
+		
         // DOM Elements
         const loginView = document.getElementById('loginView');
         const profileView = document.getElementById('profileView');
@@ -351,13 +419,19 @@
         const userName = document.getElementById('userName');
         const userRole = document.getElementById('userRole');
 		const profilePhone = document.getElementById('profilePhone');
-
-        // Check auth status on load
-        window.addEventListener('DOMContentLoaded', () => {
-            if (getAccessToken()) {
+		
+		if (getAccessToken()) {
+				loginView.classList.add('hidden');
                 fetchUserProfile();
-            }
-        });
+        }
+
+        <!-- // Check auth status on load -->
+        <!-- window.addEventListener('DOMContentLoaded', () => { -->
+            <!-- if (getAccessToken()) { -->
+				<!-- loginView.classList.add('hidden'); -->
+                <!-- fetchUserProfile(); -->
+            <!-- } -->
+        <!-- }); -->
 
         function setTokens(accessToken, refreshToken) {
             localStorage.setItem('accessToken', accessToken);
@@ -367,18 +441,18 @@
         function getAccessToken() { return localStorage.getItem('accessToken'); }
         function getRefreshToken() { return localStorage.getItem('refreshToken'); }
 
-		function loadMyIIFE() {
-		  return new Promise((resolve, reject) => {
-			const script = document.createElement('script');
-			script.src = '/static/js/global-tracker.js';
+		<!-- function loadMyIIFE() { -->
+		  <!-- return new Promise((resolve, reject) => { -->
+			<!-- const script = document.createElement('script'); -->
+			<!-- script.src = '/static/js/global-tracker.js'; -->
 			
-			// Resolve when the script is loaded and executed
-			script.onload = () => resolve();
-			script.onerror = () => reject(new Error(`Failed to load script: ${script.src}`));
+			<!-- // Resolve when the script is loaded and executed -->
+			<!-- script.onload = () => resolve(); -->
+			<!-- script.onerror = () => reject(new Error(`Failed to load script: ${script.src}`)); -->
 			
-			document.body.appendChild(script);
-		  });
-		}
+			<!-- document.body.appendChild(script); -->
+		  <!-- }); -->
+		<!-- } -->
 		
 		
 		
@@ -400,13 +474,6 @@
 			document.head.appendChild(newScript);
 		}
 		
-		
-		
-		<!-- function loadMyIIFE() { -->
-			<!-- const script = document.createElement('script'); -->
-			<!-- script.src = '/static/js/global-tracker.js'; // Path to your file -->
-			<!-- document.body.appendChild(script); // Triggers immediate execution -->
-		<!-- } -->
 
         async function authorizedFetch(url, options = {}) {
             options.headers = options.headers || {};
@@ -528,7 +595,8 @@
 			
             const firstName = user.first_name || "";
             const lastName = user.last_name || "";
-            const fullname = (firstName + ' ' + lastName).trim() || user.username;
+            const fullname = (firstName.charAt(0).toUpperCase()+ firstName.slice(1) + 
+					' ' + lastName.charAt(0).toUpperCase()+ lastName.slice(1)).trim() || user.username;
             
             profileDisplayName.textContent = fullname;
             userName.textContent = user.username || "---";
@@ -556,9 +624,13 @@
             const phoneStatusContainer = document.getElementById('phone-status-container');
             if (phoneStatusContainer) {
                 if (user.profile?.phone_verified) {
-                    phoneStatusContainer.innerHTML = '<span style="color: #10b981; font-weight: 600;">Verified ✓</span>';
+                    phoneStatusContainer.innerHTML = '<span class="badge bg-success-subtle text-success border border-success-subtle"><i class="fa-solid fa-check me-1"></i> Verified</span>';
                 } else {
-                    phoneStatusContainer.innerHTML = '<button onclick="triggerPhoneVerification(event)" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold"> Verify Phone</button>';
+                    phoneStatusContainer.innerHTML = `
+						<button type="button" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold text-nowrap" data-bs-toggle="modal" data-bs-target="#otpModal" onclick="initiateOtpModal()">
+							Verify Phone
+						</button>
+					`;
                 }
             }
             // ----------------------------------------------
@@ -699,16 +771,28 @@
 							<div class="row g-3 bg-light p-3 rounded-3 border mb-3 small">
 								<div class="col-4">
 									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>TYPE</strong></span>
-									<span class="fw-semibold fst-italic text-capitalize">${vehicle.vehicle_type}</span>
+									<span class="fw-semibold fst-italic text-capitalize">${vehicle.vehicle_type_description}</span>
 								</div>
 								<div class="col-4">
-									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>CHASSIS NO</strong></span>
-									<span class="fw-semibold fst-italic">${vehicle.chesis_no}</span>
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>CURRENT ORDER</strong></span>
+									<span class="fw-semibold fst-italic">${vehicle.current_order?.status.charAt(0).toUpperCase()+vehicle.current_order?.status.slice(1)}</span>
 								</div>
 								<div class="col-4">
-									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>ENGINE NO</strong></span>
-									<span class="fw-semibold fst-italic">${vehicle.engine_no}</span>
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>ORDER ID</strong></span>
+									<span class="fw-semibold fst-italic">
+										<a href="order-details.html?id=${vehicle.current_order?.order_id}" class="fw-bold text-primary text-decoration-none">
+											${vehicle.current_order?.order_id}
+										</a>
+									</span>
 								</div>
+								<!-- <div class="col-4"> -->
+									<!-- <span class="text-muted d-block" style="font-size: 0.7rem;"><strong>PICKUP ADDRESS</strong></span> -->
+									<!-- <span class="fw-semibold fst-italic">${vehicle.current_order?.pickup_address}</span> -->
+								<!-- </div> -->
+								<!-- <div class="col-4"> -->
+									<!-- <span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DELIVERY ADDRESS</strong></span> -->
+									<!-- <span class="fw-semibold fst-italic">${vehicle.current_order?.delivery_address}</span> -->
+								<!-- </div> -->
 								<div class="col-4">
 									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DRIVER NAME</strong></span>
 									<span class="fw-semibold fst-italic">${vehicle.driver ? vehicle.driver_first_name : null} ${vehicle.driver ? vehicle.driver_last_name : ''}</span>
@@ -778,7 +862,7 @@
 							<div class="row g-3 bg-light p-3 rounded-3 border mb-3 small">
 								<div class="col-4">
 									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>TYPE</strong></span>
-									<span class="fw-semibold fst-italic text-capitalize">${vehicle.vehicle_type}</span>
+									<span class="fw-semibold fst-italic text-capitalize">${vehicle.vehicle_type_description}</span>
 								</div>
 								<div class="col-4">
 									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>CHASSIS NO</strong></span>
@@ -886,15 +970,107 @@
                 alert(err.message);
             }
         }
+	
+	function initiateOtpModal() {
+		// Reset modal state whenever opened
+		document.getElementById('modalSendStep').style.display = 'block';
+		document.getElementById('modalOtpStep').style.display = 'none';
+		document.getElementById('otpMsg').innerText = '';
+		document.getElementById('modalOtpCode').value = '';
+	}
 
-        async function triggerPhoneVerification(event) {
-            event.preventDefault();
-            const otp = prompt("Enter the 6-digit OTP sent to your phone number:");
-            if (!otp) return;
+	async function sendModalOtpDirect() {
+		const msg = document.getElementById('otpMsg');
+		const token = localStorage.getItem('accessToken');
+		const phoneNumber = parseInt(document.getElementById('profilePhone').textContent);
 
-            // Optional: Send OTP payload to your backend phone verification endpoint
-            alert("Phone number verified successfully!");
-        }
+		try {
+			msg.style.color = "#007BFF";
+			msg.innerText = "Sending OTP to your registered number...";
+
+			const response = await fetch(`${API_BASE}/user_profiles/send-phone-otp/`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${token}`,
+					'ngrok-skip-browser-warning': 'true'
+				},
+				body: JSON.stringify({ phone_number: phoneNumber }) // Uses request.user.profile on the backend
+			});
+
+			const data = await response.json();
+			if (!response.ok) throw new Error(data.error || "Failed to send OTP.");
+
+			msg.style.color = "green";
+			msg.innerText = data.message || "OTP sent successfully!";
+
+			// Switch modal view to OTP input
+			document.getElementById('modalSendStep').style.display = 'none';
+			document.getElementById('modalOtpStep').style.display = 'block';
+		} catch (err) {
+			msg.style.color = "red";
+			msg.innerText = err.message;
+		}
+	}
+
+	async function verifyModalOtp() {
+		const otp = document.getElementById('modalOtpCode').value;
+		const msg = document.getElementById('otpMsg');
+		const token = localStorage.getItem('accessToken');
+
+		if (!otp || otp.length !== 6) {
+			msg.style.color = "red";
+			msg.innerText = "Please enter the complete 6-digit OTP.";
+			return;
+		}
+
+		try {
+			msg.style.color = "#007BFF";
+			msg.innerText = "Verifying OTP...";
+
+			const response = await fetch(`${API_BASE}/user_profiles/verify-phone-otp/`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${token}`,
+					'ngrok-skip-browser-warning': 'true'
+				},
+				body: JSON.stringify({ otp: otp })
+			});
+
+			const data = await response.json();
+			if (!response.ok) throw new Error(data.error || "Verification failed.");
+
+			msg.style.color = "green";
+			msg.innerText = data.message || "Phone number verified successfully!";
+
+			// Close modal and refresh profile page after 1.5 seconds
+			setTimeout(() => {
+				const modalElement = document.getElementById('otpModal');
+				const modalInstance = bootstrap.Modal.getInstance(modalElement);
+				modalInstance.hide();
+				location.reload(); 
+			}, 1500);
+
+		} catch (err) {
+			msg.style.color = "red";
+			msg.innerText = err.message;
+		}
+	}
+
+	function resetOtpModal() {
+		document.getElementById('modalOtpStep').style.display = 'none';
+		document.getElementById('modalSendStep').style.display = 'block';
+		document.getElementById('otpMsg').innerText = '';
+		document.getElementById('modalOtpCode').value = '';
+		sendModalOtpDirect(); // Automatically trigger resend
+	}
+			
+		
+		
+		
+		
+		
 		
 		
 		
@@ -913,6 +1089,10 @@
 				icon.classList.add('fa-eye');
 			}
 		});
+		
+		
+		
+		
 		
 		<!-- let watchId = null; -->
 

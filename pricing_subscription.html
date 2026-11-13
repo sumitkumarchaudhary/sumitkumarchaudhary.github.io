@@ -71,7 +71,7 @@
                             </div>
                         </div>
                     </div>
-                    <button onclick="selectPlan(299, '28 Days')" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2 rounded-3">Select Plan</button>
+                    <button onclick="onPaymentSuccess(1, 1, 'signature', 28)" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2 rounded-3">Select Plan</button>
                 </div>
             </div>
         </div>
@@ -95,9 +95,8 @@
                                 <strong class="small text-dark">Unlimited</strong>
                             </div>
                         </div>
-                        <p class="text-muted mb-3" style="font-size: 0.8rem;"><i class="fa-solid fa-circle-check text-success me-1"></i> Includes 100 SMS/day + Unlimited 5G Data upgrade.</p>
                     </div>
-                    <button onclick="selectPlan(719, '84 Days')" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2 rounded-3">Select Plan</button>
+                    <button onclick="onPaymentSuccess(1, 1, 'signature', 84)" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2 rounded-3">Select Plan</button>
                 </div>
             </div>
         </div>
@@ -122,9 +121,8 @@
                                 <strong class="small text-dark">Unlimited</strong>
                             </div>
                         </div>
-                        <p class="text-muted mb-3" style="font-size: 0.8rem;"><i class="fa-solid fa-circle-check text-success me-1"></i> 100 SMS/day + Free Disney+ Hotstar subscription for 1 year.</p>
                     </div>
-                    <button onclick="selectPlan(2999, '365 Days')" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2 rounded-3">Select Plan</button>
+                    <button onclick="onPaymentSuccess(1, 1, 'signature', 365)" class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2 rounded-3">Select Plan</button>
                 </div>
             </div>
         </div>
@@ -137,6 +135,7 @@
 
 <!-- Interactive Filtering and Plan Selection Script -->
 <script>
+	const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api";
     function filterPlans(category) {
         // Update Active Pill state styling
         const buttons = document.querySelectorAll('#planTabs .nav-link');
@@ -158,21 +157,24 @@
         });
     }
 
-    function selectPlan(amount, data, validity) {
-        alert(`You selected plan: ₹${amount} (${data} data for ${validity}). Proceeding to payment gateway...`);
+    function selectPlan(amount, validity) {
+        alert(`You selected plan: ₹${amount} for ${validity} validity). Proceeding to payment gateway...`);
 		
         // window.location.href = `checkout.html?amount=${amount}`;
 		
     }
-	
-	
 	// Example using a gateway success callback (e.g., Razorpay or generic success)
-	function onPaymentSuccess(paymentResponse) {
+	function onPaymentSuccess(payment_id, order_id, signature, planDays) {
 		const token = localStorage.getItem('accessToken');
 		
 		// Extract plan duration from localStorage or URL query parameters
-		const planDays = parseInt(localStorage.getItem('selectedPlanDays')) || 30;
-
+		<!-- const planDays = parseInt(localStorage.getItem('selectedPlanDays')) || 30; -->
+		const payload = {
+			payment_id: payment_id,
+			order_id: order_id,
+			signature: signature, // If using Razorpay/HMAC verification
+			days: planDays
+		}
 		fetch(`${API_BASE}/user_profiles/verify-payment/`, {
 			method: 'POST',
 			headers: {
@@ -180,12 +182,7 @@
 				'Authorization': `Bearer ${token}`,
 				'ngrok-skip-browser-warning': 'true'
 			},
-			body: JSON.stringify({
-				payment_id: paymentResponse.payment_id,
-				order_id: paymentResponse.order_id,
-				signature: paymentResponse.signature, // If using Razorpay/HMAC verification
-				days: planDays
-			})
+			body: JSON.stringify(payload)
 		})
 		.then(response => {
 			if (!response.ok) throw new Error("Payment verification failed on server.");
@@ -194,6 +191,7 @@
 		.then(data => {
 			// Clear temporary storage and redirect to dashboard with success message
 			localStorage.removeItem('selectedPlanDays');
+			alert("Payment successful! Redirecting to your dashboard."); 
 			window.location.href = 'index.html?payment=success';
 		})
 		.catch(err => {

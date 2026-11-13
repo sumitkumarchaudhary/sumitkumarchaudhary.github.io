@@ -146,7 +146,7 @@
 
                 const data = await response.json();
                 console.log(data);
-                titleElement.textContent = `History Trail: ${data.vehicle_no} (${data.vehicle_type.toUpperCase()})`;
+                titleElement.textContent = `History Trail: ${data.vehicle_no} (${data.vehicle_type_description})`;
                 
                 // 1. Render Coordinate History Trail
                 if (data.coordinate_history && data.coordinate_history.length > 0) {
@@ -193,8 +193,10 @@
                                 </div>
                                 <p class="mb-1 small"><strong>Material:</strong> ${o.material}</p>
                                 <p class="mb-1 small"><strong>Customer:</strong> ${o.customer}</p>
+								<p class="mb-1 small"><strong>Pickup:</strong> ${o.pickup_address}</p>
+								<p class="mb-1 small"><strong>Dropoff:</strong> ${o.delivery_address}</p>
                                 <p class="mb-0 text-muted" style="font-size: 0.75rem;"><i class="fa-regular fa-clock me-1"></i> Created at: ${new Date(o.created_at).toLocaleString('en-IN')}</p>
-                                <p class="mb-0 text-muted" style="font-size: 0.75rem;"><i class="fa-solid fa-square-check me-1"></i> Delivered at: ${new Date(o.completed_at).toLocaleString('en-IN')}</p>
+                                <p class="mb-0 text-muted" style="font-size: 0.75rem;"><i class="fa-solid fa-square-check me-1"></i> Delivered at: ${o.completed_at ? new Date(o.completed_at).toLocaleString() : "Not Available"}</p>
                             </div>
                         </div>
                     `).join('');
@@ -248,7 +250,7 @@
 
                 <!-- const data = await response.json(); -->
                 <!-- console.log(data); -->
-                <!-- titleElement.textContent = `History Trail: ${data.vehicle_no} (${data.vehicle_type})`; -->
+                <!-- titleElement.textContent = `History Trail: ${data.vehicle_no} (${data.vehicle_type_description})`; -->
 				
 				
 				

@@ -73,32 +73,38 @@
                 <!-- Commercial Vehicle Type (Radio Grid) -->
                 <div class="mb-4">
                     <label class="form-label text-muted small fw-semibold">Commercial Vehicle Type</label>
-                    <div class="row g-2">
-                        <div class="col-12 col-sm-6">
-                            <input type="radio" class="btn-check" name="vehicle_type" id="type_small" value="small" required>
-                            <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_small">
-                                Small (≤ 3.5 tonnes)
-                            </label>
-                        </div>
-                        <div class="col-12 col-sm-6">
-                            <input type="radio" class="btn-check" name="vehicle_type" id="type_light" value="light">
-                            <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_light">
-                                Light (3.5 to 7.5 tonnes)
-                            </label>
-                        </div>
-                        <div class="col-12 col-sm-6">
-                            <input type="radio" class="btn-check" name="vehicle_type" id="type_medium" value="medium">
-                            <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_medium">
-                                Medium (7.5 to 18.5 tonnes)
-                            </label>
-                        </div>
-                        <div class="col-12 col-sm-6">
-                            <input type="radio" class="btn-check" name="vehicle_type" id="type_heavy" value="heavy">
-                            <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_heavy">
-                                Heavy (≥ 18.5 tonnes)
-                            </label>
-                        </div>
-                    </div>
+					<div class="mb-3">
+						<label for="vehicleSelect" class="form-label text-muted small fw-semibold">Select Vehicle Type</label>
+						<select id="vehicleSelect" name="vehicle_type" class="form-select bg-light shadow-none" required>
+							<option value="" disabled selected>Loading available vehicle type...</option>
+						</select>
+					</div>
+                    <!-- <div class="row g-2"> -->
+                        <!-- <div class="col-12 col-sm-6"> -->
+                            <!-- <input type="radio" class="btn-check" name="vehicle_type" id="type_small" value="small" required> -->
+                            <!-- <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_small"> -->
+                                <!-- Small (≤ 3.5 tonnes) -->
+                            <!-- </label> -->
+                        <!-- </div> -->
+                        <!-- <div class="col-12 col-sm-6"> -->
+                            <!-- <input type="radio" class="btn-check" name="vehicle_type" id="type_light" value="light"> -->
+                            <!-- <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_light"> -->
+                                <!-- Light (3.5 to 7.5 tonnes) -->
+                            <!-- </label> -->
+                        <!-- </div> -->
+                        <!-- <div class="col-12 col-sm-6"> -->
+                            <!-- <input type="radio" class="btn-check" name="vehicle_type" id="type_medium" value="medium"> -->
+                            <!-- <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_medium"> -->
+                                <!-- Medium (7.5 to 18.5 tonnes) -->
+                            <!-- </label> -->
+                        <!-- </div> -->
+                        <!-- <div class="col-12 col-sm-6"> -->
+                            <!-- <input type="radio" class="btn-check" name="vehicle_type" id="type_heavy" value="heavy"> -->
+                            <!-- <label class="btn btn-outline-light text-dark border w-100 py-2 text-start small fw-medium" for="type_heavy"> -->
+                                <!-- Heavy (≥ 18.5 tonnes) -->
+                            <!-- </label> -->
+                        <!-- </div> -->
+                    <!-- </div> -->
                 </div>
                 
                 <!-- Vehicle Number -->
@@ -149,7 +155,7 @@
 <script src="/static/js/tracker.js"></script>
 <script src="/static/js/bootstrap.bundle.min.js"></script>
 <script>
-	const API_URL = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
+	const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api"; 
 	// Grab form and input elements
 	const form = document.getElementById('vehicleRegistrationForm');
 	function getAccessToken() { return localStorage.getItem('accessToken'); }
@@ -163,6 +169,7 @@
     
 		// 🚀 Grabs vehicle_type, vehicle_no, chesis_no, engine_no, AND vehicle_rc automatically!
 		const formData = new FormData(form);
+		console.log([...formData.entries()])
 		<!-- // 1. Manually extract text inputs using their element IDs -->
 		<!-- const vehicleNoValue = document.getElementById('vehicle_no').value; -->
 		<!-- const chesisNoValue = document.getElementById('chesis_no').value; -->
@@ -203,7 +210,7 @@
 				
 		// Send data via Fetch API
 		try {
-			const response = await fetch(`${API_URL}/vehicles/`, {
+			const response = await fetch(`${API_BASE}/vehicles/`, {
 				method: 'POST',
 				headers: {
 					'Authorization': `Bearer ${getAccessToken()}`,
@@ -232,6 +239,51 @@
 			alert('A network error occurred. Please check your connection and try again.');
 		}
 	});
+
+
+	let allTrucks = [];
+	// 1. Fetch trucks from backend on page load
+	async function loadTrucksDropdown() {
+		const token = localStorage.getItem('accessToken');
+		const selectElement = document.getElementById('vehicleSelect');
+		selectElement.innerHTML = '<option value="" disabled selected>Choose from Available Vehicle Type</option>';
+
+		try {
+			const response = await fetch(`${API_BASE}/trucks/`, {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'ngrok-skip-browser-warning': 'true'
+				}
+			});
+
+			if (!response.ok) throw new Error("Failed to fetch vehicles.");
+
+			allTrucks = await response.json();
+			console.log(allTrucks);
+			// option population
+			allTrucks.forEach(truck => {
+				// Adjust property name based on your backend serializer (e.g., truck.capacity or truck.max_weight)
+				const truckCapacity = parseFloat(truck.max_load_capacity); 
+				console.log(truckCapacity);
+				const truckTypeLabel =  `${truck.truck_type} - (Capacity: ${truck.min_load_capacity} to ${truck.max_load_capacity} kg)`;
+				
+				const option = document.createElement('option');
+				option.value = truck.id;
+				option.textContent = `${truckTypeLabel}`;
+				selectElement.appendChild(option);
+			});	
+		} catch (err) {
+			console.error('Error loading trucks:', err);
+			selectElement.innerHTML = '<option value="" disabled selected>Error loading trucks</option>';
+		}
+	}
+	
+	// Load trucks when the DOM is ready
+	document.addEventListener('DOMContentLoaded', () => {
+		loadTrucksDropdown();
+	});
+
 	
 	document.getElementById('certInput').addEventListener('change', function(event) {
 	  const fileDisplay = document.getElementById('fileNameDisplay');

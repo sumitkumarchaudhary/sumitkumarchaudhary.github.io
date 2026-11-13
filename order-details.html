@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - Fleet Portal</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background-color: #f8fafc; 
+            color: #1e293b; 
+        }
+        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
+    </style>
+</head>
+<body class="bg-light py-5">
+
+    <div class="container" style="max-width: 800px;">
+        
+        <!-- Navigation & Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="dashboard.html" class="text-decoration-none text-muted fw-semibold small">
+                <i class="fa-solid fa-arrow-left me-1"></i> Back To Dashboard
+            </a>
+            <span id="orderIdBadge" class="badge bg-primary px-3 py-2 fs-6">Loading Order...</span>
+        </div>
+
+        <!-- Main Details Card -->
+        <div class="card rounded-4 p-4 p-sm-5 mb-4">
+            
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                <div>
+                    <h3 id="pageTitle" class="fw-bold text-dark mb-1">Order Details</h3>
+                    <p class="text-muted small mb-0" id="orderCreatedDate">Created on: ---</p>
+                </div>
+                <div>
+                    <span id="orderStatusBadge" class="badge bg-secondary px-3 py-2">Pending</span>
+                </div>
+            </div>
+
+            <!-- Meta Information Grid -->
+            <div class="row g-4 mb-4">
+                <div class="col-sm-6">
+                    <div class="p-3 bg-light rounded-3">
+                        <span class="text-muted small fw-semibold d-block mb-1"><i class="fa-solid fa-weight-scale me-1 text-primary"></i> Total Cargo Weight</span>
+                        <h5 id="orderWeight" class="fw-bold text-dark mb-0">--- kg</h5>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 bg-light rounded-3">
+                        <span class="text-muted small fw-semibold d-block mb-1"><i class="fa-solid fa-truck me-1 text-primary"></i> Assigned Vehicle</span>
+                        <h5 id="orderVehicle" class="fw-bold text-dark mb-0">---</h5>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Materials Breakdown Section -->
+            <!-- <div class="mb-4"> -->
+                <!-- <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-boxes-stacked me-2 text-primary"></i>Cargo Materials</h5> -->
+                <!-- <div class="table-responsive"> -->
+                    <!-- <table class="table align-middle table-hover border"> -->
+                        <!-- <thead class="table-light text-muted small"> -->
+                            <!-- <tr> -->
+                                <!-- <th class="py-3 ps-3">Material Name</th> -->
+                                <!-- <th class="py-3">Quantity</th> -->
+                                <!-- <th class="py-3 pe-3 text-end">Unit</th> -->
+                            <!-- </tr> -->
+                        <!-- </thead> -->
+                        <!-- <tbody id="materialsTableBody"> -->
+                            <!-- <tr> -->
+                                <!-- <td colspan="3" class="text-center text-muted py-3">Loading materials...</td> -->
+                            <!-- </tr> -->
+                        <!-- </tbody> -->
+                    <!-- </table> -->
+                <!-- </div> -->
+            <!-- </div> -->
+
+            <!-- Additional Timeline / Activity Info -->
+            <div class="p-3 bg-light rounded-3 border-start border-primary border-4">
+                <span class="text-muted small fw-semibold d-block mb-1">Completion Status</span>
+                <span id="orderCompletedDate" class="text-dark small">---</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const API_BASE = "https://upheaval-revise-fit.ngrok-free.dev/etransport/api";
+        
+        // Extract order ID from URL query parameters (e.g., order-details.html?id=12)
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('id');
+
+        function formatDateTime(isoString) {
+            if (!isoString) return 'Not available';
+            const dateObj = new Date(isoString);
+            if (isNaN(dateObj.getTime()) || dateObj.getFullYear() <= 1970) return 'Not available';
+            return dateObj.toLocaleString('en-US', {
+                month: 'short', day: 'numeric', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        async function fetchOrderDetails() {
+            if (!orderId) {
+                alert("No Order ID specified in URL.");
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/orders/${orderId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+
+                if (!response.ok) throw new Error("Failed to load order details from server.");
+
+                const order = await response.json();
+				console.log(order);
+                // Populate Header & Badges
+                document.getElementById('pageTitle').textContent = `Order #${order.id}`;
+                document.getElementById('orderIdBadge').textContent = `ID: #${order.id}`;
+                document.getElementById('orderCreatedDate').textContent = `Created on: ${formatDateTime(order.created_at)}`;
+                
+                // Status Badge styling
+                const statusBadge = document.getElementById('orderStatusBadge');
+                statusBadge.textContent = order.status ? order.status.toUpperCase() : 'PENDING';
+                statusBadge.className = `badge px-3 py-2 ${order.status === 'completed' ? 'bg-success' : 'bg-warning text-dark'}`;
+
+                // Meta fields
+                document.getElementById('orderWeight').textContent = `${parseFloat(order.material_weight || 0).toLocaleString()} kg`;
+                document.getElementById('orderVehicle').textContent = order.vehicle_no || `Vehicle ID: ${order.vehicle || 'N/A'}`;
+                document.getElementById('orderCompletedDate').textContent = order.completed_at ? `Completed on: ${formatDateTime(order.completed_at)}` : 'In progress / Pending dispatch';
+
+                <!-- // Populate Materials Table -->
+                <!-- const tbody = document.getElementById('materialsTableBody'); -->
+                <!-- tbody.innerHTML = ''; -->
+
+                <!-- if (order.items && order.items.length > 0) { -->
+                    <!-- order.items.forEach(item => { -->
+                        <!-- const tr = document.createElement('tr'); -->
+                        <!-- tr.innerHTML = ` -->
+                            <!-- <td class="ps-3 fw-semibold text-dark">${item.material_name || 'Material #' + item.material}</td> -->
+                            <!-- <td>${item.quantity}</td> -->
+                            <!-- <td class="pe-3 text-end text-muted">${item.unit || 'kg'}</td> -->
+                        <!-- `; -->
+                        <!-- tbody.appendChild(tr); -->
+                    <!-- }); -->
+                <!-- } else { -->
+                    <!-- tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">No individual material breakdown recorded. (${order.materials_summary || 'Summary unavailable'})</td></tr>`; -->
+                <!-- } -->
+
+            } catch (err) {
+                console.error("Error fetching order details:", err);
+                alert(err.message || "Could not load order details.");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchOrderDetails);
+    </script>
+</body>
+</html>
