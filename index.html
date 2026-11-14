@@ -26,94 +26,16 @@
         }
 		.hidden { display: none !important; }
     </style>
-	
-	<!-- <stylestyle> -->
-        <!-- /* Modern Reset & UI Layout variables */ -->
-        <!-- * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; } -->
-        <!-- :root { -->
-            <!-- --bg-workspace: #f8fafc; -->
-            <!-- --surface: #ffffff; -->
-            <!-- --primary: #4f46e5; -->
-            <!-- --primary-hover: #4338ca; -->
-            <!-- --text-dark: #0f172a; -->
-            <!-- --text-muted: #64748b; -->
-            <!-- --border: #e2e8f0; -->
-            <!-- --error: #ef4444; -->
-            <!-- --success: #10b981; -->
-        <!-- } -->
-        <!-- body { background-color: var(--bg-workspace); color: var(--text-dark); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1.5rem; } -->
-        <!-- .hidden { display: none !important; } -->
-        
-        <!-- /* Cards */ -->
-        <!-- .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; } -->
-        <!-- .auth-card { max-width: 440px; padding: 2.5rem; } -->
-        <!-- .profile-card { max-width: 600px; overflow: hidden; padding-bottom: 2rem; } -->
-        
-        <!-- /* Typography & Controls */ -->
-        <!-- h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.025em; } -->
-        <!-- .subtitle { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem; } -->
-        <!-- .form-group { margin-bottom: 1.25rem; } -->
-        <!-- label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; } -->
-        <!-- input { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; outline: none; } -->
-        <!-- input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); } -->
-        <!-- .error-message { color: var(--error); font-size: 0.875rem; margin-top: 0.5rem; min-height: 1.25rem; } -->
-        
-        <!-- /* Buttons */ -->
-        <!-- .btn { width: 100%; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; border: none; transition: background-color 0.2s; } -->
-        <!-- .btn-primary { background-color: var(--primary); color: white; } -->
-        <!-- .btn-primary:hover { background-color: var(--primary-hover); } -->
-        <!-- .btn-primary:disabled { background-color: #a5b4fc; cursor: not-allowed; } -->
-        <!-- .btn-outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-dark); } -->
-        <!-- .btn-outline:hover { background-color: var(--bg-workspace); } -->
-        
-        <!-- /* Profile Details Layout */ -->
-        <!-- .profile-banner { height: 120px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); } -->
-        <!-- .profile-header-content { padding: 0 2rem 1.5rem 2rem; text-align: center; border-bottom: 1px solid var(--border); } -->
-        <!-- .avatar { width: 100px; height: 100px; border-radius: 50%; background: #e2e8f0; border: 4px solid var(--surface); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; color: var(--text-muted); margin: -50px auto 1rem auto; } -->
-        <!-- .profile-body { padding: 2rem; } -->
-        <!-- .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; } -->
-        <!-- .info-item label { color: var(--text-muted); margin-bottom: 0.25rem; } -->
-        <!-- .info-value { font-size: 1rem; font-weight: 500; } -->
-        <!-- @media (max-width: 480px) { .info-grid { grid-template-columns: 1fr; } } -->
-        
-        <!-- .form-footer { text-align: center; margin-top: 15px; font-size: 13px; color: #666666; } -->
-        <!-- .form-footer a { color: #4472c4; text-decoration: none; } -->
-        
-        <!-- h1 { color: #333; } -->
-        <!-- .vehicle-card { background: #fff; border: 1px solid #ddd; padding: 15px 20px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); } -->
-        <!-- .vehicle-card h3 { margin-top: 0; color: #007BFF; } -->
-        <!-- .vehicle-card p { margin: 5px 0; color: #555; } -->
-        <!-- .loading { color: #666; font-style: italic; } -->
-        <!-- .error { color: #d9534f; } -->
-        
-        <!-- .map-link { -->
-            <!-- display: inline-block; -->
-            <!-- margin-top: 8px; -->
-            <!-- padding: 6px 12px; -->
-            <!-- background-color: #007BFF; -->
-            <!-- color: white; -->
-            <!-- text-decoration: none; -->
-            <!-- border-radius: 4px; -->
-            <!-- font-size: 14px; -->
-            <!-- text-align: center; -->
-        <!-- } -->
-        <!-- .map-link:hover { background-color: #0056b3; } -->
-        <!-- .no-location { font-size: 13px; color: #888; text-align: center; } -->
-        <!-- .nav-links { margin-top: 1.5rem; text-align: center; display: flex; flex-direction: column; gap: 8px; } -->
-        <!-- .nav-links a { color: #4f46e5; text-decoration: none; font-weight: 600; font-size: 14px; } -->
-        <!-- .nav-links a:hover { text-decoration: underline; } -->
-    <!-- </style> -->
 </head>
-<body class="d-flex flex-column min-vh-100 justify-content-between">
+<body class="d-flex flex-column min-vh-100 justify-content-between pt-4">
 
     <!-- 1. LOGIN INTERFACE -->
     <div class="container" id="loginView" style="max-width: 100%;">
         <div class="row justify-content-center">
             <div class="col-md-5 col-lg-4">
-                
                 <!-- Login Card -->
                 <div class="card shadow-sm border-0 rounded-4">
-                    <div class="card-body p-4 p-sm-5">
+                    <div class="card-body p-2 p-sm-5">
                         
                         <!-- Header / Logo Area -->
                         <div class="text-center mb-4">
@@ -161,15 +83,16 @@
                                 </button>
                             </div>
                         </form>
+						<div class="text-center mt-3">
+							<a href="login-otp.html" class="text-decoration-none small fw-semibold text-primary">
+								<i class="fa-solid fa-mobile-screen-button me-1"></i> Login with Mobile & OTP instead
+							</a>
+						</div>
                     </div>
                 </div>
-				<div class="text-center mt-3">
-					<a href="login-otp.html" class="text-decoration-none small fw-semibold text-primary">
-						<i class="fa-solid fa-mobile-screen-button me-1"></i> Login with Mobile & OTP instead
-					</a>
-				</div>
+
                 <!-- Footer text -->
-                <div class="text-center mt-4">
+                <div class="text-center mt-2">
                     <p class="text-muted small">Don't have an account? <a href="user_registration.html" class="text-primary fw-semibold text-decoration-none">Register</a></p>
                 </div>
 
@@ -381,22 +304,6 @@
 			<p class="mb-0">&copy; 2026 FleetPro Telematics & Logistics Inc. All rights reserved.</p>
 		</footer>
     </div>
-
-	<!-- otp verification modal -->
-	<!-- <div class="card shadow-sm border-0 rounded-4 p-4 mx-auto" style="max-width: 450px;"> -->
-		<!-- <h4 class="fw-bold mb-3">Verify Phone Number</h4> -->
-		
-		<!-- <!-- Step 1: Input Phone Number --> -->
-		<!-- <div id="phoneStep"> -->
-			<!-- <div class="mb-3"> -->
-				<!-- <label for="phoneNumber" class="form-label text-muted small fw-semibold">Mobile Number</label> -->
-				<!-- <input type="text" id="phoneNumber" class="form-control bg-light shadow-none" placeholder="Enter 10-digit mobile number" required> -->
-			<!-- </div> -->
-			<!-- <button class="btn btn-primary w-100 fw-semibold" onclick="sendOtp()">Send OTP</button> -->
-		<!-- </div> -->
-
-		<!-- Step 2: Enter OTP (Hidden by default) -->
-	<!-- </div> -->
 	
 	<!-- <script src="/static/js/global-tracker.js"></script> -->
 	<script src="/static/js/tracker.js"></script>
@@ -775,13 +682,13 @@
 								</div>
 								<div class="col-4">
 									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>CURRENT ORDER</strong></span>
-									<span class="fw-semibold fst-italic">${vehicle.current_order?.status.charAt(0).toUpperCase()+vehicle.current_order?.status.slice(1)}</span>
+									<span class="fw-semibold fst-italic">${vehicle.current_order ? vehicle.current_order.status.charAt(0).toUpperCase()+vehicle.current_order.status.slice(1) : ''}</span>
 								</div>
 								<div class="col-4">
 									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>ORDER ID</strong></span>
 									<span class="fw-semibold fst-italic">
-										<a href="order-details.html?id=${vehicle.current_order?.order_id}" class="fw-bold text-primary text-decoration-none">
-											${vehicle.current_order?.order_id}
+										<a href="order-details.html?id=${vehicle.current_order ? vehicle.current_order.order_id : ''}" class="fw-bold text-primary text-decoration-none">
+											${vehicle.current_order ? vehicle.current_order.order_id : ''}
 										</a>
 									</span>
 								</div>
@@ -865,25 +772,37 @@
 									<span class="fw-semibold fst-italic text-capitalize">${vehicle.vehicle_type_description}</span>
 								</div>
 								<div class="col-4">
-									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>CHASSIS NO</strong></span>
-									<span class="fw-semibold fst-italic">${vehicle.chesis_no}</span>
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>CURRENT ORDER</strong></span>
+									<span class="fw-semibold fst-italic">${vehicle.current_order ? vehicle.current_order.status.charAt(0).toUpperCase()+vehicle.current_order.status.slice(1) : ''}</span>
 								</div>
 								<div class="col-4">
-									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>ENGINE NO</strong></span>
-									<span class="fw-semibold fst-italic">${vehicle.engine_no}</span>
+									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>ORDER ID</strong></span>
+									<span class="fw-semibold fst-italic">
+										<a href="order-details.html?id=${vehicle.current_order ? vehicle.current_order.order_id : ''}" class="fw-bold text-primary text-decoration-none">
+											${vehicle.current_order ? vehicle.current_order.order_id : ''}
+										</a>
+									</span>
 								</div>
-								<div class="col-4">
-									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DRIVER NAME</strong></span>
-									<span class="fw-semibold fst-italic">${vehicle.driver ? vehicle.driver_first_name : null} ${vehicle.driver ? vehicle.driver_last_name : ''}</span>
-								</div>
-								<div class="col-4">
-									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DRIVER PHONE</strong></span>
-									<span class="fw-semibold fst-italic">${vehicle.driver ? vehicle.driver_phone_number: null}</span>
-								</div>
-								<div class="col-4">
-									<span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DRIVER EMAIL</strong></span>
-									<span class="fw-semibold fst-italic">${vehicle.driver ? vehicle.driver_email: null}</span>
-								</div>
+								<!-- <div class="col-4"> -->
+									<!-- <span class="text-muted d-block" style="font-size: 0.7rem;"><strong>CHASSIS NO</strong></span> -->
+									<!-- <span class="fw-semibold fst-italic">${vehicle.chesis_no}</span> -->
+								<!-- </div> -->
+								<!-- <div class="col-4"> -->
+									<!-- <span class="text-muted d-block" style="font-size: 0.7rem;"><strong>ENGINE NO</strong></span> -->
+									<!-- <span class="fw-semibold fst-italic">${vehicle.engine_no}</span> -->
+								<!-- </div> -->
+								<!-- <div class="col-4"> -->
+									<!-- <span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DRIVER NAME</strong></span> -->
+									<!-- <span class="fw-semibold fst-italic">${vehicle.driver ? vehicle.driver_first_name : null} ${vehicle.driver ? vehicle.driver_last_name : ''}</span> -->
+								<!-- </div> -->
+								<!-- <div class="col-4"> -->
+									<!-- <span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DRIVER PHONE</strong></span> -->
+									<!-- <span class="fw-semibold fst-italic">${vehicle.driver ? vehicle.driver_phone_number: null}</span> -->
+								<!-- </div> -->
+								<!-- <div class="col-4"> -->
+									<!-- <span class="text-muted d-block" style="font-size: 0.7rem;"><strong>DRIVER EMAIL</strong></span> -->
+									<!-- <span class="fw-semibold fst-italic">${vehicle.driver ? vehicle.driver_email: null}</span> -->
+								<!-- </div> -->
 							</div>
 							<div class="d-flex flex-wrap gap-2">
 								${mapLinkHtml}
@@ -1089,69 +1008,6 @@
 				icon.classList.add('fa-eye');
 			}
 		});
-		
-		
-		
-		
-		
-		<!-- let watchId = null; -->
-
-		<!-- function startBackgroundDriverTracker() { -->
-			<!-- if (!navigator.geolocation) { -->
-				<!-- console.warn("Geolocation is not supported by this browser."); -->
-				<!-- return; -->
-			<!-- } -->
-
-			<!-- // Prevent starting multiple loops if already running -->
-			<!-- if (watchId !== null) return; -->
-
-			<!-- const token = localStorage.getItem('accessToken'); -->
-			<!-- const vehicleId = localStorage.getItem('driver_vehicle_id'); -->
-			<!-- const trackingApiUrl = `https://upheaval-revise-fit.ngrok-free.dev/etransport/api/vehicles/${vehicleId}/update-location/`; // Adjust to your endpoint -->
-
-			<!-- watchId = navigator.geolocation.watchPosition( -->
-				<!-- async position => { -->
-					<!-- const lat = position.coords.latitude; -->
-					<!-- const lon = position.coords.longitude; -->
-					<!-- console.log({'lat': lat, 'lon': lon}) -->
-					<!-- try { -->
-						<!-- const response = await fetch(trackingApiUrl, { -->
-							<!-- method: 'PATCH', -->
-							<!-- headers: { -->
-								<!-- 'Content-Type': 'application/json', -->
-								<!-- 'Authorization': `Bearer ${token}`, -->
-								<!-- 'ngrok-skip-browser-warning': 'true' -->
-							<!-- }, -->
-							<!-- body: JSON.stringify({ lat: lat, lon: lon }) -->
-						<!-- }); -->
-
-						<!-- if (!response.ok) { -->
-							<!-- console.error("Failed to sync driver location to server."); -->
-						<!-- } else { -->
-							<!-- console.log(`Location synced: [${lat}, ${lon}]`); -->
-						<!-- } -->
-					<!-- } catch (error) { -->
-						<!-- console.error("Network error while syncing location:", error); -->
-					<!-- } -->
-				<!-- }, -->
-				<!-- error => { -->
-					<!-- console.error("Geolocation tracking error code:", error.code, error.message); -->
-				<!-- }, -->
-				<!-- { -->
-					<!-- enableHighAccuracy: true, -->
-					<!-- maximumAge: 10000,     // Accept cached position up to 10 seconds old -->
-					<!-- timeout: 15000         // Time out if position takes longer than 15 seconds -->
-				<!-- } -->
-			<!-- ); -->
-		<!-- } -->
-
-		<!-- // Optional cleanup function if the driver explicitly logs out -->
-		<!-- function stopDriverTracker() { -->
-			<!-- if (watchId !== null) { -->
-				<!-- navigator.geolocation.clearWatch(watchId); -->
-				<!-- watchId = null; -->
-			<!-- } -->
-		<!-- } -->
 	</script>
 	<!-- Register the Service Worker -->
     <script>
